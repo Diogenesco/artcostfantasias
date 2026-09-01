@@ -1151,6 +1151,12 @@ body.admin-visible .admin-panel {
   color: var(--ink);
 }
 
+.admin-edit:disabled {
+  background: var(--soft);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
 .admin-unblock {
   color: var(--ink);
   flex: 0 0 auto;

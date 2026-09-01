@@ -183,6 +183,7 @@ function loadCashflow() {
     category: "locacao",
     description: "",
     amount: 0,
+    sourceOrderId: "",
     ...entry,
   }));
 }
@@ -537,7 +538,9 @@ function renderOrdersList() {
 
   ordersList.innerHTML = orders
     .map(
-      (order) => `
+      (order) => {
+        const hasCashflow = state.cashflow.some((entry) => entry.sourceOrderId === order.id);
+        return `
         <article class="admin-item">
           <div>
             <strong>${order.customerName} - ${order.productName}</strong>
@@ -546,13 +549,15 @@ function renderOrdersList() {
             <span>${order.period || "Pedido de compra"} | ${order.notes}</span>
           </div>
           <div class="admin-actions">
+            <button class="admin-edit" type="button" data-order-cashflow="${order.id}" ${hasCashflow ? "disabled" : ""}>${hasCashflow ? "Lançado" : "Lançar entrada"}</button>
             <select class="status-select" data-order-status="${order.id}" aria-label="Status da solicitação">
               ${orderStatusOptions(order.status)}
             </select>
             <button class="admin-delete" type="button" data-delete-order="${order.id}">Remover</button>
           </div>
         </article>
-      `
+      `;
+      }
     )
     .join("");
 }
@@ -659,6 +664,25 @@ function renderCashflow() {
       `
     )
     .join("");
+}
+
+function addCashflowFromOrder(orderId) {
+  const order = state.orders.find((item) => item.id === orderId);
+  if (!order || state.cashflow.some((entry) => entry.sourceOrderId === order.id)) return;
+
+  state.cashflow.unshift({
+    id: `cash-${Date.now()}`,
+    date: todayDateValue(),
+    type: "entrada",
+    category: order.mode === "venda" ? "venda" : "locacao",
+    description: `${order.modeLabel} - ${order.productName} - ${order.customerName}`,
+    amount: Number(order.price) || 0,
+    sourceOrderId: order.id,
+  });
+
+  saveCashflow();
+  renderOrdersList();
+  renderCashflow();
 }
 
 function refreshAll() {
@@ -1135,6 +1159,12 @@ adminList.addEventListener("click", (event) => {
 });
 
 ordersList.addEventListener("click", (event) => {
+  const cashflowButton = event.target.closest("[data-order-cashflow]");
+  if (cashflowButton) {
+    addCashflowFromOrder(cashflowButton.dataset.orderCashflow);
+    return;
+  }
+
   const deleteButton = event.target.closest("[data-delete-order]");
   if (!deleteButton) return;
   state.orders = state.orders.filter((order) => order.id !== deleteButton.dataset.deleteOrder);
