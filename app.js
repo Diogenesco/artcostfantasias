@@ -1,5 +1,6 @@
-const WHATSAPP_NUMBER = "5500000000000";
-const STORAGE_KEY = "artCostCatalog";
+const DEFAULT_WHATSAPP_NUMBER = "5500000000000";
+const CATALOG_KEY = "artCostCatalog";
+const SETTINGS_KEY = "artCostSettings";
 
 const starterProducts = [
   {
@@ -8,9 +9,12 @@ const starterProducts = [
     price: 85,
     type: "locacao",
     audience: "adulto",
+    theme: "tematico",
     sizes: "P, M, G",
     color: "#b3202a",
     icon: "B",
+    image: "",
+    reservations: [],
     description: "Conjunto tematico com saia vermelha, camiseta e acessorios para festa a fantasia.",
   },
   {
@@ -19,9 +23,19 @@ const starterProducts = [
     price: 95,
     type: "locacao",
     audience: "adulto",
+    theme: "tematico",
     sizes: "P, M",
     color: "#9e1f28",
     icon: "C",
+    image: "",
+    reservations: [
+      {
+        id: "demo-chapeuzinho",
+        start: "2026-09-12T10:00",
+        end: "2026-09-14T18:00",
+        reason: "Reserva exemplo",
+      },
+    ],
     description: "Fantasia com capa vermelha, saia e acabamento de atelie para eventos e ensaios.",
   },
   {
@@ -30,9 +44,12 @@ const starterProducts = [
     price: 95,
     type: "locacao",
     audience: "infantil",
+    theme: "tematico",
     sizes: "Infantil 6, 8, 10",
     color: "#0f7f5c",
     icon: "F",
+    image: "",
+    reservations: [],
     description: "Vestido verde com visual encantado, ideal para festa infantil e tema fantasia.",
   },
   {
@@ -41,9 +58,12 @@ const starterProducts = [
     price: 90,
     type: "locacao",
     audience: "adulto",
+    theme: "tematico",
     sizes: "M, G",
     color: "#1d4f8f",
     icon: "M",
+    image: "",
+    reservations: [],
     description: "Look tematico azul e branco com composicao delicada para festas e apresentacoes.",
   },
   {
@@ -52,9 +72,12 @@ const starterProducts = [
     price: 180,
     type: "venda",
     audience: "todos",
+    theme: "atelie",
     sizes: "Sob medida",
     color: "#6f3d7b",
     icon: "A",
+    image: "",
+    reservations: [],
     description: "Peca de atelie para venda, com ajustes e detalhes definidos pelo atendimento.",
   },
   {
@@ -63,15 +86,19 @@ const starterProducts = [
     price: 120,
     type: "ambos",
     audience: "todos",
+    theme: "tematico",
     sizes: "P, M, G, GG",
     color: "#c9902e",
     icon: "L",
+    image: "",
+    reservations: [],
     description: "Look versatil para venda ou locacao, com brilho e acabamento em tons dourados.",
   },
 ];
 
 const state = {
   products: loadProducts(),
+  settings: loadSettings(),
   filter: "todos",
   selectedProductId: null,
 };
@@ -80,17 +107,35 @@ const catalogGrid = document.querySelector("#catalogGrid");
 const searchInput = document.querySelector("#searchInput");
 const bookingProduct = document.querySelector("#bookingProduct");
 const bookingForm = document.querySelector("#bookingForm");
+const availabilityMessage = document.querySelector("#availabilityMessage");
 const cartCount = document.querySelector("#cartCount");
 const drawer = document.querySelector("#drawer");
 const dialog = document.querySelector("#productDialog");
+const adminList = document.querySelector("#adminList");
+const blockProduct = document.querySelector("#blockProduct");
 
 function loadProducts() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  return saved ? JSON.parse(saved) : starterProducts;
+  const saved = localStorage.getItem(CATALOG_KEY);
+  const products = saved ? JSON.parse(saved) : starterProducts;
+  return products.map((product) => ({
+    reservations: [],
+    theme: "tematico",
+    image: "",
+    ...product,
+  }));
+}
+
+function loadSettings() {
+  const saved = localStorage.getItem(SETTINGS_KEY);
+  return saved ? JSON.parse(saved) : { whatsapp: DEFAULT_WHATSAPP_NUMBER };
 }
 
 function saveProducts() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.products));
+  localStorage.setItem(CATALOG_KEY, JSON.stringify(state.products));
+}
+
+function saveSettings() {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
 }
 
 function money(value) {
@@ -100,46 +145,93 @@ function money(value) {
   }).format(value);
 }
 
+function normalizeText(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function sanitizePhone(value) {
+  return String(value || "").replace(/\D/g, "");
+}
+
 function typeLabel(product) {
   if (product.type === "ambos") return "Venda e locacao";
   return product.type === "venda" ? "Venda" : "Locacao";
 }
 
+function audienceLabel(product) {
+  if (product.audience === "todos") return "Todas as idades";
+  return product.audience === "infantil" ? "Infantil" : "Adulto";
+}
+
 function productMatches(product) {
-  const term = searchInput.value.trim().toLowerCase();
+  const term = normalizeText(searchInput.value);
   const inFilter =
     state.filter === "todos" ||
     product.type === state.filter ||
     product.audience === state.filter ||
+    product.theme === state.filter ||
     product.type === "ambos" ||
     product.audience === "todos";
-  const inSearch =
-    !term ||
-    [product.name, product.description, product.sizes, typeLabel(product)]
-      .join(" ")
-      .toLowerCase()
-      .includes(term);
+  const searchable = [product.name, product.description, product.sizes, product.theme, typeLabel(product)];
 
-  return inFilter && inSearch;
+  return inFilter && (!term || normalizeText(searchable.join(" ")).includes(term));
+}
+
+function makeDateTime(dateId, timeId) {
+  const date = document.querySelector(dateId).value;
+  const time = document.querySelector(timeId).value;
+  return date && time ? `${date}T${time}` : "";
+}
+
+function periodsOverlap(firstStart, firstEnd, secondStart, secondEnd) {
+  return new Date(firstStart) < new Date(secondEnd) && new Date(firstEnd) > new Date(secondStart);
+}
+
+function findConflict(product, start, end) {
+  if (!start || !end || new Date(start) >= new Date(end)) return null;
+  return (product.reservations || []).find((reservation) =>
+    periodsOverlap(start, end, reservation.start, reservation.end)
+  );
+}
+
+function availabilityText(product) {
+  const hasBlocks = (product.reservations || []).length > 0;
+  return {
+    label: hasBlocks ? "Verificar datas" : "Disponivel",
+    blocked: hasBlocks,
+  };
+}
+
+function mediaMarkup(product) {
+  if (product.image) {
+    return `<img src="${product.image}" alt="${product.name}" loading="lazy" />`;
+  }
+
+  return `<span class="product-figure">${product.icon}</span>`;
 }
 
 function renderCatalog() {
   const products = state.products.filter(productMatches);
   catalogGrid.innerHTML = products
-    .map(
-      (product) => `
+    .map((product) => {
+      const status = availabilityText(product);
+      return `
         <article class="product-card" data-id="${product.id}" tabindex="0">
           <div class="product-image" style="background: linear-gradient(145deg, ${product.color}, #111);">
+            <span class="status-pill ${status.blocked ? "blocked" : ""}">${status.label}</span>
             <span class="tag">${typeLabel(product)}</span>
-            <span class="product-figure">${product.icon}</span>
+            ${mediaMarkup(product)}
             <button class="product-add" type="button" aria-label="Reservar ${product.name}" data-reserve="${product.id}">+</button>
           </div>
           <h3>${product.name}</h3>
           <div class="price">${money(product.price)}</div>
-          <div class="meta">${product.sizes} | ${product.audience}</div>
+          <div class="meta">${product.sizes} | ${audienceLabel(product)}</div>
         </article>
-      `
-    )
+      `;
+    })
     .join("");
 
   if (!products.length) {
@@ -148,18 +240,53 @@ function renderCatalog() {
 }
 
 function renderBookingOptions() {
-  bookingProduct.innerHTML = state.products
+  const options = state.products
     .map(
       (product) =>
         `<option value="${product.id}">${product.name} - ${money(product.price)}</option>`
     )
     .join("");
+
+  bookingProduct.innerHTML = options;
+  blockProduct.innerHTML = options;
+}
+
+function renderAdminList() {
+  adminList.innerHTML = state.products
+    .map((product) => {
+      const reservations = (product.reservations || [])
+        .map(
+          (reservation) =>
+            `<span>${reservation.reason || "Bloqueio"}: ${formatDateTime(reservation.start)} ate ${formatDateTime(reservation.end)}</span>`
+        )
+        .join("");
+
+      return `
+        <article class="admin-item">
+          <div>
+            <strong>${product.name}</strong>
+            <span>${typeLabel(product)} | ${money(product.price)} | ${product.sizes}</span>
+            ${reservations || "<span>Sem bloqueios de data.</span>"}
+          </div>
+          <button class="admin-delete" type="button" data-delete="${product.id}">Remover</button>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function refreshAll() {
+  renderCatalog();
+  renderBookingOptions();
+  renderAdminList();
+  updateAvailabilityMessage();
 }
 
 function selectProduct(productId) {
   state.selectedProductId = productId;
   bookingProduct.value = productId;
   cartCount.textContent = "1";
+  updateAvailabilityMessage();
   document.querySelector("#pedido").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -167,8 +294,9 @@ function openProduct(productId) {
   const product = state.products.find((item) => item.id === productId);
   if (!product) return;
 
-  document.querySelector("#dialogMedia").style.background = `linear-gradient(145deg, ${product.color}, #111)`;
-  document.querySelector("#dialogMedia").innerHTML = `<span class="product-figure">${product.icon}</span>`;
+  const dialogMedia = document.querySelector("#dialogMedia");
+  dialogMedia.style.background = `linear-gradient(145deg, ${product.color}, #111)`;
+  dialogMedia.innerHTML = mediaMarkup(product);
   document.querySelector("#dialogType").textContent = typeLabel(product);
   document.querySelector("#dialogTitle").textContent = product.name;
   document.querySelector("#dialogDescription").textContent = product.description;
@@ -179,16 +307,14 @@ function openProduct(productId) {
 }
 
 function whatsappUrl(message) {
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+  return `https://wa.me/${state.settings.whatsapp}?text=${encodeURIComponent(message)}`;
 }
 
 function buildBookingMessage() {
   const product = state.products.find((item) => item.id === bookingProduct.value);
   const customerName = document.querySelector("#customerName").value || "Cliente";
-  const startDate = document.querySelector("#startDate").value;
-  const pickupTime = document.querySelector("#pickupTime").value;
-  const endDate = document.querySelector("#endDate").value;
-  const returnTime = document.querySelector("#returnTime").value;
+  const start = makeDateTime("#startDate", "#pickupTime");
+  const end = makeDateTime("#endDate", "#returnTime");
 
   return `Ola! Tenho interesse em reservar com a Art & Cost.
 
@@ -196,9 +322,44 @@ Cliente: ${customerName}
 Item: ${product.name}
 Tipo: ${typeLabel(product)}
 Valor: ${money(product.price)}
-Retirada: ${startDate} as ${pickupTime}
-Devolucao: ${endDate} as ${returnTime}
+Retirada: ${formatDateTime(start)}
+Devolucao: ${formatDateTime(end)}
 Tamanhos disponiveis: ${product.sizes}`;
+}
+
+function formatDateTime(value) {
+  if (!value) return "";
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short",
+  }).format(new Date(value));
+}
+
+function updateAvailabilityMessage() {
+  const product = state.products.find((item) => item.id === bookingProduct.value);
+  const start = makeDateTime("#startDate", "#pickupTime");
+  const end = makeDateTime("#endDate", "#returnTime");
+
+  availabilityMessage.className = "availability-message";
+  availabilityMessage.textContent = "";
+
+  if (!product || !start || !end) return;
+
+  if (new Date(start) >= new Date(end)) {
+    availabilityMessage.textContent = "A devolucao precisa ser depois da retirada.";
+    availabilityMessage.classList.add("show", "blocked");
+    return;
+  }
+
+  const conflict = findConflict(product, start, end);
+  if (conflict) {
+    availabilityMessage.textContent = `Este periodo esta bloqueado: ${conflict.reason || "reserva"} de ${formatDateTime(conflict.start)} ate ${formatDateTime(conflict.end)}.`;
+    availabilityMessage.classList.add("show", "blocked");
+    return;
+  }
+
+  availabilityMessage.textContent = "Periodo livre no cadastro atual. A confirmacao final sera feita pelo WhatsApp.";
+  availabilityMessage.classList.add("show", "ok");
 }
 
 document.querySelector("#menuButton").addEventListener("click", () => {
@@ -215,6 +376,10 @@ document.querySelectorAll(".segment").forEach((button) => {
 });
 
 searchInput.addEventListener("input", renderCatalog);
+
+["#bookingProduct", "#startDate", "#pickupTime", "#endDate", "#returnTime"].forEach((selector) => {
+  document.querySelector(selector).addEventListener("input", updateAvailabilityMessage);
+});
 
 catalogGrid.addEventListener("click", (event) => {
   const reserveButton = event.target.closest("[data-reserve]");
@@ -235,6 +400,15 @@ catalogGrid.addEventListener("keydown", (event) => {
 
 bookingForm.addEventListener("submit", (event) => {
   event.preventDefault();
+  const product = state.products.find((item) => item.id === bookingProduct.value);
+  const start = makeDateTime("#startDate", "#pickupTime");
+  const end = makeDateTime("#endDate", "#returnTime");
+
+  if (findConflict(product, start, end) || new Date(start) >= new Date(end)) {
+    updateAvailabilityMessage();
+    return;
+  }
+
   window.open(whatsappUrl(buildBookingMessage()), "_blank", "noopener");
 });
 
@@ -249,14 +423,17 @@ document.querySelector("#adminForm").addEventListener("submit", (event) => {
   event.preventDefault();
   const name = document.querySelector("#adminName").value.trim();
   const product = {
-    id: `${Date.now()}-${name.toLowerCase().replace(/\W+/g, "-")}`,
+    id: `${Date.now()}-${normalizeText(name).replace(/\W+/g, "-")}`,
     name,
     price: Number(document.querySelector("#adminPrice").value),
     type: document.querySelector("#adminType").value,
     audience: document.querySelector("#adminAudience").value,
+    theme: normalizeText(document.querySelector("#adminTheme").value) || "tematico",
     sizes: document.querySelector("#adminSizes").value || "Consultar",
     color: document.querySelector("#adminColor").value,
     icon: name.charAt(0).toUpperCase(),
+    image: document.querySelector("#adminImage").value.trim(),
+    reservations: [],
     description:
       document.querySelector("#adminDescription").value ||
       "Item cadastrado no painel da Art & Cost.",
@@ -264,22 +441,59 @@ document.querySelector("#adminForm").addEventListener("submit", (event) => {
 
   state.products.unshift(product);
   saveProducts();
-  renderCatalog();
-  renderBookingOptions();
+  refreshAll();
   event.target.reset();
   document.querySelector("#adminColor").value = "#b3202a";
+});
+
+document.querySelector("#blockForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const product = state.products.find((item) => item.id === blockProduct.value);
+  const start = document.querySelector("#blockStart").value;
+  const end = document.querySelector("#blockEnd").value;
+
+  if (!product || !start || !end || new Date(start) >= new Date(end)) return;
+
+  product.reservations = product.reservations || [];
+  product.reservations.push({
+    id: `block-${Date.now()}`,
+    start,
+    end,
+    reason: document.querySelector("#blockReason").value || "Periodo bloqueado",
+  });
+
+  saveProducts();
+  refreshAll();
+  event.target.reset();
+});
+
+adminList.addEventListener("click", (event) => {
+  const deleteButton = event.target.closest("[data-delete]");
+  if (!deleteButton) return;
+  state.products = state.products.filter((product) => product.id !== deleteButton.dataset.delete);
+  saveProducts();
+  refreshAll();
+});
+
+document.querySelector("#saveWhatsapp").addEventListener("click", () => {
+  const phone = sanitizePhone(document.querySelector("#adminWhatsapp").value);
+  state.settings.whatsapp = phone || DEFAULT_WHATSAPP_NUMBER;
+  saveSettings();
+  document.querySelector("#contactWhatsapp").href = whatsappUrl(
+    "Ola! Quero falar com a Art & Cost sobre fantasias."
+  );
 });
 
 document.querySelector("#resetCatalog").addEventListener("click", () => {
   state.products = starterProducts;
   saveProducts();
-  renderCatalog();
-  renderBookingOptions();
+  refreshAll();
 });
 
 document.querySelector("#contactWhatsapp").href = whatsappUrl(
   "Ola! Quero falar com a Art & Cost sobre fantasias."
 );
+document.querySelector("#adminWhatsapp").value =
+  state.settings.whatsapp === DEFAULT_WHATSAPP_NUMBER ? "" : state.settings.whatsapp;
 
-renderCatalog();
-renderBookingOptions();
+refreshAll();

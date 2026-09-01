@@ -82,6 +82,7 @@
           <button class="segment" data-filter="venda" type="button">Venda</button>
           <button class="segment" data-filter="infantil" type="button">Infantil</button>
           <button class="segment" data-filter="adulto" type="button">Adulto</button>
+          <button class="segment" data-filter="tematico" type="button">Tematicos</button>
         </div>
       </section>
 
@@ -122,6 +123,7 @@
             Hora da devolucao
             <input id="returnTime" type="time" required />
           </label>
+          <p class="availability-message" id="availabilityMessage" aria-live="polite"></p>
           <button class="primary-action form-action" type="submit">
             Reservar pelo WhatsApp
           </button>
@@ -147,11 +149,49 @@
         <div class="admin-heading">
           <div>
             <p class="eyebrow">Painel administrativo inicial</p>
-            <h2>Cadastrar fantasia</h2>
+            <h2>Painel do catalogo</h2>
           </div>
           <button class="secondary-action" id="resetCatalog" type="button">
             Restaurar exemplos
           </button>
+        </div>
+
+        <div class="admin-grid">
+          <article class="admin-box">
+            <h3>Dados da loja</h3>
+            <label>
+              WhatsApp
+              <input id="adminWhatsapp" type="tel" placeholder="Ex: 5511999999999" />
+            </label>
+            <button class="secondary-action" id="saveWhatsapp" type="button">
+              Salvar WhatsApp
+            </button>
+          </article>
+
+          <article class="admin-box">
+            <h3>Bloquear data</h3>
+            <form class="block-form" id="blockForm">
+              <label>
+                Fantasia
+                <select id="blockProduct"></select>
+              </label>
+              <label>
+                Inicio
+                <input id="blockStart" type="datetime-local" required />
+              </label>
+              <label>
+                Fim
+                <input id="blockEnd" type="datetime-local" required />
+              </label>
+              <label class="wide-field">
+                Motivo
+                <input id="blockReason" type="text" placeholder="Reserva, ajuste, manutencao" />
+              </label>
+              <button class="secondary-action form-action" type="submit">
+                Adicionar bloqueio
+              </button>
+            </form>
+          </article>
         </div>
 
         <form class="admin-form" id="adminForm">
@@ -184,8 +224,16 @@
             <input id="adminSizes" type="text" placeholder="P, M, G, Infantil 8" />
           </label>
           <label>
+            Tema
+            <input id="adminTheme" type="text" placeholder="Princesa, Halloween, Carnaval" />
+          </label>
+          <label>
             Cor do card
             <input id="adminColor" type="color" value="#b3202a" />
+          </label>
+          <label class="wide-field">
+            Link da foto
+            <input id="adminImage" type="url" placeholder="https://..." />
           </label>
           <label class="wide-field">
             Descricao
@@ -193,6 +241,11 @@
           </label>
           <button class="primary-action form-action" type="submit">Adicionar ao catalogo</button>
         </form>
+
+        <div class="admin-list">
+          <h3>Itens e bloqueios cadastrados</h3>
+          <div id="adminList"></div>
+        </div>
       </section>
 
       <section class="contact-band" id="contato">

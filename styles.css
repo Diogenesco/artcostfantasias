@@ -431,7 +431,9 @@ h2 {
 }
 
 .booking-form label,
-.admin-form label {
+.admin-form label,
+.admin-box label,
+.block-form label {
   display: grid;
   gap: 8px;
 }
@@ -440,7 +442,10 @@ h2 {
 .booking-form select,
 .admin-form input,
 .admin-form select,
-.admin-form textarea {
+.admin-form textarea,
+.admin-box input,
+.block-form input,
+.block-form select {
   background: #ffffff;
   border: 1px solid var(--line);
   border-radius: 6px;
@@ -499,6 +504,136 @@ h2 {
 
 .admin-heading .secondary-action {
   color: var(--ink);
+}
+
+.availability-message {
+  background: rgba(255, 253, 248, 0.1);
+  border: 1px solid rgba(216, 167, 74, 0.25);
+  border-radius: 6px;
+  color: #f7ecd5;
+  display: none;
+  font-weight: 700;
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 12px;
+}
+
+.availability-message.show {
+  display: block;
+}
+
+.availability-message.ok {
+  border-color: rgba(15, 127, 92, 0.8);
+}
+
+.availability-message.blocked {
+  border-color: rgba(158, 31, 40, 0.9);
+}
+
+.status-pill {
+  align-items: center;
+  background: rgba(255, 253, 248, 0.94);
+  border-radius: 999px;
+  color: var(--green);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  left: 14px;
+  min-height: 28px;
+  padding: 0 10px;
+  position: absolute;
+  top: 14px;
+}
+
+.status-pill.blocked {
+  color: var(--red);
+}
+
+.product-image img,
+.dialog-media img {
+  height: 100%;
+  grid-area: 1 / 1;
+  object-fit: cover;
+  width: 100%;
+}
+
+.product-image .tag {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+}
+
+.product-figure {
+  grid-area: 1 / 1;
+  justify-self: end;
+}
+
+.admin-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(260px, 0.65fr) minmax(320px, 1fr);
+  margin-bottom: 24px;
+}
+
+.admin-box {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+}
+
+.admin-box h3,
+.admin-list h3 {
+  font-size: 22px;
+  margin: 0 0 6px;
+}
+
+.admin-box .secondary-action,
+.block-form .secondary-action {
+  color: var(--ink);
+  width: 100%;
+}
+
+.block-form {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-list {
+  margin-top: 34px;
+}
+
+.admin-item {
+  align-items: center;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr auto;
+  padding: 16px 0;
+}
+
+.admin-item strong,
+.admin-item span {
+  display: block;
+}
+
+.admin-item span {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.admin-delete {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--red);
+  cursor: pointer;
+  font-weight: 900;
+  min-height: 40px;
+  padding: 0 12px;
 }
 
 .contact-band {
@@ -614,6 +749,8 @@ dd {
 
   .booking-form,
   .admin-form,
+  .admin-grid,
+  .block-form,
   .info-band {
     grid-template-columns: 1fr;
   }
