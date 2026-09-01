@@ -1,6 +1,7 @@
 const DEFAULT_WHATSAPP_NUMBER = "554498155843";
 const CATALOG_KEY = "artCostCatalog";
 const SETTINGS_KEY = "artCostSettings";
+const ORDERS_KEY = "artCostOrders";
 const ADMIN_PASSWORD = "artcost";
 
 const starterProducts = [
@@ -106,6 +107,7 @@ const starterProducts = [
 const state = {
   products: loadProducts(),
   settings: loadSettings(),
+  orders: loadOrders(),
   filter: "todos",
   selectedProductId: null,
 };
@@ -121,6 +123,7 @@ const drawer = document.querySelector("#drawer");
 const dialog = document.querySelector("#productDialog");
 const adminList = document.querySelector("#adminList");
 const adminStats = document.querySelector("#adminStats");
+const ordersList = document.querySelector("#ordersList");
 const blockProduct = document.querySelector("#blockProduct");
 const adminLock = document.querySelector("#adminLock");
 const adminContent = document.querySelector("#adminContent");
@@ -148,12 +151,21 @@ function loadSettings() {
   return saved ? JSON.parse(saved) : { whatsapp: DEFAULT_WHATSAPP_NUMBER };
 }
 
+function loadOrders() {
+  const saved = localStorage.getItem(ORDERS_KEY);
+  return saved ? JSON.parse(saved) : [];
+}
+
 function saveProducts() {
   localStorage.setItem(CATALOG_KEY, JSON.stringify(state.products));
 }
 
 function saveSettings() {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+}
+
+function saveOrders() {
+  localStorage.setItem(ORDERS_KEY, JSON.stringify(state.orders));
 }
 
 function setBackupStatus(message) {
@@ -371,6 +383,28 @@ function renderAdminList() {
     .join("");
 }
 
+function renderOrdersList() {
+  if (!state.orders.length) {
+    ordersList.innerHTML = `<p class="empty-admin">Nenhuma solicitacao registrada ainda.</p>`;
+    return;
+  }
+
+  ordersList.innerHTML = state.orders
+    .map(
+      (order) => `
+        <article class="admin-item">
+          <div>
+            <strong>${order.customerName} - ${order.productName}</strong>
+            <span>${order.modeLabel} | ${money(order.price)} | ${formatDateTime(order.createdAt)}</span>
+            <span>${order.period || "Pedido de compra"} | ${order.notes}</span>
+          </div>
+          <button class="admin-delete" type="button" data-delete-order="${order.id}">Remover</button>
+        </article>
+      `
+    )
+    .join("");
+}
+
 function renderAdminStats() {
   const total = state.products.length;
   const rentals = state.products.filter((product) => product.type === "locacao" || product.type === "ambos").length;
@@ -379,6 +413,7 @@ function renderAdminStats() {
     (sum, product) => sum + (product.reservations || []).length,
     0
   );
+  const orders = state.orders.length;
 
   adminStats.innerHTML = `
     <article class="admin-stat">
@@ -397,6 +432,10 @@ function renderAdminStats() {
       <span>Bloqueios</span>
       <strong>${blocks}</strong>
     </article>
+    <article class="admin-stat">
+      <span>Solicitacoes</span>
+      <strong>${orders}</strong>
+    </article>
   `;
 }
 
@@ -404,6 +443,7 @@ function refreshAll() {
   renderCatalog();
   renderBookingOptions();
   renderAdminList();
+  renderOrdersList();
   renderAdminStats();
   updateRentalFields();
   updateAvailabilityMessage();
@@ -499,6 +539,28 @@ Retirada: ${formatDateTime(start)}
 Devolucao: ${formatDateTime(end)}
 Tamanhos disponiveis: ${product.sizes}
 Observacoes: ${notes}`;
+}
+
+function createOrderRecord() {
+  const product = state.products.find((item) => item.id === bookingProduct.value);
+  const customerName = document.querySelector("#customerName").value || "Cliente";
+  const notes = document.querySelector("#bookingNotes").value || "Sem observacoes";
+  const start = makeDateTime("#startDate", "#pickupTime");
+  const end = makeDateTime("#endDate", "#returnTime");
+  const isRental = bookingMode.value === "locacao";
+
+  return {
+    id: `order-${Date.now()}`,
+    createdAt: new Date().toISOString(),
+    customerName,
+    productId: product.id,
+    productName: product.name,
+    mode: bookingMode.value,
+    modeLabel: isRental ? "Locacao" : "Compra",
+    price: product.price,
+    period: isRental ? `${formatDateTime(start)} ate ${formatDateTime(end)}` : "",
+    notes,
+  };
 }
 
 function formatDateTime(value) {
@@ -645,6 +707,9 @@ bookingForm.addEventListener("submit", (event) => {
     return;
   }
 
+  state.orders.unshift(createOrderRecord());
+  saveOrders();
+  refreshAll();
   window.open(whatsappUrl(buildBookingMessage()), "_blank", "noopener");
 });
 
@@ -739,6 +804,20 @@ adminList.addEventListener("click", (event) => {
   refreshAll();
 });
 
+ordersList.addEventListener("click", (event) => {
+  const deleteButton = event.target.closest("[data-delete-order]");
+  if (!deleteButton) return;
+  state.orders = state.orders.filter((order) => order.id !== deleteButton.dataset.deleteOrder);
+  saveOrders();
+  refreshAll();
+});
+
+document.querySelector("#clearOrders").addEventListener("click", () => {
+  state.orders = [];
+  saveOrders();
+  refreshAll();
+});
+
 document.querySelector("#saveWhatsapp").addEventListener("click", () => {
   const phone = sanitizePhone(document.querySelector("#adminWhatsapp").value);
   state.settings.whatsapp = phone || DEFAULT_WHATSAPP_NUMBER;
@@ -756,6 +835,7 @@ document.querySelector("#exportCatalog").addEventListener("click", () => {
     exportedAt: new Date().toISOString(),
     products: state.products,
     settings: state.settings,
+    orders: state.orders,
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {
     type: "application/json",
@@ -782,8 +862,10 @@ document.querySelector("#importCatalog").addEventListener("change", (event) => {
 
       state.products = data.products;
       state.settings = data.settings || state.settings;
+      state.orders = Array.isArray(data.orders) ? data.orders : [];
       saveProducts();
       saveSettings();
+      saveOrders();
       refreshAll();
       document.querySelector("#adminWhatsapp").value =
         state.settings.whatsapp === DEFAULT_WHATSAPP_NUMBER ? "" : state.settings.whatsapp;

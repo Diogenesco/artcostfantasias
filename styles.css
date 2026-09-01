@@ -657,7 +657,7 @@ body.admin-visible .admin-panel {
 .admin-stats {
   display: grid;
   gap: 14px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   margin-bottom: 24px;
 }
 
@@ -877,6 +877,13 @@ body.admin-visible .admin-panel {
   margin-top: 34px;
 }
 
+.admin-list-heading {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
 .admin-item {
   align-items: center;
   border-top: 1px solid var(--line);
@@ -884,6 +891,14 @@ body.admin-visible .admin-panel {
   gap: 16px;
   grid-template-columns: 1fr auto;
   padding: 16px 0;
+}
+
+.empty-admin {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-weight: 700;
+  margin: 0;
+  padding: 18px 0;
 }
 
 .admin-item strong,

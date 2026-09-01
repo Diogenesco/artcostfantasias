@@ -24,6 +24,7 @@
 - Permitir editar itens cadastrados sem recriar o produto.
 - Permitir bloqueio de datas por item.
 - Adicionar exportacao e importacao de backup do catalogo no prototipo.
+- Registrar historico local de solicitacoes enviadas pelo formulario.
 - Listar itens e bloqueios cadastrados.
 - Trocar a senha simples de prototipo por login real.
 

@@ -23,6 +23,9 @@ integracao com banco de dados e armazenamento real.
 O painel tambem permite exportar e importar um backup JSON do catalogo enquanto
 os dados ainda ficam salvos localmente no navegador.
 
+As solicitacoes enviadas pelo formulario tambem ficam registradas localmente no
+painel administrativo e entram no arquivo de backup.
+
 ## Roadmap
 
 O planejamento de evolucao do site esta em `ROADMAP.md`.
