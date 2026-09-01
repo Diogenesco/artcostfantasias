@@ -29,6 +29,9 @@ painel administrativo e entram no arquivo de backup.
 O historico local possui status operacional para acompanhar solicitacoes,
 reservas, retiradas, devolucoes e cancelamentos.
 
+Para acelerar o cadastro real, o painel oferece um modelo CSV e importacao de
+produtos por planilha.
+
 ## Roadmap
 
 O planejamento de evolucao do site esta em `ROADMAP.md`.

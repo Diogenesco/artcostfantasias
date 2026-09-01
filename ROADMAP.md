@@ -9,6 +9,7 @@
 - Adicionar WhatsApp oficial nos botoes de contato.
 - Criar pagina inicial com chamada, destaques e funcionamento.
 - Substituir cards de exemplo por fotos reais das fantasias.
+- Permitir importar produtos reais por CSV a partir do painel.
 
 ## Fase 2 - Reserva por WhatsApp
 

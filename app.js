@@ -131,6 +131,7 @@ const adminImage = document.querySelector("#adminImage");
 const adminImageFile = document.querySelector("#adminImageFile");
 const imagePreview = document.querySelector("#imagePreview");
 const backupStatus = document.querySelector("#backupStatus");
+const csvStatus = document.querySelector("#csvStatus");
 let selectedImageData = "";
 let editingProductId = "";
 
@@ -176,6 +177,89 @@ function saveOrders() {
 
 function setBackupStatus(message) {
   backupStatus.textContent = message;
+}
+
+function setCsvStatus(message) {
+  csvStatus.textContent = message;
+}
+
+function downloadTextFile(filename, content, type) {
+  const blob = new Blob([content], { type });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+function csvEscape(value) {
+  return `"${String(value || "").replace(/"/g, '""')}"`;
+}
+
+function parseCsv(text) {
+  const rows = [];
+  let cell = "";
+  let row = [];
+  let quoted = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    const next = text[index + 1];
+
+    if (char === '"' && quoted && next === '"') {
+      cell += '"';
+      index += 1;
+      continue;
+    }
+
+    if (char === '"') {
+      quoted = !quoted;
+      continue;
+    }
+
+    if (char === "," && !quoted) {
+      row.push(cell);
+      cell = "";
+      continue;
+    }
+
+    if ((char === "\n" || char === "\r") && !quoted) {
+      if (char === "\r" && next === "\n") index += 1;
+      row.push(cell);
+      if (row.some((value) => value.trim())) rows.push(row);
+      row = [];
+      cell = "";
+      continue;
+    }
+
+    cell += char;
+  }
+
+  row.push(cell);
+  if (row.some((value) => value.trim())) rows.push(row);
+  return rows;
+}
+
+function productFromCsvRow(headers, row) {
+  const data = Object.fromEntries(headers.map((header, index) => [normalizeText(header), row[index] || ""]));
+  const name = data.nome || data.name || "";
+  if (!name.trim()) return null;
+
+  return {
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}-${normalizeText(name).replace(/\W+/g, "-")}`,
+    name: name.trim(),
+    price: Number(String(data.preco || data.price || "0").replace(",", ".")) || 0,
+    type: normalizeText(data.tipo || data.type || "locacao") || "locacao",
+    audience: normalizeText(data.publico || data.audience || "todos") || "todos",
+    gender: normalizeText(data.genero || data.gender || "unissex") || "unissex",
+    theme: normalizeText(data.tema || data.theme || "tematico") || "tematico",
+    sizes: data.tamanhos || data.sizes || "Consultar",
+    color: data.cor || data.color || "#b3202a",
+    icon: name.trim().charAt(0).toUpperCase(),
+    image: data.imagem || data.image || "",
+    reservations: [],
+    description: data.descricao || data.description || "Item importado pela planilha da Art & Cost.",
+  };
 }
 
 function money(value) {
@@ -897,14 +981,11 @@ document.querySelector("#exportCatalog").addEventListener("click", () => {
     settings: state.settings,
     orders: state.orders,
   };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], {
-    type: "application/json",
-  });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = `art-cost-catalogo-${new Date().toISOString().slice(0, 10)}.json`;
-  link.click();
-  URL.revokeObjectURL(link.href);
+  downloadTextFile(
+    `art-cost-catalogo-${new Date().toISOString().slice(0, 10)}.json`,
+    JSON.stringify(payload, null, 2),
+    "application/json"
+  );
   setBackupStatus("Backup exportado. Guarde esse arquivo em local seguro.");
 });
 
@@ -932,6 +1013,51 @@ document.querySelector("#importCatalog").addEventListener("change", (event) => {
       setBackupStatus("Backup importado com sucesso.");
     } catch (error) {
       setBackupStatus("Nao foi possivel importar este arquivo.");
+    } finally {
+      event.target.value = "";
+    }
+  });
+  reader.readAsText(file);
+});
+
+document.querySelector("#downloadCsvTemplate").addEventListener("click", () => {
+  const headers = ["nome", "preco", "tipo", "publico", "genero", "tamanhos", "tema", "imagem", "descricao"];
+  const example = [
+    "Fantasia Princesa",
+    "95",
+    "locacao",
+    "infantil",
+    "feminino",
+    "Infantil 8, Infantil 10",
+    "tematico",
+    "https://exemplo.com/foto.jpg",
+    "Vestido de princesa com acessorios",
+  ];
+  const csv = `${headers.join(",")}\n${example.map(csvEscape).join(",")}\n`;
+  downloadTextFile("modelo-produtos-art-cost.csv", csv, "text/csv;charset=utf-8");
+  setCsvStatus("Modelo CSV baixado.");
+});
+
+document.querySelector("#importProductsCsv").addEventListener("change", (event) => {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    try {
+      const rows = parseCsv(String(reader.result || ""));
+      const headers = rows.shift() || [];
+      const imported = rows.map((row) => productFromCsvRow(headers, row)).filter(Boolean);
+      if (!imported.length) {
+        throw new Error("Nenhum produto encontrado.");
+      }
+
+      state.products = [...imported, ...state.products];
+      saveProducts();
+      refreshAll();
+      setCsvStatus(`${imported.length} produto(s) importado(s) com sucesso.`);
+    } catch (error) {
+      setCsvStatus("Nao foi possivel importar a planilha. Confira as colunas do modelo.");
     } finally {
       event.target.value = "";
     }

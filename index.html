@@ -256,6 +256,22 @@
           </article>
 
           <article class="admin-box">
+            <h3>Importar planilha</h3>
+            <div class="backup-actions">
+              <button class="secondary-action" id="downloadCsvTemplate" type="button">
+                Baixar modelo CSV
+              </button>
+              <label class="import-button">
+                Importar produtos CSV
+                <input id="importProductsCsv" type="file" accept=".csv,text/csv" />
+              </label>
+            </div>
+            <p class="admin-note" id="csvStatus">
+              Use colunas: nome, preco, tipo, publico, genero, tamanhos, tema, imagem, descricao.
+            </p>
+          </article>
+
+          <article class="admin-box">
             <h3>Bloquear data</h3>
             <form class="block-form" id="blockForm">
               <label>
