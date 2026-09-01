@@ -124,6 +124,10 @@ const adminStats = document.querySelector("#adminStats");
 const blockProduct = document.querySelector("#blockProduct");
 const adminLock = document.querySelector("#adminLock");
 const adminContent = document.querySelector("#adminContent");
+const adminImage = document.querySelector("#adminImage");
+const adminImageFile = document.querySelector("#adminImageFile");
+const imagePreview = document.querySelector("#imagePreview");
+let selectedImageData = "";
 
 function loadProducts() {
   const saved = localStorage.getItem(CATALOG_KEY);
@@ -243,6 +247,13 @@ function mediaMarkup(product) {
   }
 
   return `<span class="product-figure">${product.icon}</span>`;
+}
+
+function updateImagePreview(value) {
+  imagePreview.classList.toggle("empty", !value);
+  imagePreview.innerHTML = value
+    ? `<img src="${value}" alt="Previa da fantasia" />`
+    : "Previa da imagem";
 }
 
 function renderCatalog() {
@@ -505,6 +516,46 @@ document.querySelectorAll(".segment").forEach((button) => {
   });
 });
 
+document.querySelectorAll(".image-tab").forEach((button) => {
+  button.addEventListener("click", () => {
+    document.querySelector(".image-tab.active").classList.remove("active");
+    button.classList.add("active");
+    document.querySelectorAll(".image-source").forEach((panel) => {
+      panel.classList.toggle("active", panel.dataset.sourcePanel === button.dataset.imageSource);
+    });
+    const previewValue = button.dataset.imageSource === "url" ? adminImage.value.trim() : selectedImageData;
+    updateImagePreview(previewValue);
+  });
+});
+
+adminImage.addEventListener("input", () => {
+  if (!document.querySelector('[data-image-source="url"]').classList.contains("active")) return;
+  updateImagePreview(adminImage.value.trim());
+});
+
+adminImageFile.addEventListener("change", () => {
+  const file = adminImageFile.files && adminImageFile.files[0];
+  if (!file) {
+    selectedImageData = "";
+    updateImagePreview("");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    selectedImageData = String(reader.result || "");
+    updateImagePreview(selectedImageData);
+  });
+  reader.readAsDataURL(file);
+});
+
+document.querySelector("#searchImageLink").addEventListener("click", () => {
+  const productName = document.querySelector("#adminName").value.trim();
+  const query = productName ? `${productName} fantasia` : "fantasia atelie";
+  const url = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query)}`;
+  window.open(url, "_blank", "noopener");
+});
+
 searchInput.addEventListener("input", renderCatalog);
 
 ["#bookingProduct", "#bookingMode", "#startDate", "#pickupTime", "#endDate", "#returnTime"].forEach((selector) => {
@@ -563,6 +614,7 @@ document.querySelector("#dialogReserve").addEventListener("click", (event) => {
 document.querySelector("#adminForm").addEventListener("submit", (event) => {
   event.preventDefault();
   const name = document.querySelector("#adminName").value.trim();
+  const imageSource = document.querySelector(".image-tab.active").dataset.imageSource;
   const product = {
     id: `${Date.now()}-${normalizeText(name).replace(/\W+/g, "-")}`,
     name,
@@ -574,7 +626,7 @@ document.querySelector("#adminForm").addEventListener("submit", (event) => {
     sizes: document.querySelector("#adminSizes").value || "Consultar",
     color: document.querySelector("#adminColor").value,
     icon: name.charAt(0).toUpperCase(),
-    image: document.querySelector("#adminImage").value.trim(),
+    image: imageSource === "file" ? selectedImageData : adminImage.value.trim(),
     reservations: [],
     description:
       document.querySelector("#adminDescription").value ||
@@ -585,6 +637,13 @@ document.querySelector("#adminForm").addEventListener("submit", (event) => {
   saveProducts();
   refreshAll();
   event.target.reset();
+  selectedImageData = "";
+  updateImagePreview("");
+  document.querySelector(".image-tab.active").classList.remove("active");
+  document.querySelector('[data-image-source="url"]').classList.add("active");
+  document.querySelectorAll(".image-source").forEach((panel) => {
+    panel.classList.toggle("active", panel.dataset.sourcePanel === "url");
+  });
   document.querySelector("#adminColor").value = "#b3202a";
 });
 

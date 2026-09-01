@@ -16,6 +16,10 @@ No Cloudflare Pages, use:
 O telefone do WhatsApp fica em `app.js`, na constante
 `DEFAULT_WHATSAPP_NUMBER`.
 
+No prototipo atual, as imagens podem ser cadastradas no painel por link ou por
+arquivo escolhido no computador. Esses dados ficam salvos no navegador ate a
+integracao com banco de dados e armazenamento real.
+
 ## Roadmap
 
 O planejamento de evolucao do site esta em `ROADMAP.md`.

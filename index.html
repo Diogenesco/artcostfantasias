@@ -302,10 +302,25 @@
             Cor do card
             <input id="adminColor" type="color" value="#b3202a" />
           </label>
-          <label class="wide-field">
-            Link da foto
-            <input id="adminImage" type="url" placeholder="https://..." />
-          </label>
+          <fieldset class="image-field wide-field">
+            <legend>Imagem da fantasia</legend>
+            <div class="image-tabs" role="tablist" aria-label="Origem da imagem">
+              <button class="image-tab active" data-image-source="url" type="button">Buscar link</button>
+              <button class="image-tab" data-image-source="file" type="button">Adicionar imagem</button>
+            </div>
+            <label class="image-source active" data-source-panel="url">
+              Link da foto
+              <input id="adminImage" type="url" placeholder="https://..." />
+            </label>
+            <button class="image-search-button" id="searchImageLink" type="button">
+              Pesquisar imagem pelo nome
+            </button>
+            <label class="image-source" data-source-panel="file">
+              Arquivo do computador
+              <input id="adminImageFile" type="file" accept="image/*" />
+            </label>
+            <div class="image-preview empty" id="imagePreview">Previa da imagem</div>
+          </fieldset>
           <label class="wide-field">
             Descricao
             <textarea id="adminDescription" rows="3" placeholder="Detalhes, medidas, acessorios inclusos"></textarea>

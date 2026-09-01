@@ -20,6 +20,7 @@
 ## Fase 3 - Painel administrativo
 
 - Criar painel com cadastro de fantasia, preco, tipo, publico, tema, tamanhos, fotos e descricao.
+- Permitir cadastro de imagem por link ou arquivo local no prototipo.
 - Permitir bloqueio de datas por item.
 - Listar itens e bloqueios cadastrados.
 - Trocar a senha simples de prototipo por login real.

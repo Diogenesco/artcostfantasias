@@ -486,6 +486,84 @@ h2 {
   resize: vertical;
 }
 
+.image-field {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 16px;
+}
+
+.image-field legend {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 900;
+  padding: 0 6px;
+  text-transform: uppercase;
+}
+
+.image-tabs {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  padding: 4px;
+}
+
+.image-tab {
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 900;
+  min-height: 40px;
+}
+
+.image-tab.active {
+  background: var(--black);
+  color: var(--gold-strong);
+}
+
+.image-search-button {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 900;
+  min-height: 42px;
+}
+
+.image-source {
+  display: none;
+}
+
+.image-source.active {
+  display: grid;
+}
+
+.image-preview {
+  align-items: center;
+  aspect-ratio: 16 / 10;
+  background: var(--soft);
+  border: 1px dashed #cdbf9f;
+  border-radius: 8px;
+  color: var(--muted);
+  display: flex;
+  font-weight: 800;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.image-preview img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
 .form-action,
 .wide-field {
   grid-column: 1 / -1;
