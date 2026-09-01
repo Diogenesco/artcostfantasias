@@ -120,6 +120,7 @@ const cartCount = document.querySelector("#cartCount");
 const drawer = document.querySelector("#drawer");
 const dialog = document.querySelector("#productDialog");
 const adminList = document.querySelector("#adminList");
+const adminStats = document.querySelector("#adminStats");
 const blockProduct = document.querySelector("#blockProduct");
 const adminLock = document.querySelector("#adminLock");
 const adminContent = document.querySelector("#adminContent");
@@ -311,12 +312,46 @@ function renderAdminList() {
     .join("");
 }
 
+function renderAdminStats() {
+  const total = state.products.length;
+  const rentals = state.products.filter((product) => product.type === "locacao" || product.type === "ambos").length;
+  const sales = state.products.filter((product) => product.type === "venda" || product.type === "ambos").length;
+  const blocks = state.products.reduce(
+    (sum, product) => sum + (product.reservations || []).length,
+    0
+  );
+
+  adminStats.innerHTML = `
+    <article class="admin-stat">
+      <span>Itens</span>
+      <strong>${total}</strong>
+    </article>
+    <article class="admin-stat">
+      <span>Locacao</span>
+      <strong>${rentals}</strong>
+    </article>
+    <article class="admin-stat">
+      <span>Venda</span>
+      <strong>${sales}</strong>
+    </article>
+    <article class="admin-stat">
+      <span>Bloqueios</span>
+      <strong>${blocks}</strong>
+    </article>
+  `;
+}
+
 function refreshAll() {
   renderCatalog();
   renderBookingOptions();
   renderAdminList();
+  renderAdminStats();
   updateRentalFields();
   updateAvailabilityMessage();
+}
+
+function syncAdminVisibility() {
+  document.body.classList.toggle("admin-visible", window.location.hash === "#admin");
 }
 
 function selectProduct(productId) {
@@ -445,6 +480,8 @@ function updateAvailabilityMessage() {
 document.querySelector("#menuButton").addEventListener("click", () => {
   drawer.classList.toggle("open");
 });
+
+window.addEventListener("hashchange", syncAdminVisibility);
 
 document.querySelector("#lockForm").addEventListener("submit", (event) => {
   event.preventDefault();
@@ -619,4 +656,5 @@ document.querySelector("#floatingWhatsapp").href = whatsappUrl(
 document.querySelector("#adminWhatsapp").value =
   state.settings.whatsapp === DEFAULT_WHATSAPP_NUMBER ? "" : state.settings.whatsapp;
 
+syncAdminVisibility();
 refreshAll();

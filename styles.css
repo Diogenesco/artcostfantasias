@@ -542,6 +542,53 @@ h2 {
 
 .admin-panel {
   background: var(--paper);
+  display: none;
+}
+
+body.admin-visible .admin-panel {
+  display: block;
+}
+
+.admin-back {
+  color: var(--muted);
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 18px;
+  text-transform: uppercase;
+}
+
+.admin-back:hover {
+  color: var(--ink);
+}
+
+.admin-stats {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 24px;
+}
+
+.admin-stat {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  min-height: 112px;
+  padding: 18px;
+}
+
+.admin-stat span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.admin-stat strong {
+  font-size: 34px;
+  line-height: 1;
 }
 
 .admin-heading {
@@ -918,6 +965,7 @@ dd {
   .booking-form,
   .admin-form,
   .admin-grid,
+  .admin-stats,
   .block-form,
   .featured-strip,
   .info-band {
