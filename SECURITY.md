@@ -14,14 +14,15 @@ mas não substitui autenticação real, porque arquivos JavaScript públicos pod
 inspecionados.
 
 Para proteger de verdade, ative o Cloudflare Zero Trust Access no painel
-administrativo. O painel já está separado em `/admin.html`, então essa rota
-deve receber login por e-mail/autenticação da Cloudflare.
+administrativo. O painel já está separado em `/admin.html`, e a Cloudflare
+também entrega essa página como `/admin`, então essa rota deve receber login por
+e-mail/autenticação da Cloudflare.
 
 Configuração recomendada:
 
 - Aplicação: Self-hosted.
 - Domínio: `artcostfantasias.com.br`.
-- Caminho protegido: `/admin.html`.
+- Caminho protegido: `/admin*`.
 - Política: permitir apenas o e-mail do administrador.
 - Sessão: expiração curta, como 8 horas.
 
