@@ -232,6 +232,22 @@
           </article>
 
           <article class="admin-box">
+            <h3>Backup do catalogo</h3>
+            <div class="backup-actions">
+              <button class="secondary-action" id="exportCatalog" type="button">
+                Exportar backup
+              </button>
+              <label class="import-button">
+                Importar backup
+                <input id="importCatalog" type="file" accept="application/json,.json" />
+              </label>
+            </div>
+            <p class="admin-note" id="backupStatus">
+              Salve uma copia dos cadastros enquanto o banco de dados nao estiver ligado.
+            </p>
+          </article>
+
+          <article class="admin-box">
             <h3>Bloquear data</h3>
             <form class="block-form" id="blockForm">
               <label>

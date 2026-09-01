@@ -127,6 +127,7 @@ const adminContent = document.querySelector("#adminContent");
 const adminImage = document.querySelector("#adminImage");
 const adminImageFile = document.querySelector("#adminImageFile");
 const imagePreview = document.querySelector("#imagePreview");
+const backupStatus = document.querySelector("#backupStatus");
 let selectedImageData = "";
 let editingProductId = "";
 
@@ -153,6 +154,10 @@ function saveProducts() {
 
 function saveSettings() {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+}
+
+function setBackupStatus(message) {
+  backupStatus.textContent = message;
 }
 
 function money(value) {
@@ -744,6 +749,52 @@ document.querySelector("#saveWhatsapp").addEventListener("click", () => {
   document.querySelector("#floatingWhatsapp").href = whatsappUrl(
     "Ola! Quero falar com a Art & Cost sobre fantasias."
   );
+});
+
+document.querySelector("#exportCatalog").addEventListener("click", () => {
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    products: state.products,
+    settings: state.settings,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {
+    type: "application/json",
+  });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `art-cost-catalogo-${new Date().toISOString().slice(0, 10)}.json`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+  setBackupStatus("Backup exportado. Guarde esse arquivo em local seguro.");
+});
+
+document.querySelector("#importCatalog").addEventListener("change", (event) => {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    try {
+      const data = JSON.parse(String(reader.result || "{}"));
+      if (!Array.isArray(data.products)) {
+        throw new Error("Arquivo sem catalogo valido.");
+      }
+
+      state.products = data.products;
+      state.settings = data.settings || state.settings;
+      saveProducts();
+      saveSettings();
+      refreshAll();
+      document.querySelector("#adminWhatsapp").value =
+        state.settings.whatsapp === DEFAULT_WHATSAPP_NUMBER ? "" : state.settings.whatsapp;
+      setBackupStatus("Backup importado com sucesso.");
+    } catch (error) {
+      setBackupStatus("Nao foi possivel importar este arquivo.");
+    } finally {
+      event.target.value = "";
+    }
+  });
+  reader.readAsText(file);
 });
 
 document.querySelector("#resetCatalog").addEventListener("click", () => {

@@ -20,6 +20,9 @@ No prototipo atual, as imagens podem ser cadastradas no painel por link ou por
 arquivo escolhido no computador. Esses dados ficam salvos no navegador ate a
 integracao com banco de dados e armazenamento real.
 
+O painel tambem permite exportar e importar um backup JSON do catalogo enquanto
+os dados ainda ficam salvos localmente no navegador.
+
 ## Roadmap
 
 O planejamento de evolucao do site esta em `ROADMAP.md`.
