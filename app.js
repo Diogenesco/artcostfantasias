@@ -160,6 +160,7 @@ function loadOrders() {
     status: "solicitado",
     customerPhone: "",
     eventDate: "",
+    desiredSize: "",
     ...order,
   }));
 }
@@ -487,7 +488,7 @@ function renderOrdersList() {
           <div>
             <strong>${order.customerName} - ${order.productName}</strong>
             <span>${order.modeLabel} | ${money(order.price)} | ${formatDateTime(order.createdAt)} | ${statusLabel(order.status)}</span>
-            <span>${order.customerPhone || "Sem telefone"} | Evento: ${formatDateOnly(order.eventDate) || "Não informado"}</span>
+            <span>${order.customerPhone || "Sem telefone"} | Evento: ${formatDateOnly(order.eventDate) || "Não informado"} | Tamanho: ${order.desiredSize || "Não informado"}</span>
             <span>${order.period || "Pedido de compra"} | ${order.notes}</span>
           </div>
           <div class="admin-actions">
@@ -615,6 +616,7 @@ function buildBookingMessage() {
   const customerName = document.querySelector("#customerName").value || "Cliente";
   const customerPhone = document.querySelector("#customerPhone").value || "Não informado";
   const eventDate = document.querySelector("#eventDate").value;
+  const desiredSize = document.querySelector("#desiredSize").value || "Não informado";
   const start = makeDateTime("#startDate", "#pickupTime");
   const end = makeDateTime("#endDate", "#returnTime");
   const notes = document.querySelector("#bookingNotes").value || "Sem observações";
@@ -628,6 +630,7 @@ Item: ${product.name}
 Tipo: Compra
 Valor: ${money(product.price)}
 Data do evento: ${formatDateOnly(eventDate) || "Não informada"}
+Tamanho desejado: ${desiredSize}
 Tamanhos disponíveis: ${product.sizes}
 Observações: ${notes}`;
   }
@@ -640,6 +643,7 @@ Item: ${product.name}
 Tipo: ${typeLabel(product)}
 Valor: ${money(product.price)}
 Data do evento: ${formatDateOnly(eventDate) || "Não informada"}
+Tamanho desejado: ${desiredSize}
 Retirada: ${formatDateTime(start)}
 Devolução: ${formatDateTime(end)}
 Tamanhos disponíveis: ${product.sizes}
@@ -655,6 +659,7 @@ function createOrderRecord() {
   const customerName = document.querySelector("#customerName").value || "Cliente";
   const customerPhone = document.querySelector("#customerPhone").value || "";
   const eventDate = document.querySelector("#eventDate").value || "";
+  const desiredSize = document.querySelector("#desiredSize").value || "";
   const notes = document.querySelector("#bookingNotes").value || "Sem observações";
   const start = makeDateTime("#startDate", "#pickupTime");
   const end = makeDateTime("#endDate", "#returnTime");
@@ -667,6 +672,7 @@ function createOrderRecord() {
     customerName,
     customerPhone,
     eventDate,
+    desiredSize,
     productId: product.id,
     productName: product.name,
     mode: bookingMode.value,
@@ -810,7 +816,7 @@ searchInput.addEventListener("input", renderCatalog);
   });
 });
 
-["#customerName", "#customerPhone", "#eventDate", "#bookingNotes"].forEach((selector) => {
+["#customerName", "#customerPhone", "#eventDate", "#desiredSize", "#bookingNotes"].forEach((selector) => {
   document.querySelector(selector).addEventListener("input", updateMessagePreview);
 });
 
