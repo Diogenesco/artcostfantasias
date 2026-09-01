@@ -85,6 +85,8 @@
           <button class="segment" data-filter="venda" type="button">Venda</button>
           <button class="segment" data-filter="infantil" type="button">Infantil</button>
           <button class="segment" data-filter="adulto" type="button">Adulto</button>
+          <button class="segment" data-filter="feminino" type="button">Feminino</button>
+          <button class="segment" data-filter="masculino" type="button">Masculino</button>
           <button class="segment" data-filter="tematico" type="button">Tematicos</button>
         </div>
       </section>
@@ -122,24 +124,32 @@
             <select id="bookingProduct" required></select>
           </label>
           <label>
+            Tipo de pedido
+            <select id="bookingMode" required></select>
+          </label>
+          <label>
             Nome da cliente
             <input id="customerName" type="text" placeholder="Nome" />
           </label>
-          <label>
+          <label class="rental-field">
             Inicio da locacao
             <input id="startDate" type="date" required />
           </label>
-          <label>
+          <label class="rental-field">
             Hora da retirada
             <input id="pickupTime" type="time" required />
           </label>
-          <label>
+          <label class="rental-field">
             Fim da locacao
             <input id="endDate" type="date" required />
           </label>
-          <label>
+          <label class="rental-field">
             Hora da devolucao
             <input id="returnTime" type="time" required />
+          </label>
+          <label class="wide-field">
+            Observacoes
+            <input id="bookingNotes" type="text" placeholder="Tamanho desejado, evento ou duvida" />
           </label>
           <p class="availability-message" id="availabilityMessage" aria-live="polite"></p>
           <button class="primary-action form-action" type="submit">
@@ -252,6 +262,14 @@
               <option value="adulto">Adulto</option>
               <option value="infantil">Infantil</option>
               <option value="todos">Todas as idades</option>
+            </select>
+          </label>
+          <label>
+            Genero
+            <select id="adminGender">
+              <option value="unissex">Unissex</option>
+              <option value="feminino">Feminino</option>
+              <option value="masculino">Masculino</option>
             </select>
           </label>
           <label>

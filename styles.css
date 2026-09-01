@@ -492,6 +492,10 @@ h2 {
   grid-column: 1 / -1;
 }
 
+.rental-field.hidden {
+  display: none;
+}
+
 .info-band {
   background: var(--soft);
   display: grid;
@@ -699,7 +703,20 @@ h2 {
   line-height: 1.45;
 }
 
-.admin-delete {
+.reservation-row {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.reservation-row span {
+  min-width: 0;
+}
+
+.admin-delete,
+.admin-unblock {
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 6px;
@@ -708,6 +725,24 @@ h2 {
   font-weight: 900;
   min-height: 40px;
   padding: 0 12px;
+}
+
+.admin-unblock {
+  color: var(--ink);
+  flex: 0 0 auto;
+  min-height: 34px;
+}
+
+@media (max-width: 540px) {
+  .reservation-row,
+  .admin-item {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .reservation-row {
+    flex-direction: column;
+  }
 }
 
 .contact-band {

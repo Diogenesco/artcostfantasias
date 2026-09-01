@@ -13,8 +13,8 @@ No Cloudflare Pages, use:
 - Build command: deixe vazio
 - Build output directory: `/`
 
-Depois substitua o telefone do WhatsApp em `app.js`, na constante
-`WHATSAPP_NUMBER`.
+O telefone do WhatsApp fica em `app.js`, na constante
+`DEFAULT_WHATSAPP_NUMBER`.
 
 ## Roadmap
 

@@ -10,6 +10,7 @@ const starterProducts = [
     price: 85,
     type: "locacao",
     audience: "adulto",
+    gender: "feminino",
     theme: "tematico",
     sizes: "P, M, G",
     color: "#b3202a",
@@ -24,6 +25,7 @@ const starterProducts = [
     price: 95,
     type: "locacao",
     audience: "adulto",
+    gender: "feminino",
     theme: "tematico",
     sizes: "P, M",
     color: "#9e1f28",
@@ -45,6 +47,7 @@ const starterProducts = [
     price: 95,
     type: "locacao",
     audience: "infantil",
+    gender: "feminino",
     theme: "tematico",
     sizes: "Infantil 6, 8, 10",
     color: "#0f7f5c",
@@ -59,6 +62,7 @@ const starterProducts = [
     price: 90,
     type: "locacao",
     audience: "adulto",
+    gender: "feminino",
     theme: "tematico",
     sizes: "M, G",
     color: "#1d4f8f",
@@ -73,6 +77,7 @@ const starterProducts = [
     price: 180,
     type: "venda",
     audience: "todos",
+    gender: "feminino",
     theme: "atelie",
     sizes: "Sob medida",
     color: "#6f3d7b",
@@ -87,6 +92,7 @@ const starterProducts = [
     price: 120,
     type: "ambos",
     audience: "todos",
+    gender: "unissex",
     theme: "tematico",
     sizes: "P, M, G, GG",
     color: "#c9902e",
@@ -107,6 +113,7 @@ const state = {
 const catalogGrid = document.querySelector("#catalogGrid");
 const searchInput = document.querySelector("#searchInput");
 const bookingProduct = document.querySelector("#bookingProduct");
+const bookingMode = document.querySelector("#bookingMode");
 const bookingForm = document.querySelector("#bookingForm");
 const availabilityMessage = document.querySelector("#availabilityMessage");
 const cartCount = document.querySelector("#cartCount");
@@ -123,6 +130,7 @@ function loadProducts() {
   return products.map((product) => ({
     reservations: [],
     theme: "tematico",
+    gender: "unissex",
     image: "",
     ...product,
   }));
@@ -169,16 +177,36 @@ function audienceLabel(product) {
   return product.audience === "infantil" ? "Infantil" : "Adulto";
 }
 
+function genderLabel(product) {
+  if (product.gender === "feminino") return "Feminino";
+  if (product.gender === "masculino") return "Masculino";
+  return "Unissex";
+}
+
 function productMatches(product) {
   const term = normalizeText(searchInput.value);
-  const inFilter =
-    state.filter === "todos" ||
-    product.type === state.filter ||
-    product.audience === state.filter ||
-    product.theme === state.filter ||
-    product.type === "ambos" ||
-    product.audience === "todos";
-  const searchable = [product.name, product.description, product.sizes, product.theme, typeLabel(product)];
+  let inFilter = state.filter === "todos";
+  if (state.filter === "locacao" || state.filter === "venda") {
+    inFilter = product.type === state.filter || product.type === "ambos";
+  }
+  if (state.filter === "infantil" || state.filter === "adulto") {
+    inFilter = product.audience === state.filter || product.audience === "todos";
+  }
+  if (state.filter === "feminino" || state.filter === "masculino") {
+    inFilter = product.gender === state.filter || product.gender === "unissex";
+  }
+  if (state.filter === "tematico") {
+    inFilter = product.theme === "tematico";
+  }
+  const searchable = [
+    product.name,
+    product.description,
+    product.sizes,
+    product.theme,
+    typeLabel(product),
+    audienceLabel(product),
+    genderLabel(product),
+  ];
 
   return inFilter && (!term || normalizeText(searchable.join(" ")).includes(term));
 }
@@ -231,7 +259,7 @@ function renderCatalog() {
           </div>
           <h3>${product.name}</h3>
           <div class="price">${money(product.price)}</div>
-          <div class="meta">${product.sizes} | ${audienceLabel(product)}</div>
+          <div class="meta">${product.sizes} | ${audienceLabel(product)} | ${genderLabel(product)}</div>
         </article>
       `;
     })
@@ -252,6 +280,7 @@ function renderBookingOptions() {
 
   bookingProduct.innerHTML = options;
   blockProduct.innerHTML = options;
+  renderBookingModes();
 }
 
 function renderAdminList() {
@@ -259,8 +288,12 @@ function renderAdminList() {
     .map((product) => {
       const reservations = (product.reservations || [])
         .map(
-          (reservation) =>
-            `<span>${reservation.reason || "Bloqueio"}: ${formatDateTime(reservation.start)} ate ${formatDateTime(reservation.end)}</span>`
+          (reservation) => `
+            <div class="reservation-row">
+              <span>${reservation.reason || "Bloqueio"}: ${formatDateTime(reservation.start)} ate ${formatDateTime(reservation.end)}</span>
+              <button class="admin-unblock" type="button" data-unblock-product="${product.id}" data-unblock="${reservation.id}">Liberar</button>
+            </div>
+          `
         )
         .join("");
 
@@ -268,7 +301,7 @@ function renderAdminList() {
         <article class="admin-item">
           <div>
             <strong>${product.name}</strong>
-            <span>${typeLabel(product)} | ${money(product.price)} | ${product.sizes}</span>
+            <span>${typeLabel(product)} | ${money(product.price)} | ${product.sizes} | ${genderLabel(product)}</span>
             ${reservations || "<span>Sem bloqueios de data.</span>"}
           </div>
           <button class="admin-delete" type="button" data-delete="${product.id}">Remover</button>
@@ -282,15 +315,46 @@ function refreshAll() {
   renderCatalog();
   renderBookingOptions();
   renderAdminList();
+  updateRentalFields();
   updateAvailabilityMessage();
 }
 
 function selectProduct(productId) {
   state.selectedProductId = productId;
   bookingProduct.value = productId;
+  renderBookingModes();
+  updateRentalFields();
   cartCount.textContent = "1";
   updateAvailabilityMessage();
   document.querySelector("#pedido").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function renderBookingModes() {
+  const product = state.products.find((item) => item.id === bookingProduct.value) || state.products[0];
+  if (!product) return;
+
+  if (product.type === "venda") {
+    bookingMode.innerHTML = `<option value="venda">Compra</option>`;
+    return;
+  }
+
+  if (product.type === "ambos") {
+    bookingMode.innerHTML = `
+      <option value="locacao">Locacao</option>
+      <option value="venda">Compra</option>
+    `;
+    return;
+  }
+
+  bookingMode.innerHTML = `<option value="locacao">Locacao</option>`;
+}
+
+function updateRentalFields() {
+  const isRental = bookingMode.value === "locacao";
+  document.querySelectorAll(".rental-field").forEach((field) => {
+    field.classList.toggle("hidden", !isRental);
+    field.querySelector("input").required = isRental;
+  });
 }
 
 function openProduct(productId) {
@@ -318,6 +382,18 @@ function buildBookingMessage() {
   const customerName = document.querySelector("#customerName").value || "Cliente";
   const start = makeDateTime("#startDate", "#pickupTime");
   const end = makeDateTime("#endDate", "#returnTime");
+  const notes = document.querySelector("#bookingNotes").value || "Sem observacoes";
+
+  if (bookingMode.value === "venda") {
+    return `Ola! Tenho interesse em comprar com a Art & Cost.
+
+Cliente: ${customerName}
+Item: ${product.name}
+Tipo: Compra
+Valor: ${money(product.price)}
+Tamanhos disponiveis: ${product.sizes}
+Observacoes: ${notes}`;
+  }
 
   return `Ola! Tenho interesse em reservar com a Art & Cost.
 
@@ -327,7 +403,8 @@ Tipo: ${typeLabel(product)}
 Valor: ${money(product.price)}
 Retirada: ${formatDateTime(start)}
 Devolucao: ${formatDateTime(end)}
-Tamanhos disponiveis: ${product.sizes}`;
+Tamanhos disponiveis: ${product.sizes}
+Observacoes: ${notes}`;
 }
 
 function formatDateTime(value) {
@@ -346,7 +423,7 @@ function updateAvailabilityMessage() {
   availabilityMessage.className = "availability-message";
   availabilityMessage.textContent = "";
 
-  if (!product || !start || !end) return;
+  if (!product || bookingMode.value !== "locacao" || !start || !end) return;
 
   if (new Date(start) >= new Date(end)) {
     availabilityMessage.textContent = "A devolucao precisa ser depois da retirada.";
@@ -393,8 +470,19 @@ document.querySelectorAll(".segment").forEach((button) => {
 
 searchInput.addEventListener("input", renderCatalog);
 
-["#bookingProduct", "#startDate", "#pickupTime", "#endDate", "#returnTime"].forEach((selector) => {
+["#bookingProduct", "#bookingMode", "#startDate", "#pickupTime", "#endDate", "#returnTime"].forEach((selector) => {
   document.querySelector(selector).addEventListener("input", updateAvailabilityMessage);
+});
+
+bookingProduct.addEventListener("change", () => {
+  renderBookingModes();
+  updateRentalFields();
+  updateAvailabilityMessage();
+});
+
+bookingMode.addEventListener("change", () => {
+  updateRentalFields();
+  updateAvailabilityMessage();
 });
 
 catalogGrid.addEventListener("click", (event) => {
@@ -420,7 +508,7 @@ bookingForm.addEventListener("submit", (event) => {
   const start = makeDateTime("#startDate", "#pickupTime");
   const end = makeDateTime("#endDate", "#returnTime");
 
-  if (findConflict(product, start, end) || new Date(start) >= new Date(end)) {
+  if (bookingMode.value === "locacao" && (findConflict(product, start, end) || new Date(start) >= new Date(end))) {
     updateAvailabilityMessage();
     return;
   }
@@ -444,6 +532,7 @@ document.querySelector("#adminForm").addEventListener("submit", (event) => {
     price: Number(document.querySelector("#adminPrice").value),
     type: document.querySelector("#adminType").value,
     audience: document.querySelector("#adminAudience").value,
+    gender: document.querySelector("#adminGender").value,
     theme: normalizeText(document.querySelector("#adminTheme").value) || "tematico",
     sizes: document.querySelector("#adminSizes").value || "Consultar",
     color: document.querySelector("#adminColor").value,
@@ -484,6 +573,18 @@ document.querySelector("#blockForm").addEventListener("submit", (event) => {
 });
 
 adminList.addEventListener("click", (event) => {
+  const unblockButton = event.target.closest("[data-unblock]");
+  if (unblockButton) {
+    const product = state.products.find((item) => item.id === unblockButton.dataset.unblockProduct);
+    if (!product) return;
+    product.reservations = (product.reservations || []).filter(
+      (reservation) => reservation.id !== unblockButton.dataset.unblock
+    );
+    saveProducts();
+    refreshAll();
+    return;
+  }
+
   const deleteButton = event.target.closest("[data-delete]");
   if (!deleteButton) return;
   state.products = state.products.filter((product) => product.id !== deleteButton.dataset.delete);
