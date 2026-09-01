@@ -94,9 +94,10 @@ textarea {
   border: 0;
   border-radius: 0;
   display: block;
-  height: clamp(112px, 18vw, 220px);
+  height: clamp(96px, 15vw, 190px);
   max-width: none;
   object-fit: cover;
+  object-position: center;
   padding: 0;
   width: 100%;
 }
@@ -333,6 +334,7 @@ h2 {
   gap: 8px;
   overflow-x: auto;
   padding-bottom: 6px;
+  scrollbar-width: thin;
 }
 
 .segment {
@@ -345,6 +347,7 @@ h2 {
   font-weight: 800;
   min-height: 40px;
   padding: 0 16px;
+  white-space: nowrap;
 }
 
 .segment.active {
@@ -436,6 +439,7 @@ h2 {
   letter-spacing: 0;
   line-height: 1.2;
   margin: 16px 0 10px;
+  overflow-wrap: anywhere;
 }
 
 .price {
@@ -448,6 +452,7 @@ h2 {
   font-size: 14px;
   font-weight: 700;
   margin-top: 8px;
+  overflow-wrap: anywhere;
 }
 
 .booking-panel,
@@ -1057,6 +1062,8 @@ body.admin-visible .admin-panel {
 .product-dialog[open] {
   display: grid;
   grid-template-columns: minmax(260px, 0.85fr) minmax(260px, 1fr);
+  max-height: calc(100vh - 28px);
+  overflow: auto;
 }
 
 .dialog-close {
@@ -1121,7 +1128,7 @@ dd {
 
   .drawer {
     flex-direction: column;
-    top: 144px;
+    top: 150px;
   }
 
   .hero,
@@ -1136,6 +1143,11 @@ dd {
     min-height: auto;
     padding-top: 42px;
     padding-bottom: 42px;
+  }
+
+  .hero-actions .primary-action,
+  .hero-actions .secondary-action {
+    flex: 1 1 180px;
   }
 
   h1 {
@@ -1173,6 +1185,10 @@ dd {
   .dialog-media {
     min-height: 260px;
   }
+
+  .dialog-content {
+    padding: 28px;
+  }
 }
 
 @media (max-width: 440px) {
@@ -1181,13 +1197,61 @@ dd {
   }
 
   .nav-row {
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    min-height: 58px;
     padding-left: 14px;
     padding-right: 14px;
   }
 
   .brand img {
-    height: 82px;
+    height: 94px;
     object-fit: cover;
+  }
+
+  .drawer {
+    top: 152px;
+  }
+
+  .nav-cta {
+    font-size: 13px;
+  }
+
+  .cart-button {
+    height: 42px;
+    width: 42px;
+  }
+
+  .hero {
+    gap: 22px;
+    padding-top: 34px;
+  }
+
+  h1 {
+    font-size: 34px;
+  }
+
+  h2 {
+    font-size: 26px;
+  }
+
+  .hero p,
+  .booking-panel p,
+  .atelier-copy {
+    font-size: 15px;
+  }
+
+  .hero-showcase {
+    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hero-showcase article {
+    min-height: 126px;
+    padding: 16px;
+  }
+
+  .hero-showcase strong {
+    font-size: 18px;
   }
 
   .site-footer {
@@ -1203,6 +1267,27 @@ dd {
 
   .product-card h3 {
     font-size: 16px;
+  }
+
+  .status-pill {
+    font-size: 10px;
+    left: 10px;
+    min-height: 24px;
+    padding: 0 8px;
+    top: 10px;
+  }
+
+  .product-image .tag {
+    bottom: 12px;
+    font-size: 10px;
+    left: 10px;
+    max-width: calc(100% - 70px);
+    overflow: hidden;
+    position: absolute;
+    right: auto;
+    text-overflow: ellipsis;
+    top: auto;
+    white-space: nowrap;
   }
 
   .price {
@@ -1226,6 +1311,48 @@ dd {
     height: 46px;
     right: 12px;
     width: 46px;
+  }
+
+  .primary-action,
+  .secondary-action {
+    min-height: 46px;
+    padding: 0 14px;
+  }
+
+  .booking-form input,
+  .booking-form select,
+  .admin-form input,
+  .admin-form select,
+  .admin-form textarea,
+  .admin-box input,
+  .block-form input,
+  .block-form select {
+    min-height: 46px;
+  }
+
+  .admin-lock,
+  .admin-box {
+    padding: 18px;
+  }
+
+  .admin-actions,
+  .admin-list-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-actions button,
+  .status-select {
+    width: 100%;
+  }
+
+  dl div {
+    display: grid;
+    gap: 4px;
+  }
+
+  dd {
+    text-align: left;
   }
 
   .whatsapp-float {
