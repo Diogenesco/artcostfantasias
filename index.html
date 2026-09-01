@@ -416,6 +416,61 @@
           </div>
           <div id="ordersList"></div>
         </div>
+
+        <div class="admin-list finance-panel">
+          <div class="admin-list-heading">
+            <h3>Fluxo de entradas e saídas</h3>
+            <button class="admin-delete" id="clearCashflow" type="button">Limpar fluxo</button>
+          </div>
+          <div class="finance-summary" id="financeSummary" aria-label="Resumo financeiro"></div>
+          <form class="finance-form" id="cashflowForm">
+            <label>
+              Data
+              <input id="cashflowDate" type="date" required />
+            </label>
+            <label>
+              Tipo
+              <select id="cashflowType" required>
+                <option value="entrada">Entrada</option>
+                <option value="saida">Saída</option>
+              </select>
+            </label>
+            <label>
+              Categoria
+              <select id="cashflowCategory" required>
+                <option value="locacao">Locação</option>
+                <option value="venda">Venda</option>
+                <option value="ajuste">Ajuste</option>
+                <option value="manutencao">Manutenção</option>
+                <option value="outros">Outros</option>
+              </select>
+            </label>
+            <label>
+              Valor
+              <input id="cashflowAmount" type="number" min="0" step="0.01" required />
+            </label>
+            <label class="wide-field">
+              Descrição
+              <input id="cashflowDescription" type="text" placeholder="Ex: Locação Chapeuzinho - Maria" required />
+            </label>
+            <button class="secondary-action form-action" type="submit">Adicionar lançamento</button>
+          </form>
+          <div class="finance-table-wrap">
+            <table class="finance-table">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Tipo</th>
+                  <th>Categoria</th>
+                  <th>Descrição</th>
+                  <th>Valor</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody id="cashflowList"></tbody>
+            </table>
+          </div>
+        </div>
         </div>
       </section>
 

@@ -2,6 +2,7 @@ const DEFAULT_WHATSAPP_NUMBER = "554498155843";
 const CATALOG_KEY = "artCostCatalog";
 const SETTINGS_KEY = "artCostSettings";
 const ORDERS_KEY = "artCostOrders";
+const CASHFLOW_KEY = "artCostCashflow";
 const ADMIN_PASSWORD = "artcost";
 
 const starterProducts = [
@@ -108,6 +109,7 @@ const state = {
   products: loadProducts(),
   settings: loadSettings(),
   orders: loadOrders(),
+  cashflow: loadCashflow(),
   filter: "todos",
   adminProductSearch: "",
   orderStatusFilter: "todos",
@@ -129,6 +131,8 @@ const adminStats = document.querySelector("#adminStats");
 const ordersList = document.querySelector("#ordersList");
 const adminProductSearch = document.querySelector("#adminProductSearch");
 const orderStatusFilter = document.querySelector("#orderStatusFilter");
+const cashflowList = document.querySelector("#cashflowList");
+const financeSummary = document.querySelector("#financeSummary");
 const blockProduct = document.querySelector("#blockProduct");
 const adminLock = document.querySelector("#adminLock");
 const adminContent = document.querySelector("#adminContent");
@@ -169,6 +173,20 @@ function loadOrders() {
   }));
 }
 
+function loadCashflow() {
+  const saved = localStorage.getItem(CASHFLOW_KEY);
+  const entries = saved ? JSON.parse(saved) : [];
+  return entries.map((entry) => ({
+    id: `cash-${Date.now()}`,
+    date: todayDateValue(),
+    type: "entrada",
+    category: "locacao",
+    description: "",
+    amount: 0,
+    ...entry,
+  }));
+}
+
 function saveProducts() {
   localStorage.setItem(CATALOG_KEY, JSON.stringify(state.products));
 }
@@ -179,6 +197,10 @@ function saveSettings() {
 
 function saveOrders() {
   localStorage.setItem(ORDERS_KEY, JSON.stringify(state.orders));
+}
+
+function saveCashflow() {
+  localStorage.setItem(CASHFLOW_KEY, JSON.stringify(state.cashflow));
 }
 
 function setBackupStatus(message) {
@@ -569,12 +591,83 @@ function renderAdminStats() {
   `;
 }
 
+function cashflowTypeLabel(type) {
+  return type === "saida" ? "Saída" : "Entrada";
+}
+
+function cashflowCategoryLabel(category) {
+  const labels = {
+    locacao: "Locação",
+    venda: "Venda",
+    ajuste: "Ajuste",
+    manutencao: "Manutenção",
+    outros: "Outros",
+  };
+  return labels[category] || "Outros";
+}
+
+function renderCashflow() {
+  const entries = [...state.cashflow].sort((first, second) =>
+    String(second.date).localeCompare(String(first.date))
+  );
+  const totals = entries.reduce(
+    (summary, entry) => {
+      const amount = Number(entry.amount) || 0;
+      if (entry.type === "saida") summary.out += amount;
+      else summary.in += amount;
+      return summary;
+    },
+    { in: 0, out: 0 }
+  );
+  const balance = totals.in - totals.out;
+
+  financeSummary.innerHTML = `
+    <article>
+      <span>Entradas</span>
+      <strong>${money(totals.in)}</strong>
+    </article>
+    <article>
+      <span>Saídas</span>
+      <strong>${money(totals.out)}</strong>
+    </article>
+    <article>
+      <span>Saldo</span>
+      <strong>${money(balance)}</strong>
+    </article>
+  `;
+
+  if (!entries.length) {
+    cashflowList.innerHTML = `
+      <tr>
+        <td colspan="6">Nenhum lançamento registrado ainda.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  cashflowList.innerHTML = entries
+    .map(
+      (entry) => `
+        <tr>
+          <td>${formatDateOnly(entry.date)}</td>
+          <td><span class="cashflow-badge ${entry.type}">${cashflowTypeLabel(entry.type)}</span></td>
+          <td>${cashflowCategoryLabel(entry.category)}</td>
+          <td>${entry.description}</td>
+          <td>${money(Number(entry.amount) || 0)}</td>
+          <td><button class="admin-delete" type="button" data-delete-cashflow="${entry.id}">Remover</button></td>
+        </tr>
+      `
+    )
+    .join("");
+}
+
 function refreshAll() {
   renderCatalog();
   renderBookingOptions();
   renderAdminList();
   renderOrdersList();
   renderAdminStats();
+  renderCashflow();
   updateRentalFields();
   updateAvailabilityMessage();
   updateMessagePreview();
@@ -768,6 +861,7 @@ function setDateLimits() {
   document.querySelector("#eventDate").min = today;
   document.querySelector("#startDate").min = today;
   document.querySelector("#endDate").min = document.querySelector("#startDate").value || today;
+  document.querySelector("#cashflowDate").value = document.querySelector("#cashflowDate").value || today;
   document.querySelector("#blockStart").min = nowDateTimeValue();
   document.querySelector("#blockEnd").min = document.querySelector("#blockStart").value || nowDateTimeValue();
 }
@@ -1066,6 +1160,40 @@ document.querySelector("#clearOrders").addEventListener("click", () => {
   refreshAll();
 });
 
+document.querySelector("#cashflowForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const amount = Number(document.querySelector("#cashflowAmount").value);
+  if (!amount || amount <= 0) return;
+
+  state.cashflow.unshift({
+    id: `cash-${Date.now()}`,
+    date: document.querySelector("#cashflowDate").value || todayDateValue(),
+    type: document.querySelector("#cashflowType").value,
+    category: document.querySelector("#cashflowCategory").value,
+    description: document.querySelector("#cashflowDescription").value.trim(),
+    amount,
+  });
+
+  saveCashflow();
+  renderCashflow();
+  event.target.reset();
+  setDateLimits();
+});
+
+cashflowList.addEventListener("click", (event) => {
+  const deleteButton = event.target.closest("[data-delete-cashflow]");
+  if (!deleteButton) return;
+  state.cashflow = state.cashflow.filter((entry) => entry.id !== deleteButton.dataset.deleteCashflow);
+  saveCashflow();
+  renderCashflow();
+});
+
+document.querySelector("#clearCashflow").addEventListener("click", () => {
+  state.cashflow = [];
+  saveCashflow();
+  renderCashflow();
+});
+
 document.querySelector("#saveWhatsapp").addEventListener("click", () => {
   const phone = sanitizePhone(document.querySelector("#adminWhatsapp").value);
   state.settings.whatsapp = phone || DEFAULT_WHATSAPP_NUMBER;
@@ -1084,6 +1212,7 @@ document.querySelector("#exportCatalog").addEventListener("click", () => {
     products: state.products,
     settings: state.settings,
     orders: state.orders,
+    cashflow: state.cashflow,
   };
   downloadTextFile(
     `art-cost-catalogo-${new Date().toISOString().slice(0, 10)}.json`,
@@ -1108,9 +1237,11 @@ document.querySelector("#importCatalog").addEventListener("change", (event) => {
       state.products = data.products;
       state.settings = data.settings || state.settings;
       state.orders = Array.isArray(data.orders) ? data.orders : [];
+      state.cashflow = Array.isArray(data.cashflow) ? data.cashflow : [];
       saveProducts();
       saveSettings();
       saveOrders();
+      saveCashflow();
       refreshAll();
       document.querySelector("#adminWhatsapp").value =
         state.settings.whatsapp === DEFAULT_WHATSAPP_NUMBER ? "" : state.settings.whatsapp;

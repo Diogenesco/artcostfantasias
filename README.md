@@ -29,6 +29,9 @@ painel administrativo e entram no arquivo de backup.
 O histórico local possui status operacional para acompanhar solicitações,
 reservas, retiradas, devoluções e cancelamentos.
 
+O painel também possui um fluxo financeiro local para lançar entradas, saídas,
+locações, vendas, ajustes e manutenções.
+
 Para acelerar o cadastro real, o painel oferece um modelo CSV e importação de
 produtos por planilha.
 

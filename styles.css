@@ -926,6 +926,121 @@ body.admin-visible .admin-panel {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.finance-panel {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.finance-summary {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 16px 0;
+}
+
+.finance-summary article {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  min-height: 96px;
+  padding: 16px;
+}
+
+.finance-summary span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.finance-summary strong {
+  font-size: 26px;
+}
+
+.finance-form {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 18px 0;
+}
+
+.finance-form label {
+  color: var(--muted);
+  display: grid;
+  font-size: 13px;
+  font-weight: 900;
+  gap: 8px;
+  text-transform: uppercase;
+}
+
+.finance-form input,
+.finance-form select {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  min-height: 48px;
+  padding: 0 12px;
+}
+
+.finance-form .secondary-action {
+  color: var(--ink);
+  width: 100%;
+}
+
+.finance-table-wrap {
+  overflow-x: auto;
+}
+
+.finance-table {
+  border-collapse: collapse;
+  min-width: 760px;
+  width: 100%;
+}
+
+.finance-table th,
+.finance-table td {
+  border-top: 1px solid var(--line);
+  padding: 14px 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.finance-table th {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.finance-table td {
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.cashflow-badge {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 10px;
+  text-transform: uppercase;
+}
+
+.cashflow-badge.entrada {
+  background: rgba(15, 127, 92, 0.12);
+  color: var(--green);
+}
+
+.cashflow-badge.saida {
+  background: rgba(158, 31, 40, 0.12);
+  color: var(--red);
+}
+
 .admin-list {
   margin-top: 34px;
 }
@@ -1228,6 +1343,8 @@ dd {
   .admin-grid,
   .admin-stats,
   .block-form,
+  .finance-form,
+  .finance-summary,
   .featured-strip,
   .info-band {
     grid-template-columns: 1fr;
