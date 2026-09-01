@@ -284,7 +284,6 @@ h2 {
 .section-heading {
   max-width: 760px;
 }
-}
 
 .search {
   display: grid;
@@ -519,6 +518,26 @@ h2 {
 .info-band span {
   color: var(--muted);
   line-height: 1.5;
+}
+
+.atelier-band {
+  align-items: start;
+  background: var(--paper);
+  display: grid;
+  gap: 28px;
+  grid-template-columns: minmax(0, 0.9fr) minmax(280px, 0.7fr);
+  padding: clamp(42px, 7vw, 72px) clamp(18px, 5vw, 64px);
+}
+
+.atelier-copy {
+  color: var(--muted);
+  display: grid;
+  gap: 14px;
+  line-height: 1.7;
+}
+
+.atelier-copy p {
+  margin: 0;
 }
 
 .admin-panel {
@@ -771,6 +790,28 @@ h2 {
   z-index: 12;
 }
 
+.site-footer {
+  align-items: center;
+  background: #050505;
+  color: #d8cfbd;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 18px clamp(18px, 5vw, 64px) 78px;
+}
+
+.admin-access {
+  color: #8f8677;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.admin-access:focus,
+.admin-access:hover {
+  color: var(--gold-strong);
+}
+
 .product-dialog {
   border: 0;
   border-radius: 8px;
@@ -856,6 +897,7 @@ dd {
 
   .hero,
   .booking-panel,
+  .atelier-band,
   .admin-lock,
   .product-dialog[open] {
     grid-template-columns: 1fr;
@@ -901,6 +943,11 @@ dd {
   .brand img {
     height: 58px;
     width: 58px;
+  }
+
+  .site-footer {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .catalog-grid {
