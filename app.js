@@ -782,7 +782,8 @@ function refreshAll() {
 }
 
 function syncAdminVisibility() {
-  const isAdminPage = window.location.pathname.endsWith("/admin.html") || window.location.hash === "#admin";
+  const path = window.location.pathname.replace(/\/$/, "");
+  const isAdminPage = path.endsWith("/admin") || path.endsWith("/admin.html") || window.location.hash === "#admin";
   document.body.classList.toggle("admin-visible", isAdminPage);
 }
 
