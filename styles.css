@@ -686,6 +686,22 @@ h2 {
   color: #eadfcf;
 }
 
+.whatsapp-float {
+  align-items: center;
+  background: #138c63;
+  border-radius: 999px;
+  bottom: 18px;
+  box-shadow: 0 16px 40px rgba(15, 127, 92, 0.32);
+  color: #fff;
+  display: inline-flex;
+  font-weight: 900;
+  min-height: 52px;
+  padding: 0 18px;
+  position: fixed;
+  right: 18px;
+  z-index: 12;
+}
+
 .product-dialog {
   border: 0;
   border-radius: 8px;

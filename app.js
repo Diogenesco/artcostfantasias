@@ -1,4 +1,4 @@
-const DEFAULT_WHATSAPP_NUMBER = "5500000000000";
+const DEFAULT_WHATSAPP_NUMBER = "554498155843";
 const CATALOG_KEY = "artCostCatalog";
 const SETTINGS_KEY = "artCostSettings";
 const ADMIN_PASSWORD = "artcost";
@@ -498,6 +498,9 @@ document.querySelector("#saveWhatsapp").addEventListener("click", () => {
   document.querySelector("#contactWhatsapp").href = whatsappUrl(
     "Ola! Quero falar com a Art & Cost sobre fantasias."
   );
+  document.querySelector("#floatingWhatsapp").href = whatsappUrl(
+    "Ola! Quero falar com a Art & Cost sobre fantasias."
+  );
 });
 
 document.querySelector("#resetCatalog").addEventListener("click", () => {
@@ -507,6 +510,9 @@ document.querySelector("#resetCatalog").addEventListener("click", () => {
 });
 
 document.querySelector("#contactWhatsapp").href = whatsappUrl(
+  "Ola! Quero falar com a Art & Cost sobre fantasias."
+);
+document.querySelector("#floatingWhatsapp").href = whatsappUrl(
   "Ola! Quero falar com a Art & Cost sobre fantasias."
 );
 document.querySelector("#adminWhatsapp").value =
