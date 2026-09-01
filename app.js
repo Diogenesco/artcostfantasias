@@ -716,15 +716,46 @@ function formatDateTime(value) {
   }).format(new Date(value));
 }
 
+function todayDateValue() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function nowDateTimeValue() {
+  const now = new Date();
+  now.setSeconds(0, 0);
+  const offset = now.getTimezoneOffset() * 60000;
+  return new Date(now.getTime() - offset).toISOString().slice(0, 16);
+}
+
+function setDateLimits() {
+  const today = todayDateValue();
+  document.querySelector("#eventDate").min = today;
+  document.querySelector("#startDate").min = today;
+  document.querySelector("#endDate").min = document.querySelector("#startDate").value || today;
+  document.querySelector("#blockStart").min = nowDateTimeValue();
+  document.querySelector("#blockEnd").min = document.querySelector("#blockStart").value || nowDateTimeValue();
+}
+
 function updateAvailabilityMessage() {
   const product = state.products.find((item) => item.id === bookingProduct.value);
   const start = makeDateTime("#startDate", "#pickupTime");
   const end = makeDateTime("#endDate", "#returnTime");
 
+  setDateLimits();
   availabilityMessage.className = "availability-message";
   availabilityMessage.textContent = "";
 
   if (!product || bookingMode.value !== "locacao" || !start || !end) return;
+
+  if (new Date(start) < new Date()) {
+    availabilityMessage.textContent = "A retirada não pode ficar em data ou horário passado.";
+    availabilityMessage.classList.add("show", "blocked");
+    return;
+  }
 
   if (new Date(start) >= new Date(end)) {
     availabilityMessage.textContent = "A devolução precisa ser depois da retirada.";
@@ -811,9 +842,14 @@ searchInput.addEventListener("input", renderCatalog);
 
 ["#bookingProduct", "#bookingMode", "#startDate", "#pickupTime", "#endDate", "#returnTime"].forEach((selector) => {
   document.querySelector(selector).addEventListener("input", () => {
+    setDateLimits();
     updateAvailabilityMessage();
     updateMessagePreview();
   });
+});
+
+["#blockStart", "#blockEnd"].forEach((selector) => {
+  document.querySelector(selector).addEventListener("input", setDateLimits);
 });
 
 ["#customerName", "#customerPhone", "#eventDate", "#desiredSize", "#bookingNotes"].forEach((selector) => {
@@ -856,7 +892,10 @@ bookingForm.addEventListener("submit", (event) => {
   const start = makeDateTime("#startDate", "#pickupTime");
   const end = makeDateTime("#endDate", "#returnTime");
 
-  if (bookingMode.value === "locacao" && (findConflict(product, start, end) || new Date(start) >= new Date(end))) {
+  if (
+    bookingMode.value === "locacao" &&
+    (findConflict(product, start, end) || new Date(start) >= new Date(end) || new Date(start) < new Date())
+  ) {
     updateAvailabilityMessage();
     return;
   }
@@ -917,7 +956,7 @@ document.querySelector("#blockForm").addEventListener("submit", (event) => {
   const start = document.querySelector("#blockStart").value;
   const end = document.querySelector("#blockEnd").value;
 
-  if (!product || !start || !end || new Date(start) >= new Date(end)) return;
+  if (!product || !start || !end || new Date(start) >= new Date(end) || new Date(start) < new Date()) return;
 
   product.reservations = product.reservations || [];
   product.reservations.push({
@@ -1104,4 +1143,5 @@ document.querySelector("#adminWhatsapp").value =
   state.settings.whatsapp === DEFAULT_WHATSAPP_NUMBER ? "" : state.settings.whatsapp;
 
 syncAdminVisibility();
+setDateLimits();
 refreshAll();
