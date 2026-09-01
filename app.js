@@ -685,6 +685,25 @@ function addCashflowFromOrder(orderId) {
   renderCashflow();
 }
 
+function exportCashflowCsv() {
+  const headers = ["data", "tipo", "categoria", "descricao", "valor"];
+  const rows = [...state.cashflow]
+    .sort((first, second) => String(first.date).localeCompare(String(second.date)))
+    .map((entry) => [
+      entry.date,
+      cashflowTypeLabel(entry.type),
+      cashflowCategoryLabel(entry.category),
+      entry.description,
+      String(Number(entry.amount || 0).toFixed(2)).replace(".", ","),
+    ]);
+  const csv = `${headers.join(";")}\n${rows.map((row) => row.map(csvEscape).join(";")).join("\n")}\n`;
+  downloadTextFile(
+    `art-cost-fluxo-${new Date().toISOString().slice(0, 10)}.csv`,
+    csv,
+    "text/csv;charset=utf-8"
+  );
+}
+
 function refreshAll() {
   renderCatalog();
   renderBookingOptions();
@@ -1223,6 +1242,8 @@ document.querySelector("#clearCashflow").addEventListener("click", () => {
   saveCashflow();
   renderCashflow();
 });
+
+document.querySelector("#exportCashflow").addEventListener("click", exportCashflowCsv);
 
 document.querySelector("#saveWhatsapp").addEventListener("click", () => {
   const phone = sanitizePhone(document.querySelector("#adminWhatsapp").value);

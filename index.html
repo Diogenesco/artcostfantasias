@@ -420,7 +420,10 @@
         <div class="admin-list finance-panel">
           <div class="admin-list-heading">
             <h3>Fluxo de entradas e saídas</h3>
-            <button class="admin-delete" id="clearCashflow" type="button">Limpar fluxo</button>
+            <div class="admin-list-actions">
+              <button class="admin-edit" id="exportCashflow" type="button">Exportar CSV</button>
+              <button class="admin-delete" id="clearCashflow" type="button">Limpar fluxo</button>
+            </div>
           </div>
           <div class="finance-summary" id="financeSummary" aria-label="Resumo financeiro"></div>
           <form class="finance-form" id="cashflowForm">
