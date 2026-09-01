@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Art & Cost Fantasias</title>
+    <meta
+      name="description"
+      content="Locacao e venda de fantasias, roupas de atelie e looks tematicos para todas as idades."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Parisienne&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <button class="icon-button" aria-label="Abrir menu" id="menuButton">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <a class="brand" href="#catalogo" aria-label="Art & Cost Fantasias">
+        <span class="brand-mark">Art & Cost</span>
+        <span class="brand-subtitle">Fantasias e Atelie</span>
+      </a>
+
+      <a class="cart-button" id="cartButton" href="#pedido" aria-label="Ver pedido">
+        <span class="cart-icon">+</span>
+        <span class="cart-count" id="cartCount">0</span>
+      </a>
+    </header>
+
+    <nav class="drawer" id="drawer" aria-label="Menu principal">
+      <a href="#catalogo">Catalogo</a>
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#admin">Painel</a>
+      <a href="#contato">Contato</a>
+    </nav>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Locacao e venda</p>
+          <h1>Fantasias para viver cada tema com estilo.</h1>
+          <p>
+            Escolha a fantasia, informe data e horario de retirada/devolucao e
+            finalize o pedido pelo WhatsApp.
+          </p>
+          <div class="hero-actions">
+            <a class="primary-action" href="#catalogo">Ver fantasias</a>
+            <a class="secondary-action" href="#admin">Cadastrar item</a>
+          </div>
+        </div>
+        <div class="hero-showcase" aria-label="Destaques do catalogo">
+          <article>
+            <span class="tag">Locacao</span>
+            <strong>Chapeuzinho</strong>
+            <small>A partir de R$ 95,00</small>
+          </article>
+          <article>
+            <span class="tag">Venda</span>
+            <strong>Looks de atelie</strong>
+            <small>Roupas sob medida</small>
+          </article>
+        </div>
+      </section>
+
+      <section class="toolbar" id="catalogo" aria-label="Busca e filtros">
+        <label class="search">
+          <span>Buscar</span>
+          <input id="searchInput" type="search" placeholder="Digite sua busca..." />
+        </label>
+
+        <div class="segments" role="tablist" aria-label="Tipo de catalogo">
+          <button class="segment active" data-filter="todos" type="button">Todos</button>
+          <button class="segment" data-filter="locacao" type="button">Locacao</button>
+          <button class="segment" data-filter="venda" type="button">Venda</button>
+          <button class="segment" data-filter="infantil" type="button">Infantil</button>
+          <button class="segment" data-filter="adulto" type="button">Adulto</button>
+        </div>
+      </section>
+
+      <section class="catalog-grid" id="catalogGrid" aria-live="polite"></section>
+
+      <section class="booking-panel" id="pedido">
+        <div>
+          <p class="eyebrow">Reserva pelo WhatsApp</p>
+          <h2>Monte o pedido da cliente</h2>
+          <p>
+            Selecione uma fantasia no catalogo e informe o periodo. O botao
+            abre o WhatsApp com a mensagem pronta.
+          </p>
+        </div>
+
+        <form class="booking-form" id="bookingForm">
+          <label>
+            Fantasia
+            <select id="bookingProduct" required></select>
+          </label>
+          <label>
+            Nome da cliente
+            <input id="customerName" type="text" placeholder="Nome" />
+          </label>
+          <label>
+            Inicio da locacao
+            <input id="startDate" type="date" required />
+          </label>
+          <label>
+            Hora da retirada
+            <input id="pickupTime" type="time" required />
+          </label>
+          <label>
+            Fim da locacao
+            <input id="endDate" type="date" required />
+          </label>
+          <label>
+            Hora da devolucao
+            <input id="returnTime" type="time" required />
+          </label>
+          <button class="primary-action form-action" type="submit">
+            Reservar pelo WhatsApp
+          </button>
+        </form>
+      </section>
+
+      <section class="info-band" id="como-funciona">
+        <article>
+          <strong>1. Escolha</strong>
+          <span>Filtre por idade, tamanho, tema ou tipo de produto.</span>
+        </article>
+        <article>
+          <strong>2. Reserve</strong>
+          <span>Informe retirada, devolucao e horarios no calendario.</span>
+        </article>
+        <article>
+          <strong>3. Confirme</strong>
+          <span>Finalize no WhatsApp com a Art & Cost.</span>
+        </article>
+      </section>
+
+      <section class="admin-panel" id="admin">
+        <div class="admin-heading">
+          <div>
+            <p class="eyebrow">Painel administrativo inicial</p>
+            <h2>Cadastrar fantasia</h2>
+          </div>
+          <button class="secondary-action" id="resetCatalog" type="button">
+            Restaurar exemplos
+          </button>
+        </div>
+
+        <form class="admin-form" id="adminForm">
+          <label>
+            Nome
+            <input id="adminName" type="text" required placeholder="Ex: Fantasia Fada" />
+          </label>
+          <label>
+            Preco
+            <input id="adminPrice" type="number" min="0" step="0.01" required />
+          </label>
+          <label>
+            Tipo
+            <select id="adminType">
+              <option value="locacao">Locacao</option>
+              <option value="venda">Venda</option>
+              <option value="ambos">Venda e locacao</option>
+            </select>
+          </label>
+          <label>
+            Publico
+            <select id="adminAudience">
+              <option value="adulto">Adulto</option>
+              <option value="infantil">Infantil</option>
+              <option value="todos">Todas as idades</option>
+            </select>
+          </label>
+          <label>
+            Tamanhos
+            <input id="adminSizes" type="text" placeholder="P, M, G, Infantil 8" />
+          </label>
+          <label>
+            Cor do card
+            <input id="adminColor" type="color" value="#b3202a" />
+          </label>
+          <label class="wide-field">
+            Descricao
+            <textarea id="adminDescription" rows="3" placeholder="Detalhes, medidas, acessorios inclusos"></textarea>
+          </label>
+          <button class="primary-action form-action" type="submit">Adicionar ao catalogo</button>
+        </form>
+      </section>
+
+      <section class="contact-band" id="contato">
+        <h2>Art & Cost</h2>
+        <p>Atendimento, reservas e encomendas pelo WhatsApp.</p>
+        <a class="primary-action" id="contactWhatsapp" href="#">Chamar no WhatsApp</a>
+      </section>
+    </main>
+
+    <dialog class="product-dialog" id="productDialog">
+      <button class="dialog-close" id="dialogClose" aria-label="Fechar">x</button>
+      <div class="dialog-media" id="dialogMedia"></div>
+      <div class="dialog-content">
+        <p class="eyebrow" id="dialogType"></p>
+        <h2 id="dialogTitle"></h2>
+        <p id="dialogDescription"></p>
+        <dl>
+          <div>
+            <dt>Preco</dt>
+            <dd id="dialogPrice"></dd>
+          </div>
+          <div>
+            <dt>Tamanhos</dt>
+            <dd id="dialogSizes"></dd>
+          </div>
+        </dl>
+        <button class="primary-action form-action" id="dialogReserve" type="button">
+          Reservar este item
+        </button>
+      </div>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
