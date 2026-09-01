@@ -15,3 +15,7 @@ No Cloudflare Pages, use:
 
 Depois substitua o telefone do WhatsApp em `app.js`, na constante
 `WHATSAPP_NUMBER`.
+
+## Roadmap
+
+O planejamento de evolucao do site esta em `ROADMAP.md`.

@@ -278,7 +278,12 @@ h2 {
   background: var(--paper);
   display: grid;
   gap: 18px;
-  padding: 32px clamp(18px, 5vw, 64px) 10px;
+  padding: 46px clamp(18px, 5vw, 64px) 10px;
+}
+
+.section-heading {
+  max-width: 760px;
+}
 }
 
 .search {
@@ -333,7 +338,36 @@ h2 {
   display: grid;
   gap: clamp(18px, 3vw, 30px);
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  padding: 28px clamp(18px, 5vw, 64px) 60px;
+  padding: 28px clamp(18px, 5vw, 64px) 38px;
+}
+
+.featured-strip {
+  background: var(--soft);
+  display: grid;
+  gap: 1px;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 1px;
+}
+
+.featured-strip article {
+  background: #fff;
+  min-height: 132px;
+  padding: 28px clamp(18px, 4vw, 42px);
+}
+
+.featured-strip span {
+  color: var(--muted);
+  display: block;
+  font-size: 13px;
+  font-weight: 900;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.featured-strip strong {
+  display: block;
+  font-size: 24px;
+  line-height: 1.15;
 }
 
 .product-card {
@@ -808,6 +842,7 @@ dd {
   .admin-form,
   .admin-grid,
   .block-form,
+  .featured-strip,
   .info-band {
     grid-template-columns: 1fr;
   }
