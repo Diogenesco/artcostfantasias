@@ -118,6 +118,7 @@ const bookingProduct = document.querySelector("#bookingProduct");
 const bookingMode = document.querySelector("#bookingMode");
 const bookingForm = document.querySelector("#bookingForm");
 const availabilityMessage = document.querySelector("#availabilityMessage");
+const messagePreview = document.querySelector("#messagePreview");
 const cartCount = document.querySelector("#cartCount");
 const drawer = document.querySelector("#drawer");
 const dialog = document.querySelector("#productDialog");
@@ -543,6 +544,7 @@ function refreshAll() {
   renderAdminStats();
   updateRentalFields();
   updateAvailabilityMessage();
+  updateMessagePreview();
 }
 
 function syncAdminVisibility() {
@@ -609,6 +611,7 @@ function whatsappUrl(message) {
 
 function buildBookingMessage() {
   const product = state.products.find((item) => item.id === bookingProduct.value);
+  if (!product) return "";
   const customerName = document.querySelector("#customerName").value || "Cliente";
   const customerPhone = document.querySelector("#customerPhone").value || "Não informado";
   const eventDate = document.querySelector("#eventDate").value;
@@ -641,6 +644,10 @@ Retirada: ${formatDateTime(start)}
 Devolução: ${formatDateTime(end)}
 Tamanhos disponíveis: ${product.sizes}
 Observações: ${notes}`;
+}
+
+function updateMessagePreview() {
+  messagePreview.textContent = buildBookingMessage();
 }
 
 function createOrderRecord() {
@@ -797,18 +804,27 @@ document.querySelector("#searchImageLink").addEventListener("click", () => {
 searchInput.addEventListener("input", renderCatalog);
 
 ["#bookingProduct", "#bookingMode", "#startDate", "#pickupTime", "#endDate", "#returnTime"].forEach((selector) => {
-  document.querySelector(selector).addEventListener("input", updateAvailabilityMessage);
+  document.querySelector(selector).addEventListener("input", () => {
+    updateAvailabilityMessage();
+    updateMessagePreview();
+  });
+});
+
+["#customerName", "#customerPhone", "#eventDate", "#bookingNotes"].forEach((selector) => {
+  document.querySelector(selector).addEventListener("input", updateMessagePreview);
 });
 
 bookingProduct.addEventListener("change", () => {
   renderBookingModes();
   updateRentalFields();
   updateAvailabilityMessage();
+  updateMessagePreview();
 });
 
 bookingMode.addEventListener("change", () => {
   updateRentalFields();
   updateAvailabilityMessage();
+  updateMessagePreview();
 });
 
 catalogGrid.addEventListener("click", (event) => {
@@ -839,10 +855,11 @@ bookingForm.addEventListener("submit", (event) => {
     return;
   }
 
+  const message = buildBookingMessage();
   state.orders.unshift(createOrderRecord());
   saveOrders();
   refreshAll();
-  window.open(whatsappUrl(buildBookingMessage()), "_blank", "noopener");
+  window.open(whatsappUrl(message), "_blank", "noopener");
 });
 
 document.querySelector("#dialogClose").addEventListener("click", () => dialog.close());
