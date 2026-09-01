@@ -153,7 +153,13 @@ function loadSettings() {
 
 function loadOrders() {
   const saved = localStorage.getItem(ORDERS_KEY);
-  return saved ? JSON.parse(saved) : [];
+  const orders = saved ? JSON.parse(saved) : [];
+  return orders.map((order) => ({
+    status: "solicitado",
+    customerPhone: "",
+    eventDate: "",
+    ...order,
+  }));
 }
 
 function saveProducts() {
@@ -395,10 +401,16 @@ function renderOrdersList() {
         <article class="admin-item">
           <div>
             <strong>${order.customerName} - ${order.productName}</strong>
-            <span>${order.modeLabel} | ${money(order.price)} | ${formatDateTime(order.createdAt)}</span>
+            <span>${order.modeLabel} | ${money(order.price)} | ${formatDateTime(order.createdAt)} | ${statusLabel(order.status)}</span>
+            <span>${order.customerPhone || "Sem telefone"} | Evento: ${formatDateOnly(order.eventDate) || "Nao informado"}</span>
             <span>${order.period || "Pedido de compra"} | ${order.notes}</span>
           </div>
-          <button class="admin-delete" type="button" data-delete-order="${order.id}">Remover</button>
+          <div class="admin-actions">
+            <select class="status-select" data-order-status="${order.id}" aria-label="Status da solicitacao">
+              ${orderStatusOptions(order.status)}
+            </select>
+            <button class="admin-delete" type="button" data-delete-order="${order.id}">Remover</button>
+          </div>
         </article>
       `
     )
@@ -514,6 +526,8 @@ function whatsappUrl(message) {
 function buildBookingMessage() {
   const product = state.products.find((item) => item.id === bookingProduct.value);
   const customerName = document.querySelector("#customerName").value || "Cliente";
+  const customerPhone = document.querySelector("#customerPhone").value || "Nao informado";
+  const eventDate = document.querySelector("#eventDate").value;
   const start = makeDateTime("#startDate", "#pickupTime");
   const end = makeDateTime("#endDate", "#returnTime");
   const notes = document.querySelector("#bookingNotes").value || "Sem observacoes";
@@ -522,9 +536,11 @@ function buildBookingMessage() {
     return `Ola! Tenho interesse em comprar com a Art & Cost.
 
 Cliente: ${customerName}
+Telefone: ${customerPhone}
 Item: ${product.name}
 Tipo: Compra
 Valor: ${money(product.price)}
+Data do evento: ${formatDateOnly(eventDate) || "Nao informada"}
 Tamanhos disponiveis: ${product.sizes}
 Observacoes: ${notes}`;
   }
@@ -532,9 +548,11 @@ Observacoes: ${notes}`;
   return `Ola! Tenho interesse em reservar com a Art & Cost.
 
 Cliente: ${customerName}
+Telefone: ${customerPhone}
 Item: ${product.name}
 Tipo: ${typeLabel(product)}
 Valor: ${money(product.price)}
+Data do evento: ${formatDateOnly(eventDate) || "Nao informada"}
 Retirada: ${formatDateTime(start)}
 Devolucao: ${formatDateTime(end)}
 Tamanhos disponiveis: ${product.sizes}
@@ -544,6 +562,8 @@ Observacoes: ${notes}`;
 function createOrderRecord() {
   const product = state.products.find((item) => item.id === bookingProduct.value);
   const customerName = document.querySelector("#customerName").value || "Cliente";
+  const customerPhone = document.querySelector("#customerPhone").value || "";
+  const eventDate = document.querySelector("#eventDate").value || "";
   const notes = document.querySelector("#bookingNotes").value || "Sem observacoes";
   const start = makeDateTime("#startDate", "#pickupTime");
   const end = makeDateTime("#endDate", "#returnTime");
@@ -552,7 +572,10 @@ function createOrderRecord() {
   return {
     id: `order-${Date.now()}`,
     createdAt: new Date().toISOString(),
+    status: "solicitado",
     customerName,
+    customerPhone,
+    eventDate,
     productId: product.id,
     productName: product.name,
     mode: bookingMode.value,
@@ -561,6 +584,31 @@ function createOrderRecord() {
     period: isRental ? `${formatDateTime(start)} ate ${formatDateTime(end)}` : "",
     notes,
   };
+}
+
+function statusLabel(status) {
+  const labels = {
+    solicitado: "Solicitado",
+    reservado: "Reservado",
+    retirado: "Retirado",
+    devolvido: "Devolvido",
+    cancelado: "Cancelado",
+  };
+  return labels[status] || "Solicitado";
+}
+
+function orderStatusOptions(currentStatus) {
+  return ["solicitado", "reservado", "retirado", "devolvido", "cancelado"]
+    .map(
+      (status) =>
+        `<option value="${status}" ${status === currentStatus ? "selected" : ""}>${statusLabel(status)}</option>`
+    )
+    .join("");
+}
+
+function formatDateOnly(value) {
+  if (!value) return "";
+  return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(new Date(`${value}T12:00`));
 }
 
 function formatDateTime(value) {
@@ -808,6 +856,18 @@ ordersList.addEventListener("click", (event) => {
   const deleteButton = event.target.closest("[data-delete-order]");
   if (!deleteButton) return;
   state.orders = state.orders.filter((order) => order.id !== deleteButton.dataset.deleteOrder);
+  saveOrders();
+  refreshAll();
+});
+
+ordersList.addEventListener("change", (event) => {
+  const statusSelect = event.target.closest("[data-order-status]");
+  if (!statusSelect) return;
+  state.orders = state.orders.map((order) =>
+    order.id === statusSelect.dataset.orderStatus
+      ? { ...order, status: statusSelect.value }
+      : order
+  );
   saveOrders();
   refreshAll();
 });

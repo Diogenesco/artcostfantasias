@@ -25,6 +25,7 @@
 - Permitir bloqueio de datas por item.
 - Adicionar exportacao e importacao de backup do catalogo no prototipo.
 - Registrar historico local de solicitacoes enviadas pelo formulario.
+- Permitir status de solicitacao: solicitado, reservado, retirado, devolvido e cancelado.
 - Listar itens e bloqueios cadastrados.
 - Trocar a senha simples de prototipo por login real.
 

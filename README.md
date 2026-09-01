@@ -26,6 +26,9 @@ os dados ainda ficam salvos localmente no navegador.
 As solicitacoes enviadas pelo formulario tambem ficam registradas localmente no
 painel administrativo e entram no arquivo de backup.
 
+O historico local possui status operacional para acompanhar solicitacoes,
+reservas, retiradas, devolucoes e cancelamentos.
+
 ## Roadmap
 
 O planejamento de evolucao do site esta em `ROADMAP.md`.

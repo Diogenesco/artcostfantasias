@@ -901,6 +901,16 @@ body.admin-visible .admin-panel {
   padding: 18px 0;
 }
 
+.status-select {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  font-weight: 800;
+  min-height: 40px;
+  padding: 0 10px;
+}
+
 .admin-item strong,
 .admin-item span {
   display: block;
