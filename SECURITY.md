@@ -14,8 +14,8 @@ mas não substitui autenticação real, porque arquivos JavaScript públicos pod
 inspecionados.
 
 Para proteger de verdade, ative o Cloudflare Zero Trust Access no painel
-administrativo. O ideal é separar o painel em uma rota como `/admin.html` e
-proteger essa rota com login por e-mail/autenticação da Cloudflare.
+administrativo. O painel já está separado em `/admin.html`, então essa rota
+deve receber login por e-mail/autenticação da Cloudflare.
 
 Configuração recomendada:
 

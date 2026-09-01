@@ -112,6 +112,15 @@ textarea {
   width: 100%;
 }
 
+.admin-home-link {
+  color: var(--ink);
+  justify-self: start;
+}
+
+body.admin-visible .nav-row {
+  grid-template-columns: minmax(130px, auto) 1fr;
+}
+
 .nav-cta {
   color: var(--ink);
   font-weight: 900;
@@ -1380,6 +1389,16 @@ dd {
     min-height: 58px;
     padding-left: 14px;
     padding-right: 14px;
+  }
+
+  body.admin-visible .nav-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .admin-home-link,
+  body.admin-visible .nav-cta {
+    justify-self: stretch;
   }
 
   .brand img {

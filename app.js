@@ -211,10 +211,12 @@ function saveCashflow() {
 }
 
 function setBackupStatus(message) {
+  if (!backupStatus) return;
   backupStatus.textContent = message;
 }
 
 function setCsvStatus(message) {
+  if (!csvStatus) return;
   csvStatus.textContent = message;
 }
 
@@ -329,6 +331,7 @@ function adminSessionValid() {
 }
 
 function unlockAdmin() {
+  if (!adminLock || !adminContent) return;
   adminLock.style.display = "none";
   adminContent.classList.remove("locked");
 }
@@ -440,6 +443,7 @@ function mediaMarkup(product) {
 }
 
 function updateImagePreview(value) {
+  if (!imagePreview) return;
   imagePreview.classList.toggle("empty", !value);
   imagePreview.innerHTML = value
     ? `<img src="${value}" alt="Prévia da fantasia" />`
@@ -447,6 +451,7 @@ function updateImagePreview(value) {
 }
 
 function setImageSource(source) {
+  if (!document.querySelector(".image-tab.active")) return;
   document.querySelector(".image-tab.active").classList.remove("active");
   document.querySelector(`[data-image-source="${source}"]`).classList.add("active");
   document.querySelectorAll(".image-source").forEach((panel) => {
@@ -455,6 +460,7 @@ function setImageSource(source) {
 }
 
 function resetAdminForm() {
+  if (!document.querySelector("#adminForm")) return;
   document.querySelector("#adminForm").reset();
   editingProductId = "";
   selectedImageData = "";
@@ -466,6 +472,7 @@ function resetAdminForm() {
 }
 
 function fillAdminForm(product) {
+  if (!document.querySelector("#adminForm")) return;
   editingProductId = product.id;
   document.querySelector("#adminName").value = product.name;
   document.querySelector("#adminPrice").value = product.price;
@@ -486,6 +493,7 @@ function fillAdminForm(product) {
 }
 
 function renderCatalog() {
+  if (!catalogGrid || !searchInput) return;
   const products = state.products.filter(productMatches);
   catalogGrid.innerHTML = products
     .map((product) => {
@@ -519,12 +527,13 @@ function renderBookingOptions() {
     )
     .join("");
 
-  bookingProduct.innerHTML = options;
-  blockProduct.innerHTML = options;
+  if (bookingProduct) bookingProduct.innerHTML = options;
+  if (blockProduct) blockProduct.innerHTML = options;
   renderBookingModes();
 }
 
 function renderAdminList() {
+  if (!adminList) return;
   const term = normalizeText(state.adminProductSearch);
   const products = state.products.filter((product) =>
     !term ||
@@ -575,6 +584,7 @@ function renderAdminList() {
 }
 
 function renderOrdersList() {
+  if (!ordersList) return;
   const orders = state.orders.filter((order) =>
     state.orderStatusFilter === "todos" || order.status === state.orderStatusFilter
   );
@@ -616,6 +626,7 @@ function renderOrdersList() {
 }
 
 function renderAdminStats() {
+  if (!adminStats) return;
   const total = state.products.length;
   const rentals = state.products.filter((product) => product.type === "locacao" || product.type === "ambos").length;
   const sales = state.products.filter((product) => product.type === "venda" || product.type === "ambos").length;
@@ -665,6 +676,7 @@ function cashflowCategoryLabel(category) {
 }
 
 function renderCashflow() {
+  if (!cashflowList || !financeSummary) return;
   const entries = [...state.cashflow].sort((first, second) =>
     String(second.date).localeCompare(String(first.date))
   );
@@ -770,10 +782,12 @@ function refreshAll() {
 }
 
 function syncAdminVisibility() {
-  document.body.classList.toggle("admin-visible", window.location.hash === "#admin");
+  const isAdminPage = window.location.pathname.endsWith("/admin.html") || window.location.hash === "#admin";
+  document.body.classList.toggle("admin-visible", isAdminPage);
 }
 
 function selectProduct(productId) {
+  if (!bookingProduct || !cartCount) return;
   state.selectedProductId = productId;
   bookingProduct.value = productId;
   renderBookingModes();
@@ -784,6 +798,7 @@ function selectProduct(productId) {
 }
 
 function renderBookingModes() {
+  if (!bookingProduct || !bookingMode) return;
   const product = state.products.find((item) => item.id === bookingProduct.value) || state.products[0];
   if (!product) return;
 
@@ -804,6 +819,7 @@ function renderBookingModes() {
 }
 
 function updateRentalFields() {
+  if (!bookingMode) return;
   const isRental = bookingMode.value === "locacao";
   document.querySelectorAll(".rental-field").forEach((field) => {
     field.classList.toggle("hidden", !isRental);
@@ -812,6 +828,7 @@ function updateRentalFields() {
 }
 
 function openProduct(productId) {
+  if (!dialog) return;
   const product = state.products.find((item) => item.id === productId);
   if (!product) return;
 
@@ -832,6 +849,7 @@ function whatsappUrl(message) {
 }
 
 function buildBookingMessage() {
+  if (!bookingProduct || !bookingMode) return "";
   const product = state.products.find((item) => item.id === bookingProduct.value);
   if (!product) return "";
   const customerName = document.querySelector("#customerName").value || "Cliente";
@@ -872,6 +890,7 @@ Observações: ${notes}`;
 }
 
 function updateMessagePreview() {
+  if (!messagePreview) return;
   messagePreview.textContent = buildBookingMessage();
 }
 
@@ -954,15 +973,22 @@ function nowDateTimeValue() {
 
 function setDateLimits() {
   const today = todayDateValue();
-  document.querySelector("#eventDate").min = today;
-  document.querySelector("#startDate").min = today;
-  document.querySelector("#endDate").min = document.querySelector("#startDate").value || today;
-  document.querySelector("#cashflowDate").value = document.querySelector("#cashflowDate").value || today;
-  document.querySelector("#blockStart").min = nowDateTimeValue();
-  document.querySelector("#blockEnd").min = document.querySelector("#blockStart").value || nowDateTimeValue();
+  const eventDate = document.querySelector("#eventDate");
+  const startDate = document.querySelector("#startDate");
+  const endDate = document.querySelector("#endDate");
+  const cashflowDate = document.querySelector("#cashflowDate");
+  const blockStart = document.querySelector("#blockStart");
+  const blockEnd = document.querySelector("#blockEnd");
+  if (eventDate) eventDate.min = today;
+  if (startDate) startDate.min = today;
+  if (endDate) endDate.min = startDate?.value || today;
+  if (cashflowDate) cashflowDate.value = cashflowDate.value || today;
+  if (blockStart) blockStart.min = nowDateTimeValue();
+  if (blockEnd) blockEnd.min = blockStart?.value || nowDateTimeValue();
 }
 
 function updateAvailabilityMessage() {
+  if (!availabilityMessage || !bookingProduct || !bookingMode) return;
   const product = state.products.find((item) => item.id === bookingProduct.value);
   const start = makeDateTime("#startDate", "#pickupTime");
   const end = makeDateTime("#endDate", "#returnTime");
@@ -996,13 +1022,13 @@ function updateAvailabilityMessage() {
   availabilityMessage.classList.add("show", "ok");
 }
 
-document.querySelector("#menuButton").addEventListener("click", () => {
+document.querySelector("#menuButton")?.addEventListener("click", () => {
   drawer.classList.toggle("open");
 });
 
 window.addEventListener("hashchange", syncAdminVisibility);
 
-document.querySelector("#lockForm").addEventListener("submit", async (event) => {
+document.querySelector("#lockForm")?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const hint = document.querySelector("#lockHint");
   const passwordInput = document.querySelector("#adminPassword");
@@ -1043,12 +1069,12 @@ document.querySelectorAll(".image-tab").forEach((button) => {
   });
 });
 
-adminImage.addEventListener("input", () => {
+adminImage?.addEventListener("input", () => {
   if (!document.querySelector('[data-image-source="url"]').classList.contains("active")) return;
   updateImagePreview(adminImage.value.trim());
 });
 
-adminImageFile.addEventListener("change", () => {
+adminImageFile?.addEventListener("change", () => {
   const file = adminImageFile.files && adminImageFile.files[0];
   if (!file) {
     selectedImageData = "";
@@ -1064,27 +1090,27 @@ adminImageFile.addEventListener("change", () => {
   reader.readAsDataURL(file);
 });
 
-document.querySelector("#searchImageLink").addEventListener("click", () => {
+document.querySelector("#searchImageLink")?.addEventListener("click", () => {
   const productName = document.querySelector("#adminName").value.trim();
   const query = productName ? `${productName} fantasia` : "fantasia ateliê";
   const url = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query)}`;
   window.open(url, "_blank", "noopener");
 });
 
-searchInput.addEventListener("input", renderCatalog);
+searchInput?.addEventListener("input", renderCatalog);
 
-adminProductSearch.addEventListener("input", () => {
+adminProductSearch?.addEventListener("input", () => {
   state.adminProductSearch = adminProductSearch.value;
   renderAdminList();
 });
 
-orderStatusFilter.addEventListener("change", () => {
+orderStatusFilter?.addEventListener("change", () => {
   state.orderStatusFilter = orderStatusFilter.value;
   renderOrdersList();
 });
 
 ["#bookingProduct", "#bookingMode", "#startDate", "#pickupTime", "#endDate", "#returnTime"].forEach((selector) => {
-  document.querySelector(selector).addEventListener("input", () => {
+  document.querySelector(selector)?.addEventListener("input", () => {
     setDateLimits();
     updateAvailabilityMessage();
     updateMessagePreview();
@@ -1092,27 +1118,27 @@ orderStatusFilter.addEventListener("change", () => {
 });
 
 ["#blockStart", "#blockEnd"].forEach((selector) => {
-  document.querySelector(selector).addEventListener("input", setDateLimits);
+  document.querySelector(selector)?.addEventListener("input", setDateLimits);
 });
 
 ["#customerName", "#customerPhone", "#eventDate", "#desiredSize", "#bookingNotes"].forEach((selector) => {
-  document.querySelector(selector).addEventListener("input", updateMessagePreview);
+  document.querySelector(selector)?.addEventListener("input", updateMessagePreview);
 });
 
-bookingProduct.addEventListener("change", () => {
+bookingProduct?.addEventListener("change", () => {
   renderBookingModes();
   updateRentalFields();
   updateAvailabilityMessage();
   updateMessagePreview();
 });
 
-bookingMode.addEventListener("change", () => {
+bookingMode?.addEventListener("change", () => {
   updateRentalFields();
   updateAvailabilityMessage();
   updateMessagePreview();
 });
 
-catalogGrid.addEventListener("click", (event) => {
+catalogGrid?.addEventListener("click", (event) => {
   const reserveButton = event.target.closest("[data-reserve]");
   if (reserveButton) {
     selectProduct(reserveButton.dataset.reserve);
@@ -1123,13 +1149,13 @@ catalogGrid.addEventListener("click", (event) => {
   if (card) openProduct(card.dataset.id);
 });
 
-catalogGrid.addEventListener("keydown", (event) => {
+catalogGrid?.addEventListener("keydown", (event) => {
   if (event.key !== "Enter") return;
   const card = event.target.closest(".product-card");
   if (card) openProduct(card.dataset.id);
 });
 
-bookingForm.addEventListener("submit", (event) => {
+bookingForm?.addEventListener("submit", (event) => {
   event.preventDefault();
   const product = state.products.find((item) => item.id === bookingProduct.value);
   const start = makeDateTime("#startDate", "#pickupTime");
@@ -1150,14 +1176,14 @@ bookingForm.addEventListener("submit", (event) => {
   window.open(whatsappUrl(message), "_blank", "noopener");
 });
 
-document.querySelector("#dialogClose").addEventListener("click", () => dialog.close());
+document.querySelector("#dialogClose")?.addEventListener("click", () => dialog.close());
 
-document.querySelector("#dialogReserve").addEventListener("click", (event) => {
+document.querySelector("#dialogReserve")?.addEventListener("click", (event) => {
   dialog.close();
   selectProduct(event.currentTarget.dataset.id);
 });
 
-document.querySelector("#adminForm").addEventListener("submit", (event) => {
+document.querySelector("#adminForm")?.addEventListener("submit", (event) => {
   event.preventDefault();
   const name = document.querySelector("#adminName").value.trim();
   const imageSource = document.querySelector(".image-tab.active").dataset.imageSource;
@@ -1191,9 +1217,9 @@ document.querySelector("#adminForm").addEventListener("submit", (event) => {
   resetAdminForm();
 });
 
-document.querySelector("#cancelEdit").addEventListener("click", resetAdminForm);
+document.querySelector("#cancelEdit")?.addEventListener("click", resetAdminForm);
 
-document.querySelector("#blockForm").addEventListener("submit", (event) => {
+document.querySelector("#blockForm")?.addEventListener("submit", (event) => {
   event.preventDefault();
   const product = state.products.find((item) => item.id === blockProduct.value);
   const start = document.querySelector("#blockStart").value;
@@ -1214,7 +1240,7 @@ document.querySelector("#blockForm").addEventListener("submit", (event) => {
   event.target.reset();
 });
 
-adminList.addEventListener("click", (event) => {
+adminList?.addEventListener("click", (event) => {
   const editButton = event.target.closest("[data-edit]");
   if (editButton) {
     const product = state.products.find((item) => item.id === editButton.dataset.edit);
@@ -1241,7 +1267,7 @@ adminList.addEventListener("click", (event) => {
   refreshAll();
 });
 
-ordersList.addEventListener("click", (event) => {
+ordersList?.addEventListener("click", (event) => {
   const cashflowButton = event.target.closest("[data-order-cashflow]");
   if (cashflowButton) {
     addCashflowFromOrder(cashflowButton.dataset.orderCashflow);
@@ -1255,7 +1281,7 @@ ordersList.addEventListener("click", (event) => {
   refreshAll();
 });
 
-ordersList.addEventListener("change", (event) => {
+ordersList?.addEventListener("change", (event) => {
   const statusSelect = event.target.closest("[data-order-status]");
   if (!statusSelect) return;
   state.orders = state.orders.map((order) =>
@@ -1267,13 +1293,13 @@ ordersList.addEventListener("change", (event) => {
   refreshAll();
 });
 
-document.querySelector("#clearOrders").addEventListener("click", () => {
+document.querySelector("#clearOrders")?.addEventListener("click", () => {
   state.orders = [];
   saveOrders();
   refreshAll();
 });
 
-document.querySelector("#cashflowForm").addEventListener("submit", (event) => {
+document.querySelector("#cashflowForm")?.addEventListener("submit", (event) => {
   event.preventDefault();
   const amount = Number(document.querySelector("#cashflowAmount").value);
   if (!amount || amount <= 0) return;
@@ -1293,7 +1319,7 @@ document.querySelector("#cashflowForm").addEventListener("submit", (event) => {
   setDateLimits();
 });
 
-cashflowList.addEventListener("click", (event) => {
+cashflowList?.addEventListener("click", (event) => {
   const deleteButton = event.target.closest("[data-delete-cashflow]");
   if (!deleteButton) return;
   state.cashflow = state.cashflow.filter((entry) => entry.id !== deleteButton.dataset.deleteCashflow);
@@ -1301,27 +1327,25 @@ cashflowList.addEventListener("click", (event) => {
   renderCashflow();
 });
 
-document.querySelector("#clearCashflow").addEventListener("click", () => {
+document.querySelector("#clearCashflow")?.addEventListener("click", () => {
   state.cashflow = [];
   saveCashflow();
   renderCashflow();
 });
 
-document.querySelector("#exportCashflow").addEventListener("click", exportCashflowCsv);
+document.querySelector("#exportCashflow")?.addEventListener("click", exportCashflowCsv);
 
-document.querySelector("#saveWhatsapp").addEventListener("click", () => {
+document.querySelector("#saveWhatsapp")?.addEventListener("click", () => {
   const phone = sanitizePhone(document.querySelector("#adminWhatsapp").value);
   state.settings.whatsapp = phone || DEFAULT_WHATSAPP_NUMBER;
   saveSettings();
-  document.querySelector("#contactWhatsapp").href = whatsappUrl(
-    "Olá! Quero falar com a Art & Cost sobre fantasias."
-  );
-  document.querySelector("#floatingWhatsapp").href = whatsappUrl(
-    "Olá! Quero falar com a Art & Cost sobre fantasias."
-  );
+  const contactWhatsapp = document.querySelector("#contactWhatsapp");
+  const floatingWhatsapp = document.querySelector("#floatingWhatsapp");
+  if (contactWhatsapp) contactWhatsapp.href = whatsappUrl("Olá! Quero falar com a Art & Cost sobre fantasias.");
+  if (floatingWhatsapp) floatingWhatsapp.href = whatsappUrl("Olá! Quero falar com a Art & Cost sobre fantasias.");
 });
 
-document.querySelector("#exportCatalog").addEventListener("click", () => {
+document.querySelector("#exportCatalog")?.addEventListener("click", () => {
   const payload = {
     exportedAt: new Date().toISOString(),
     products: state.products,
@@ -1337,7 +1361,7 @@ document.querySelector("#exportCatalog").addEventListener("click", () => {
   setBackupStatus("Backup exportado. Guarde esse arquivo em local seguro.");
 });
 
-document.querySelector("#importCatalog").addEventListener("change", (event) => {
+document.querySelector("#importCatalog")?.addEventListener("change", (event) => {
   const file = event.target.files && event.target.files[0];
   if (!file) return;
 
@@ -1370,7 +1394,7 @@ document.querySelector("#importCatalog").addEventListener("change", (event) => {
   reader.readAsText(file);
 });
 
-document.querySelector("#downloadCsvTemplate").addEventListener("click", () => {
+document.querySelector("#downloadCsvTemplate")?.addEventListener("click", () => {
   const headers = ["nome", "preco", "tipo", "publico", "genero", "tamanhos", "tema", "imagem", "descricao"];
   const example = [
     "Fantasia Princesa",
@@ -1388,7 +1412,7 @@ document.querySelector("#downloadCsvTemplate").addEventListener("click", () => {
   setCsvStatus("Modelo CSV baixado.");
 });
 
-document.querySelector("#importProductsCsv").addEventListener("change", (event) => {
+document.querySelector("#importProductsCsv")?.addEventListener("change", (event) => {
   const file = event.target.files && event.target.files[0];
   if (!file) return;
 
@@ -1415,19 +1439,18 @@ document.querySelector("#importProductsCsv").addEventListener("change", (event) 
   reader.readAsText(file);
 });
 
-document.querySelector("#resetCatalog").addEventListener("click", () => {
+document.querySelector("#resetCatalog")?.addEventListener("click", () => {
   state.products = starterProducts;
   saveProducts();
   refreshAll();
 });
 
-document.querySelector("#contactWhatsapp").href = whatsappUrl(
-  "Olá! Quero falar com a Art & Cost sobre fantasias."
-);
-document.querySelector("#floatingWhatsapp").href = whatsappUrl(
-  "Olá! Quero falar com a Art & Cost sobre fantasias."
-);
-document.querySelector("#adminWhatsapp").value =
+const contactWhatsapp = document.querySelector("#contactWhatsapp");
+const floatingWhatsapp = document.querySelector("#floatingWhatsapp");
+const adminWhatsapp = document.querySelector("#adminWhatsapp");
+if (contactWhatsapp) contactWhatsapp.href = whatsappUrl("Olá! Quero falar com a Art & Cost sobre fantasias.");
+if (floatingWhatsapp) floatingWhatsapp.href = whatsappUrl("Olá! Quero falar com a Art & Cost sobre fantasias.");
+if (adminWhatsapp) adminWhatsapp.value =
   state.settings.whatsapp === DEFAULT_WHATSAPP_NUMBER ? "" : state.settings.whatsapp;
 
 syncAdminVisibility();

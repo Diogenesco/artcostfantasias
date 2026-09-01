@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Administração | Art & Cost Fantasias</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <meta
+      name="description"
+      content="Painel administrativo da Art & Cost Fantasias."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Parisienne&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png" />
+    <link rel="icon" type="image/png" href="/assets/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Art & Cost Fantasias">
+        <img src="assets/logo-art-cost-banner.png" alt="Art & Cost Fantasias e Ateliê" />
+      </a>
+
+      <div class="nav-row">
+        <a class="secondary-action admin-home-link" href="/">Voltar ao site</a>
+        <a class="nav-cta" href="/admin.html">Administração</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="admin-panel" id="admin">
+        <a class="admin-back" href="/">Voltar para o site</a>
+        <div class="admin-lock" id="adminLock">
+          <div>
+            <p class="eyebrow">Área administrativa</p>
+            <h2>Acesso ao painel</h2>
+            <p>Acesso reservado para administração do catálogo, reservas e financeiro.</p>
+          </div>
+          <form class="lock-form" id="lockForm">
+            <label>
+              Senha
+              <input id="adminPassword" type="password" placeholder="Digite a senha" autocomplete="current-password" />
+            </label>
+            <button class="primary-action" type="submit">Entrar</button>
+            <p class="lock-hint" id="lockHint">Digite a senha administrativa para continuar.</p>
+          </form>
+        </div>
+
+        <div class="admin-content locked" id="adminContent">
+          <div class="admin-stats" id="adminStats" aria-label="Resumo do painel"></div>
+          <div class="admin-heading">
+            <div>
+              <p class="eyebrow">Painel administrativo inicial</p>
+              <h2>Painel do catálogo</h2>
+            </div>
+            <button class="secondary-action" id="resetCatalog" type="button">
+              Restaurar exemplos
+            </button>
+          </div>
+
+          <div class="admin-grid">
+            <article class="admin-box">
+              <h3>Dados da loja</h3>
+              <label>
+                WhatsApp
+                <input id="adminWhatsapp" type="tel" placeholder="Ex: 5511999999999" />
+              </label>
+              <button class="secondary-action" id="saveWhatsapp" type="button">
+                Salvar WhatsApp
+              </button>
+            </article>
+
+            <article class="admin-box">
+              <h3>Backup do catálogo</h3>
+              <div class="backup-actions">
+                <button class="secondary-action" id="exportCatalog" type="button">
+                  Exportar backup
+                </button>
+                <label class="import-button">
+                  Importar backup
+                  <input id="importCatalog" type="file" accept="application/json,.json" />
+                </label>
+              </div>
+              <p class="admin-note" id="backupStatus">
+                Salve uma cópia dos cadastros enquanto o banco de dados não estiver ligado.
+              </p>
+            </article>
+
+            <article class="admin-box">
+              <h3>Importar planilha</h3>
+              <div class="backup-actions">
+                <button class="secondary-action" id="downloadCsvTemplate" type="button">
+                  Baixar modelo CSV
+                </button>
+                <label class="import-button">
+                  Importar produtos CSV
+                  <input id="importProductsCsv" type="file" accept=".csv,text/csv" />
+                </label>
+              </div>
+              <p class="admin-note" id="csvStatus">
+                Use colunas: nome, preço, tipo, público, gênero, tamanhos, tema, imagem, descrição.
+              </p>
+            </article>
+
+            <article class="admin-box">
+              <h3>Bloquear data</h3>
+              <form class="block-form" id="blockForm">
+                <label>
+                  Fantasia
+                  <select id="blockProduct"></select>
+                </label>
+                <label>
+                  Início
+                  <input id="blockStart" type="datetime-local" required />
+                </label>
+                <label>
+                  Fim
+                  <input id="blockEnd" type="datetime-local" required />
+                </label>
+                <label class="wide-field">
+                  Motivo
+                  <input id="blockReason" type="text" placeholder="Reserva, ajuste, manutenção" />
+                </label>
+                <button class="secondary-action form-action" type="submit">
+                  Adicionar bloqueio
+                </button>
+              </form>
+            </article>
+          </div>
+
+          <form class="admin-form" id="adminForm">
+            <label>
+              Nome
+              <input id="adminName" type="text" required placeholder="Ex: Fantasia Fada" />
+            </label>
+            <label>
+              Preço
+              <input id="adminPrice" type="number" min="0" step="0.01" required />
+            </label>
+            <label>
+              Tipo
+              <select id="adminType">
+                <option value="locacao">Locação</option>
+                <option value="venda">Venda</option>
+                <option value="ambos">Venda e locação</option>
+              </select>
+            </label>
+            <label>
+              Público
+              <select id="adminAudience">
+                <option value="adulto">Adulto</option>
+                <option value="infantil">Infantil</option>
+                <option value="todos">Todas as idades</option>
+              </select>
+            </label>
+            <label>
+              Gênero
+              <select id="adminGender">
+                <option value="unissex">Unissex</option>
+                <option value="feminino">Feminino</option>
+                <option value="masculino">Masculino</option>
+              </select>
+            </label>
+            <label>
+              Tamanhos
+              <input id="adminSizes" type="text" placeholder="P, M, G, Infantil 8" />
+            </label>
+            <label>
+              Tema
+              <input id="adminTheme" type="text" placeholder="Princesa, Halloween, Carnaval" />
+            </label>
+            <label>
+              Cor do card
+              <input id="adminColor" type="color" value="#b3202a" />
+            </label>
+            <fieldset class="image-field wide-field">
+              <legend>Imagem da fantasia</legend>
+              <div class="image-tabs" role="tablist" aria-label="Origem da imagem">
+                <button class="image-tab active" data-image-source="url" type="button">Buscar link</button>
+                <button class="image-tab" data-image-source="file" type="button">Adicionar imagem</button>
+              </div>
+              <label class="image-source active" data-source-panel="url">
+                Link da foto
+                <input id="adminImage" type="url" placeholder="https://..." />
+              </label>
+              <button class="image-search-button" id="searchImageLink" type="button">
+                Pesquisar imagem pelo nome
+              </button>
+              <label class="image-source" data-source-panel="file">
+                Arquivo do computador
+                <input id="adminImageFile" type="file" accept="image/*" />
+              </label>
+              <div class="image-preview empty" id="imagePreview">Prévia da imagem</div>
+            </fieldset>
+            <label class="wide-field">
+              Descrição
+              <textarea id="adminDescription" rows="3" placeholder="Detalhes, medidas, acessórios inclusos"></textarea>
+            </label>
+            <div class="form-actions form-action">
+              <button class="primary-action" id="adminSubmit" type="submit">Adicionar ao catálogo</button>
+              <button class="secondary-action hidden-control" id="cancelEdit" type="button">
+                Cancelar edição
+              </button>
+            </div>
+          </form>
+
+          <div class="admin-list">
+            <div class="admin-list-heading">
+              <h3>Itens e bloqueios cadastrados</h3>
+              <label class="admin-filter">
+                <span>Buscar item</span>
+                <input id="adminProductSearch" type="search" placeholder="Nome, tipo, tamanho ou tema" />
+              </label>
+            </div>
+            <div id="adminList"></div>
+          </div>
+
+          <div class="admin-list">
+            <div class="admin-list-heading">
+              <h3>Solicitações recebidas neste navegador</h3>
+              <div class="admin-list-actions">
+                <label class="admin-filter">
+                  <span>Status</span>
+                  <select id="orderStatusFilter">
+                    <option value="todos">Todos</option>
+                    <option value="solicitado">Solicitado</option>
+                    <option value="reservado">Reservado</option>
+                    <option value="retirado">Retirado</option>
+                    <option value="devolvido">Devolvido</option>
+                    <option value="cancelado">Cancelado</option>
+                  </select>
+                </label>
+                <button class="admin-delete" id="clearOrders" type="button">Limpar histórico</button>
+              </div>
+            </div>
+            <div id="ordersList"></div>
+          </div>
+
+          <div class="admin-list finance-panel">
+            <div class="admin-list-heading">
+              <h3>Fluxo de entradas e saídas</h3>
+              <div class="admin-list-actions">
+                <button class="admin-edit" id="exportCashflow" type="button">Exportar CSV</button>
+                <button class="admin-delete" id="clearCashflow" type="button">Limpar fluxo</button>
+              </div>
+            </div>
+            <div class="finance-summary" id="financeSummary" aria-label="Resumo financeiro"></div>
+            <form class="finance-form" id="cashflowForm">
+              <label>
+                Data
+                <input id="cashflowDate" type="date" required />
+              </label>
+              <label>
+                Tipo
+                <select id="cashflowType" required>
+                  <option value="entrada">Entrada</option>
+                  <option value="saida">Saída</option>
+                </select>
+              </label>
+              <label>
+                Categoria
+                <select id="cashflowCategory" required>
+                  <option value="locacao">Locação</option>
+                  <option value="venda">Venda</option>
+                  <option value="ajuste">Ajuste</option>
+                  <option value="manutencao">Manutenção</option>
+                  <option value="outros">Outros</option>
+                </select>
+              </label>
+              <label>
+                Valor
+                <input id="cashflowAmount" type="number" min="0" step="0.01" required />
+              </label>
+              <label class="wide-field">
+                Descrição
+                <input id="cashflowDescription" type="text" placeholder="Ex: Locação Chapeuzinho - Maria" required />
+              </label>
+              <button class="secondary-action form-action" type="submit">Adicionar lançamento</button>
+            </form>
+            <div class="finance-table-wrap">
+              <table class="finance-table">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Tipo</th>
+                    <th>Categoria</th>
+                    <th>Descrição</th>
+                    <th>Valor</th>
+                    <th>Ação</th>
+                  </tr>
+                </thead>
+                <tbody id="cashflowList"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
