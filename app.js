@@ -18,7 +18,7 @@ const starterProducts = [
     icon: "B",
     image: "",
     reservations: [],
-    description: "Conjunto tematico com saia vermelha, camiseta e acessorios para festa a fantasia.",
+    description: "Conjunto temático com saia vermelha, camiseta e acessórios para festa a fantasia.",
   },
   {
     id: "chapeuzinho",
@@ -40,7 +40,7 @@ const starterProducts = [
         reason: "Reserva exemplo",
       },
     ],
-    description: "Fantasia com capa vermelha, saia e acabamento de atelie para eventos e ensaios.",
+    description: "Fantasia com capa vermelha, saia e acabamento de ateliê para eventos e ensaios.",
   },
   {
     id: "fada",
@@ -70,11 +70,11 @@ const starterProducts = [
     icon: "M",
     image: "",
     reservations: [],
-    description: "Look tematico azul e branco com composicao delicada para festas e apresentacoes.",
+    description: "Look temático azul e branco com composição delicada para festas e apresentações.",
   },
   {
     id: "atelie",
-    name: "Vestido de Atelie",
+    name: "Vestido de Ateliê",
     price: 180,
     type: "venda",
     audience: "todos",
@@ -85,7 +85,7 @@ const starterProducts = [
     icon: "A",
     image: "",
     reservations: [],
-    description: "Peca de atelie para venda, com ajustes e detalhes definidos pelo atendimento.",
+    description: "Peça de ateliê para venda, com ajustes e detalhes definidos pelo atendimento.",
   },
   {
     id: "carnaval",
@@ -100,7 +100,7 @@ const starterProducts = [
     icon: "L",
     image: "",
     reservations: [],
-    description: "Look versatil para venda ou locacao, com brilho e acabamento em tons dourados.",
+    description: "Look versátil para venda ou locação, com brilho e acabamento em tons dourados.",
   },
 ];
 
@@ -281,8 +281,8 @@ function sanitizePhone(value) {
 }
 
 function typeLabel(product) {
-  if (product.type === "ambos") return "Venda e locacao";
-  return product.type === "venda" ? "Venda" : "Locacao";
+  if (product.type === "ambos") return "Venda e locação";
+  return product.type === "venda" ? "Venda" : "Locação";
 }
 
 function audienceLabel(product) {
@@ -344,7 +344,7 @@ function findConflict(product, start, end) {
 function availabilityText(product) {
   const hasBlocks = (product.reservations || []).length > 0;
   return {
-    label: hasBlocks ? "Verificar datas" : "Disponivel",
+    label: hasBlocks ? "Verificar datas" : "Disponível",
     blocked: hasBlocks,
   };
 }
@@ -360,8 +360,8 @@ function mediaMarkup(product) {
 function updateImagePreview(value) {
   imagePreview.classList.toggle("empty", !value);
   imagePreview.innerHTML = value
-    ? `<img src="${value}" alt="Previa da fantasia" />`
-    : "Previa da imagem";
+    ? `<img src="${value}" alt="Prévia da fantasia" />`
+    : "Prévia da imagem";
 }
 
 function setImageSource(source) {
@@ -379,7 +379,7 @@ function resetAdminForm() {
   setImageSource("url");
   updateImagePreview("");
   document.querySelector("#adminColor").value = "#b3202a";
-  document.querySelector("#adminSubmit").textContent = "Adicionar ao catalogo";
+  document.querySelector("#adminSubmit").textContent = "Adicionar ao catálogo";
   document.querySelector("#cancelEdit").classList.add("hidden-control");
 }
 
@@ -398,7 +398,7 @@ function fillAdminForm(product) {
   adminImage.value = product.image && !product.image.startsWith("data:") ? product.image : "";
   setImageSource(selectedImageData ? "file" : "url");
   updateImagePreview(product.image || "");
-  document.querySelector("#adminSubmit").textContent = "Salvar alteracoes";
+  document.querySelector("#adminSubmit").textContent = "Salvar alterações";
   document.querySelector("#cancelEdit").classList.remove("hidden-control");
   document.querySelector("#adminForm").scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -449,7 +449,7 @@ function renderAdminList() {
         .map(
           (reservation) => `
             <div class="reservation-row">
-              <span>${reservation.reason || "Bloqueio"}: ${formatDateTime(reservation.start)} ate ${formatDateTime(reservation.end)}</span>
+              <span>${reservation.reason || "Bloqueio"}: ${formatDateTime(reservation.start)} até ${formatDateTime(reservation.end)}</span>
               <button class="admin-unblock" type="button" data-unblock-product="${product.id}" data-unblock="${reservation.id}">Liberar</button>
             </div>
           `
@@ -475,7 +475,7 @@ function renderAdminList() {
 
 function renderOrdersList() {
   if (!state.orders.length) {
-    ordersList.innerHTML = `<p class="empty-admin">Nenhuma solicitacao registrada ainda.</p>`;
+    ordersList.innerHTML = `<p class="empty-admin">Nenhuma solicitação registrada ainda.</p>`;
     return;
   }
 
@@ -486,11 +486,11 @@ function renderOrdersList() {
           <div>
             <strong>${order.customerName} - ${order.productName}</strong>
             <span>${order.modeLabel} | ${money(order.price)} | ${formatDateTime(order.createdAt)} | ${statusLabel(order.status)}</span>
-            <span>${order.customerPhone || "Sem telefone"} | Evento: ${formatDateOnly(order.eventDate) || "Nao informado"}</span>
+            <span>${order.customerPhone || "Sem telefone"} | Evento: ${formatDateOnly(order.eventDate) || "Não informado"}</span>
             <span>${order.period || "Pedido de compra"} | ${order.notes}</span>
           </div>
           <div class="admin-actions">
-            <select class="status-select" data-order-status="${order.id}" aria-label="Status da solicitacao">
+            <select class="status-select" data-order-status="${order.id}" aria-label="Status da solicitação">
               ${orderStatusOptions(order.status)}
             </select>
             <button class="admin-delete" type="button" data-delete-order="${order.id}">Remover</button>
@@ -517,7 +517,7 @@ function renderAdminStats() {
       <strong>${total}</strong>
     </article>
     <article class="admin-stat">
-      <span>Locacao</span>
+      <span>Locação</span>
       <strong>${rentals}</strong>
     </article>
     <article class="admin-stat">
@@ -529,7 +529,7 @@ function renderAdminStats() {
       <strong>${blocks}</strong>
     </article>
     <article class="admin-stat">
-      <span>Solicitacoes</span>
+      <span>Solicitações</span>
       <strong>${orders}</strong>
     </article>
   `;
@@ -570,13 +570,13 @@ function renderBookingModes() {
 
   if (product.type === "ambos") {
     bookingMode.innerHTML = `
-      <option value="locacao">Locacao</option>
+      <option value="locacao">Locação</option>
       <option value="venda">Compra</option>
     `;
     return;
   }
 
-  bookingMode.innerHTML = `<option value="locacao">Locacao</option>`;
+  bookingMode.innerHTML = `<option value="locacao">Locação</option>`;
 }
 
 function updateRentalFields() {
@@ -610,37 +610,37 @@ function whatsappUrl(message) {
 function buildBookingMessage() {
   const product = state.products.find((item) => item.id === bookingProduct.value);
   const customerName = document.querySelector("#customerName").value || "Cliente";
-  const customerPhone = document.querySelector("#customerPhone").value || "Nao informado";
+  const customerPhone = document.querySelector("#customerPhone").value || "Não informado";
   const eventDate = document.querySelector("#eventDate").value;
   const start = makeDateTime("#startDate", "#pickupTime");
   const end = makeDateTime("#endDate", "#returnTime");
-  const notes = document.querySelector("#bookingNotes").value || "Sem observacoes";
+  const notes = document.querySelector("#bookingNotes").value || "Sem observações";
 
   if (bookingMode.value === "venda") {
-    return `Ola! Tenho interesse em comprar com a Art & Cost.
+    return `Olá! Tenho interesse em comprar com a Art & Cost.
 
 Cliente: ${customerName}
 Telefone: ${customerPhone}
 Item: ${product.name}
 Tipo: Compra
 Valor: ${money(product.price)}
-Data do evento: ${formatDateOnly(eventDate) || "Nao informada"}
-Tamanhos disponiveis: ${product.sizes}
-Observacoes: ${notes}`;
+Data do evento: ${formatDateOnly(eventDate) || "Não informada"}
+Tamanhos disponíveis: ${product.sizes}
+Observações: ${notes}`;
   }
 
-  return `Ola! Tenho interesse em reservar com a Art & Cost.
+  return `Olá! Tenho interesse em reservar com a Art & Cost.
 
 Cliente: ${customerName}
 Telefone: ${customerPhone}
 Item: ${product.name}
 Tipo: ${typeLabel(product)}
 Valor: ${money(product.price)}
-Data do evento: ${formatDateOnly(eventDate) || "Nao informada"}
+Data do evento: ${formatDateOnly(eventDate) || "Não informada"}
 Retirada: ${formatDateTime(start)}
-Devolucao: ${formatDateTime(end)}
-Tamanhos disponiveis: ${product.sizes}
-Observacoes: ${notes}`;
+Devolução: ${formatDateTime(end)}
+Tamanhos disponíveis: ${product.sizes}
+Observações: ${notes}`;
 }
 
 function createOrderRecord() {
@@ -648,7 +648,7 @@ function createOrderRecord() {
   const customerName = document.querySelector("#customerName").value || "Cliente";
   const customerPhone = document.querySelector("#customerPhone").value || "";
   const eventDate = document.querySelector("#eventDate").value || "";
-  const notes = document.querySelector("#bookingNotes").value || "Sem observacoes";
+  const notes = document.querySelector("#bookingNotes").value || "Sem observações";
   const start = makeDateTime("#startDate", "#pickupTime");
   const end = makeDateTime("#endDate", "#returnTime");
   const isRental = bookingMode.value === "locacao";
@@ -663,9 +663,9 @@ function createOrderRecord() {
     productId: product.id,
     productName: product.name,
     mode: bookingMode.value,
-    modeLabel: isRental ? "Locacao" : "Compra",
+    modeLabel: isRental ? "Locação" : "Compra",
     price: product.price,
-    period: isRental ? `${formatDateTime(start)} ate ${formatDateTime(end)}` : "",
+    period: isRental ? `${formatDateTime(start)} até ${formatDateTime(end)}` : "",
     notes,
   };
 }
@@ -714,19 +714,19 @@ function updateAvailabilityMessage() {
   if (!product || bookingMode.value !== "locacao" || !start || !end) return;
 
   if (new Date(start) >= new Date(end)) {
-    availabilityMessage.textContent = "A devolucao precisa ser depois da retirada.";
+    availabilityMessage.textContent = "A devolução precisa ser depois da retirada.";
     availabilityMessage.classList.add("show", "blocked");
     return;
   }
 
   const conflict = findConflict(product, start, end);
   if (conflict) {
-    availabilityMessage.textContent = `Este periodo esta bloqueado: ${conflict.reason || "reserva"} de ${formatDateTime(conflict.start)} ate ${formatDateTime(conflict.end)}.`;
+    availabilityMessage.textContent = `Este período está bloqueado: ${conflict.reason || "reserva"} de ${formatDateTime(conflict.start)} até ${formatDateTime(conflict.end)}.`;
     availabilityMessage.classList.add("show", "blocked");
     return;
   }
 
-  availabilityMessage.textContent = "Periodo livre no cadastro atual. A confirmacao final sera feita pelo WhatsApp.";
+  availabilityMessage.textContent = "Período livre no cadastro atual. A confirmação final será feita pelo WhatsApp.";
   availabilityMessage.classList.add("show", "ok");
 }
 
@@ -789,7 +789,7 @@ adminImageFile.addEventListener("change", () => {
 
 document.querySelector("#searchImageLink").addEventListener("click", () => {
   const productName = document.querySelector("#adminName").value.trim();
-  const query = productName ? `${productName} fantasia` : "fantasia atelie";
+  const query = productName ? `${productName} fantasia` : "fantasia ateliê";
   const url = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query)}`;
   window.open(url, "_blank", "noopener");
 });
@@ -901,7 +901,7 @@ document.querySelector("#blockForm").addEventListener("submit", (event) => {
     id: `block-${Date.now()}`,
     start,
     end,
-    reason: document.querySelector("#blockReason").value || "Periodo bloqueado",
+    reason: document.querySelector("#blockReason").value || "Período bloqueado",
   });
 
   saveProducts();
@@ -967,10 +967,10 @@ document.querySelector("#saveWhatsapp").addEventListener("click", () => {
   state.settings.whatsapp = phone || DEFAULT_WHATSAPP_NUMBER;
   saveSettings();
   document.querySelector("#contactWhatsapp").href = whatsappUrl(
-    "Ola! Quero falar com a Art & Cost sobre fantasias."
+    "Olá! Quero falar com a Art & Cost sobre fantasias."
   );
   document.querySelector("#floatingWhatsapp").href = whatsappUrl(
-    "Ola! Quero falar com a Art & Cost sobre fantasias."
+    "Olá! Quero falar com a Art & Cost sobre fantasias."
   );
 });
 
@@ -998,7 +998,7 @@ document.querySelector("#importCatalog").addEventListener("change", (event) => {
     try {
       const data = JSON.parse(String(reader.result || "{}"));
       if (!Array.isArray(data.products)) {
-        throw new Error("Arquivo sem catalogo valido.");
+        throw new Error("Arquivo sem catálogo válido.");
       }
 
       state.products = data.products;
@@ -1012,7 +1012,7 @@ document.querySelector("#importCatalog").addEventListener("change", (event) => {
         state.settings.whatsapp === DEFAULT_WHATSAPP_NUMBER ? "" : state.settings.whatsapp;
       setBackupStatus("Backup importado com sucesso.");
     } catch (error) {
-      setBackupStatus("Nao foi possivel importar este arquivo.");
+      setBackupStatus("Não foi possível importar este arquivo.");
     } finally {
       event.target.value = "";
     }
@@ -1031,7 +1031,7 @@ document.querySelector("#downloadCsvTemplate").addEventListener("click", () => {
     "Infantil 8, Infantil 10",
     "tematico",
     "https://exemplo.com/foto.jpg",
-    "Vestido de princesa com acessorios",
+    "Vestido de princesa com acessórios",
   ];
   const csv = `${headers.join(",")}\n${example.map(csvEscape).join(",")}\n`;
   downloadTextFile("modelo-produtos-art-cost.csv", csv, "text/csv;charset=utf-8");
@@ -1057,7 +1057,7 @@ document.querySelector("#importProductsCsv").addEventListener("change", (event) 
       refreshAll();
       setCsvStatus(`${imported.length} produto(s) importado(s) com sucesso.`);
     } catch (error) {
-      setCsvStatus("Nao foi possivel importar a planilha. Confira as colunas do modelo.");
+      setCsvStatus("Não foi possível importar a planilha. Confira as colunas do modelo.");
     } finally {
       event.target.value = "";
     }
@@ -1072,10 +1072,10 @@ document.querySelector("#resetCatalog").addEventListener("click", () => {
 });
 
 document.querySelector("#contactWhatsapp").href = whatsappUrl(
-  "Ola! Quero falar com a Art & Cost sobre fantasias."
+  "Olá! Quero falar com a Art & Cost sobre fantasias."
 );
 document.querySelector("#floatingWhatsapp").href = whatsappUrl(
-  "Ola! Quero falar com a Art & Cost sobre fantasias."
+  "Olá! Quero falar com a Art & Cost sobre fantasias."
 );
 document.querySelector("#adminWhatsapp").value =
   state.settings.whatsapp === DEFAULT_WHATSAPP_NUMBER ? "" : state.settings.whatsapp;

@@ -6,7 +6,7 @@
     <title>Art & Cost Fantasias</title>
     <meta
       name="description"
-      content="Locacao e venda de fantasias, roupas de atelie e looks tematicos para todas as idades."
+      content="Locação e venda de fantasias, roupas de ateliê e looks temáticos para todas as idades."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -19,7 +19,7 @@
   <body>
     <header class="topbar">
       <a class="brand" href="#catalogo" aria-label="Art & Cost Fantasias">
-        <img src="assets/logo-art-cost-banner.png" alt="Art & Cost Fantasias e Atelie" />
+        <img src="assets/logo-art-cost-banner.png" alt="Art & Cost Fantasias e Ateliê" />
       </a>
 
       <div class="nav-row">
@@ -29,7 +29,7 @@
           <span></span>
         </button>
 
-        <a class="nav-cta" href="#catalogo">Catalogo</a>
+        <a class="nav-cta" href="#catalogo">Catálogo</a>
 
         <a class="cart-button" id="cartButton" href="#pedido" aria-label="Ver pedido">
           <span class="cart-icon">+</span>
@@ -39,7 +39,7 @@
     </header>
 
     <nav class="drawer" id="drawer" aria-label="Menu principal">
-      <a href="#catalogo">Catalogo</a>
+      <a href="#catalogo">Catálogo</a>
       <a href="#como-funciona">Como funciona</a>
       <a href="#contato">Contato</a>
     </nav>
@@ -47,10 +47,10 @@
     <main>
       <section class="hero">
         <div class="hero-copy">
-          <p class="eyebrow">Locacao e venda</p>
+          <p class="eyebrow">Locação e venda</p>
           <h1>Fantasias para viver cada tema com estilo.</h1>
           <p>
-            Escolha a fantasia, informe data e horario de retirada/devolucao e
+            Escolha a fantasia, informe data e horário de retirada/devolução e
             finalize o pedido pelo WhatsApp.
           </p>
           <div class="hero-actions">
@@ -58,15 +58,15 @@
             <a class="secondary-action" href="#pedido">Reservar data</a>
           </div>
         </div>
-        <div class="hero-showcase" aria-label="Destaques do catalogo">
+        <div class="hero-showcase" aria-label="Destaques do catálogo">
           <article>
-            <span class="tag">Locacao</span>
+            <span class="tag">Locação</span>
             <strong>Chapeuzinho</strong>
             <small>A partir de R$ 95,00</small>
           </article>
           <article>
             <span class="tag">Venda</span>
-            <strong>Looks de atelie</strong>
+            <strong>Looks de ateliê</strong>
             <small>Roupas sob medida</small>
           </article>
         </div>
@@ -74,7 +74,7 @@
 
       <section class="toolbar" id="catalogo" aria-label="Busca e filtros">
         <div class="section-heading">
-          <p class="eyebrow">Catalogo Art & Cost</p>
+          <p class="eyebrow">Catálogo Art & Cost</p>
           <h2>Escolha por tema, idade ou tipo de atendimento.</h2>
         </div>
         <label class="search">
@@ -82,15 +82,15 @@
           <input id="searchInput" type="search" placeholder="Digite sua busca..." />
         </label>
 
-        <div class="segments" role="tablist" aria-label="Tipo de catalogo">
+        <div class="segments" role="tablist" aria-label="Tipo de catálogo">
           <button class="segment active" data-filter="todos" type="button">Todos</button>
-          <button class="segment" data-filter="locacao" type="button">Locacao</button>
+          <button class="segment" data-filter="locacao" type="button">Locação</button>
           <button class="segment" data-filter="venda" type="button">Venda</button>
           <button class="segment" data-filter="infantil" type="button">Infantil</button>
           <button class="segment" data-filter="adulto" type="button">Adulto</button>
           <button class="segment" data-filter="feminino" type="button">Feminino</button>
           <button class="segment" data-filter="masculino" type="button">Masculino</button>
-          <button class="segment" data-filter="tematico" type="button">Tematicos</button>
+          <button class="segment" data-filter="tematico" type="button">Temáticos</button>
         </div>
       </section>
 
@@ -102,8 +102,8 @@
           <strong>Princesas, contos e personagens</strong>
         </article>
         <article>
-          <span>Atelie</span>
-          <strong>Ajustes e pecas sob medida</strong>
+          <span>Ateliê</span>
+          <strong>Ajustes e peças sob medida</strong>
         </article>
         <article>
           <span>Eventos</span>
@@ -116,7 +116,7 @@
           <p class="eyebrow">Reserva pelo WhatsApp</p>
           <h2>Monte o pedido da cliente</h2>
           <p>
-            Selecione uma fantasia no catalogo e informe o periodo. O botao
+            Selecione uma fantasia no catálogo e informe o período. O botão
             abre o WhatsApp com a mensagem pronta.
           </p>
         </div>
@@ -143,7 +143,7 @@
             <input id="eventDate" type="date" />
           </label>
           <label class="rental-field">
-            Inicio da locacao
+            Início da locação
             <input id="startDate" type="date" required />
           </label>
           <label class="rental-field">
@@ -151,16 +151,16 @@
             <input id="pickupTime" type="time" required />
           </label>
           <label class="rental-field">
-            Fim da locacao
+            Fim da locação
             <input id="endDate" type="date" required />
           </label>
           <label class="rental-field">
-            Hora da devolucao
+            Hora da devolução
             <input id="returnTime" type="time" required />
           </label>
           <label class="wide-field">
-            Observacoes
-            <input id="bookingNotes" type="text" placeholder="Tamanho desejado, evento ou duvida" />
+            Observações
+            <input id="bookingNotes" type="text" placeholder="Tamanho desejado, evento ou dúvida" />
           </label>
           <p class="availability-message" id="availabilityMessage" aria-live="polite"></p>
           <button class="primary-action form-action" type="submit">
@@ -176,7 +176,7 @@
         </article>
         <article>
           <strong>2. Reserve</strong>
-          <span>Informe retirada, devolucao e horarios no calendario.</span>
+          <span>Informe retirada, devolução e horários no calendário.</span>
         </article>
         <article>
           <strong>3. Confirme</strong>
@@ -186,17 +186,17 @@
 
       <section class="atelier-band" aria-label="Atendimento Art & Cost">
         <div>
-          <p class="eyebrow">Atelie e fantasias</p>
+          <p class="eyebrow">Ateliê e fantasias</p>
           <h2>Uma vitrine simples para escolher, reservar e conversar.</h2>
         </div>
         <div class="atelier-copy">
           <p>
-            A Art & Cost atende locacao e venda para todas as idades, com
-            disponibilidade por periodo e combinacao de detalhes pelo WhatsApp.
+            A Art & Cost atende locação e venda para todas as idades, com
+            disponibilidade por período e combinação de detalhes pelo WhatsApp.
           </p>
           <p>
             O painel administrativo fica reservado para cadastro de itens,
-            bloqueio de datas e manutencao do catalogo.
+            bloqueio de datas e manutenção do catálogo.
           </p>
         </div>
       </section>
@@ -205,9 +205,9 @@
         <a class="admin-back" href="#contato">Voltar para o site</a>
         <div class="admin-lock" id="adminLock">
           <div>
-            <p class="eyebrow">Area administrativa</p>
+            <p class="eyebrow">Área administrativa</p>
             <h2>Acesso ao painel</h2>
-            <p>Use a senha de teste para liberar o cadastro neste prototipo.</p>
+            <p>Use a senha de teste para liberar o cadastro neste protótipo.</p>
           </div>
           <form class="lock-form" id="lockForm">
             <label>
@@ -224,7 +224,7 @@
         <div class="admin-heading">
           <div>
             <p class="eyebrow">Painel administrativo inicial</p>
-            <h2>Painel do catalogo</h2>
+            <h2>Painel do catálogo</h2>
           </div>
           <button class="secondary-action" id="resetCatalog" type="button">
             Restaurar exemplos
@@ -244,7 +244,7 @@
           </article>
 
           <article class="admin-box">
-            <h3>Backup do catalogo</h3>
+            <h3>Backup do catálogo</h3>
             <div class="backup-actions">
               <button class="secondary-action" id="exportCatalog" type="button">
                 Exportar backup
@@ -255,7 +255,7 @@
               </label>
             </div>
             <p class="admin-note" id="backupStatus">
-              Salve uma copia dos cadastros enquanto o banco de dados nao estiver ligado.
+              Salve uma cópia dos cadastros enquanto o banco de dados não estiver ligado.
             </p>
           </article>
 
@@ -271,7 +271,7 @@
               </label>
             </div>
             <p class="admin-note" id="csvStatus">
-              Use colunas: nome, preco, tipo, publico, genero, tamanhos, tema, imagem, descricao.
+              Use colunas: nome, preço, tipo, público, gênero, tamanhos, tema, imagem, descrição.
             </p>
           </article>
 
@@ -283,7 +283,7 @@
                 <select id="blockProduct"></select>
               </label>
               <label>
-                Inicio
+                Início
                 <input id="blockStart" type="datetime-local" required />
               </label>
               <label>
@@ -292,7 +292,7 @@
               </label>
               <label class="wide-field">
                 Motivo
-                <input id="blockReason" type="text" placeholder="Reserva, ajuste, manutencao" />
+                <input id="blockReason" type="text" placeholder="Reserva, ajuste, manutenção" />
               </label>
               <button class="secondary-action form-action" type="submit">
                 Adicionar bloqueio
@@ -307,19 +307,19 @@
             <input id="adminName" type="text" required placeholder="Ex: Fantasia Fada" />
           </label>
           <label>
-            Preco
+            Preço
             <input id="adminPrice" type="number" min="0" step="0.01" required />
           </label>
           <label>
             Tipo
             <select id="adminType">
-              <option value="locacao">Locacao</option>
+              <option value="locacao">Locação</option>
               <option value="venda">Venda</option>
-              <option value="ambos">Venda e locacao</option>
+              <option value="ambos">Venda e locação</option>
             </select>
           </label>
           <label>
-            Publico
+            Público
             <select id="adminAudience">
               <option value="adulto">Adulto</option>
               <option value="infantil">Infantil</option>
@@ -327,7 +327,7 @@
             </select>
           </label>
           <label>
-            Genero
+            Gênero
             <select id="adminGender">
               <option value="unissex">Unissex</option>
               <option value="feminino">Feminino</option>
@@ -363,16 +363,16 @@
               Arquivo do computador
               <input id="adminImageFile" type="file" accept="image/*" />
             </label>
-            <div class="image-preview empty" id="imagePreview">Previa da imagem</div>
+            <div class="image-preview empty" id="imagePreview">Prévia da imagem</div>
           </fieldset>
           <label class="wide-field">
-            Descricao
-            <textarea id="adminDescription" rows="3" placeholder="Detalhes, medidas, acessorios inclusos"></textarea>
+            Descrição
+            <textarea id="adminDescription" rows="3" placeholder="Detalhes, medidas, acessórios inclusos"></textarea>
           </label>
           <div class="form-actions form-action">
-            <button class="primary-action" id="adminSubmit" type="submit">Adicionar ao catalogo</button>
+            <button class="primary-action" id="adminSubmit" type="submit">Adicionar ao catálogo</button>
             <button class="secondary-action hidden-control" id="cancelEdit" type="button">
-              Cancelar edicao
+              Cancelar edição
             </button>
           </div>
         </form>
@@ -384,8 +384,8 @@
 
         <div class="admin-list">
           <div class="admin-list-heading">
-            <h3>Solicitacoes recebidas neste navegador</h3>
-            <button class="admin-delete" id="clearOrders" type="button">Limpar historico</button>
+            <h3>Solicitações recebidas neste navegador</h3>
+            <button class="admin-delete" id="clearOrders" type="button">Limpar histórico</button>
           </div>
           <div id="ordersList"></div>
         </div>
@@ -417,7 +417,7 @@
         <p id="dialogDescription"></p>
         <dl>
           <div>
-            <dt>Preco</dt>
+            <dt>Preço</dt>
             <dd id="dialogPrice"></dd>
           </div>
           <div>

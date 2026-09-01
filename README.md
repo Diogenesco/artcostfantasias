@@ -1,10 +1,10 @@
 # Art & Cost Fantasias
 
-Site inicial para catalogo de locacao e venda de fantasias da Art & Cost.
+Site inicial para catálogo de locação e venda de fantasias da Art & Cost.
 
-## Publicacao
+## Publicação
 
-Este projeto e estatico. Pode ser publicado gratuitamente no Cloudflare Pages,
+Este projeto é estático. Pode ser publicado gratuitamente no Cloudflare Pages,
 Vercel, Netlify ou GitHub Pages.
 
 No Cloudflare Pages, use:
@@ -16,22 +16,22 @@ No Cloudflare Pages, use:
 O telefone do WhatsApp fica em `app.js`, na constante
 `DEFAULT_WHATSAPP_NUMBER`.
 
-No prototipo atual, as imagens podem ser cadastradas no painel por link ou por
-arquivo escolhido no computador. Esses dados ficam salvos no navegador ate a
-integracao com banco de dados e armazenamento real.
+No protótipo atual, as imagens podem ser cadastradas no painel por link ou por
+arquivo escolhido no computador. Esses dados ficam salvos no navegador até a
+integração com banco de dados e armazenamento real.
 
-O painel tambem permite exportar e importar um backup JSON do catalogo enquanto
+O painel também permite exportar e importar um backup JSON do catálogo enquanto
 os dados ainda ficam salvos localmente no navegador.
 
-As solicitacoes enviadas pelo formulario tambem ficam registradas localmente no
+As solicitações enviadas pelo formulário também ficam registradas localmente no
 painel administrativo e entram no arquivo de backup.
 
-O historico local possui status operacional para acompanhar solicitacoes,
-reservas, retiradas, devolucoes e cancelamentos.
+O histórico local possui status operacional para acompanhar solicitações,
+reservas, retiradas, devoluções e cancelamentos.
 
-Para acelerar o cadastro real, o painel oferece um modelo CSV e importacao de
+Para acelerar o cadastro real, o painel oferece um modelo CSV e importação de
 produtos por planilha.
 
 ## Roadmap
 
-O planejamento de evolucao do site esta em `ROADMAP.md`.
+O planejamento de evolução do site está em `ROADMAP.md`.
