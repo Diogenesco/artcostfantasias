@@ -937,6 +937,34 @@ body.admin-visible .admin-panel {
   justify-content: space-between;
 }
 
+.admin-list-actions {
+  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.admin-filter {
+  color: var(--muted);
+  display: grid;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 6px;
+  min-width: min(260px, 100%);
+  text-transform: uppercase;
+}
+
+.admin-filter input,
+.admin-filter select {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  min-height: 42px;
+  padding: 0 12px;
+}
+
 .admin-item {
   align-items: center;
   border-top: 1px solid var(--line);
@@ -1364,12 +1392,15 @@ dd {
   }
 
   .admin-actions,
+  .admin-list-actions,
   .admin-list-heading {
     align-items: stretch;
     flex-direction: column;
   }
 
   .admin-actions button,
+  .admin-list-actions button,
+  .admin-filter,
   .status-select {
     width: 100%;
   }

@@ -386,14 +386,33 @@
         </form>
 
         <div class="admin-list">
-          <h3>Itens e bloqueios cadastrados</h3>
+          <div class="admin-list-heading">
+            <h3>Itens e bloqueios cadastrados</h3>
+            <label class="admin-filter">
+              <span>Buscar item</span>
+              <input id="adminProductSearch" type="search" placeholder="Nome, tipo, tamanho ou tema" />
+            </label>
+          </div>
           <div id="adminList"></div>
         </div>
 
         <div class="admin-list">
           <div class="admin-list-heading">
             <h3>Solicitações recebidas neste navegador</h3>
-            <button class="admin-delete" id="clearOrders" type="button">Limpar histórico</button>
+            <div class="admin-list-actions">
+              <label class="admin-filter">
+                <span>Status</span>
+                <select id="orderStatusFilter">
+                  <option value="todos">Todos</option>
+                  <option value="solicitado">Solicitado</option>
+                  <option value="reservado">Reservado</option>
+                  <option value="retirado">Retirado</option>
+                  <option value="devolvido">Devolvido</option>
+                  <option value="cancelado">Cancelado</option>
+                </select>
+              </label>
+              <button class="admin-delete" id="clearOrders" type="button">Limpar histórico</button>
+            </div>
           </div>
           <div id="ordersList"></div>
         </div>

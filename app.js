@@ -109,6 +109,8 @@ const state = {
   settings: loadSettings(),
   orders: loadOrders(),
   filter: "todos",
+  adminProductSearch: "",
+  orderStatusFilter: "todos",
   selectedProductId: null,
 };
 
@@ -125,6 +127,8 @@ const dialog = document.querySelector("#productDialog");
 const adminList = document.querySelector("#adminList");
 const adminStats = document.querySelector("#adminStats");
 const ordersList = document.querySelector("#ordersList");
+const adminProductSearch = document.querySelector("#adminProductSearch");
+const orderStatusFilter = document.querySelector("#orderStatusFilter");
 const blockProduct = document.querySelector("#blockProduct");
 const adminLock = document.querySelector("#adminLock");
 const adminContent = document.querySelector("#adminContent");
@@ -445,7 +449,26 @@ function renderBookingOptions() {
 }
 
 function renderAdminList() {
-  adminList.innerHTML = state.products
+  const term = normalizeText(state.adminProductSearch);
+  const products = state.products.filter((product) =>
+    !term ||
+    normalizeText([
+      product.name,
+      product.description,
+      product.sizes,
+      product.theme,
+      typeLabel(product),
+      audienceLabel(product),
+      genderLabel(product),
+    ].join(" ")).includes(term)
+  );
+
+  if (!products.length) {
+    adminList.innerHTML = `<p class="empty-admin">Nenhum item encontrado para essa busca.</p>`;
+    return;
+  }
+
+  adminList.innerHTML = products
     .map((product) => {
       const reservations = (product.reservations || [])
         .map(
@@ -476,12 +499,21 @@ function renderAdminList() {
 }
 
 function renderOrdersList() {
+  const orders = state.orders.filter((order) =>
+    state.orderStatusFilter === "todos" || order.status === state.orderStatusFilter
+  );
+
   if (!state.orders.length) {
     ordersList.innerHTML = `<p class="empty-admin">Nenhuma solicitação registrada ainda.</p>`;
     return;
   }
 
-  ordersList.innerHTML = state.orders
+  if (!orders.length) {
+    ordersList.innerHTML = `<p class="empty-admin">Nenhuma solicitação encontrada para este status.</p>`;
+    return;
+  }
+
+  ordersList.innerHTML = orders
     .map(
       (order) => `
         <article class="admin-item">
@@ -839,6 +871,16 @@ document.querySelector("#searchImageLink").addEventListener("click", () => {
 });
 
 searchInput.addEventListener("input", renderCatalog);
+
+adminProductSearch.addEventListener("input", () => {
+  state.adminProductSearch = adminProductSearch.value;
+  renderAdminList();
+});
+
+orderStatusFilter.addEventListener("change", () => {
+  state.orderStatusFilter = orderStatusFilter.value;
+  renderOrdersList();
+});
 
 ["#bookingProduct", "#bookingMode", "#startDate", "#pickupTime", "#endDate", "#returnTime"].forEach((selector) => {
   document.querySelector(selector).addEventListener("input", () => {
