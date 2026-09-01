@@ -128,6 +128,7 @@ const adminImage = document.querySelector("#adminImage");
 const adminImageFile = document.querySelector("#adminImageFile");
 const imagePreview = document.querySelector("#imagePreview");
 let selectedImageData = "";
+let editingProductId = "";
 
 function loadProducts() {
   const saved = localStorage.getItem(CATALOG_KEY);
@@ -256,6 +257,45 @@ function updateImagePreview(value) {
     : "Previa da imagem";
 }
 
+function setImageSource(source) {
+  document.querySelector(".image-tab.active").classList.remove("active");
+  document.querySelector(`[data-image-source="${source}"]`).classList.add("active");
+  document.querySelectorAll(".image-source").forEach((panel) => {
+    panel.classList.toggle("active", panel.dataset.sourcePanel === source);
+  });
+}
+
+function resetAdminForm() {
+  document.querySelector("#adminForm").reset();
+  editingProductId = "";
+  selectedImageData = "";
+  setImageSource("url");
+  updateImagePreview("");
+  document.querySelector("#adminColor").value = "#b3202a";
+  document.querySelector("#adminSubmit").textContent = "Adicionar ao catalogo";
+  document.querySelector("#cancelEdit").classList.add("hidden-control");
+}
+
+function fillAdminForm(product) {
+  editingProductId = product.id;
+  document.querySelector("#adminName").value = product.name;
+  document.querySelector("#adminPrice").value = product.price;
+  document.querySelector("#adminType").value = product.type;
+  document.querySelector("#adminAudience").value = product.audience;
+  document.querySelector("#adminGender").value = product.gender || "unissex";
+  document.querySelector("#adminSizes").value = product.sizes;
+  document.querySelector("#adminTheme").value = product.theme || "";
+  document.querySelector("#adminColor").value = product.color || "#b3202a";
+  document.querySelector("#adminDescription").value = product.description || "";
+  selectedImageData = product.image && product.image.startsWith("data:") ? product.image : "";
+  adminImage.value = product.image && !product.image.startsWith("data:") ? product.image : "";
+  setImageSource(selectedImageData ? "file" : "url");
+  updateImagePreview(product.image || "");
+  document.querySelector("#adminSubmit").textContent = "Salvar alteracoes";
+  document.querySelector("#cancelEdit").classList.remove("hidden-control");
+  document.querySelector("#adminForm").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function renderCatalog() {
   const products = state.products.filter(productMatches);
   catalogGrid.innerHTML = products
@@ -316,7 +356,10 @@ function renderAdminList() {
             <span>${typeLabel(product)} | ${money(product.price)} | ${product.sizes} | ${genderLabel(product)}</span>
             ${reservations || "<span>Sem bloqueios de data.</span>"}
           </div>
-          <button class="admin-delete" type="button" data-delete="${product.id}">Remover</button>
+          <div class="admin-actions">
+            <button class="admin-edit" type="button" data-edit="${product.id}">Editar</button>
+            <button class="admin-delete" type="button" data-delete="${product.id}">Remover</button>
+          </div>
         </article>
       `;
     })
@@ -518,11 +561,7 @@ document.querySelectorAll(".segment").forEach((button) => {
 
 document.querySelectorAll(".image-tab").forEach((button) => {
   button.addEventListener("click", () => {
-    document.querySelector(".image-tab.active").classList.remove("active");
-    button.classList.add("active");
-    document.querySelectorAll(".image-source").forEach((panel) => {
-      panel.classList.toggle("active", panel.dataset.sourcePanel === button.dataset.imageSource);
-    });
+    setImageSource(button.dataset.imageSource);
     const previewValue = button.dataset.imageSource === "url" ? adminImage.value.trim() : selectedImageData;
     updateImagePreview(previewValue);
   });
@@ -615,8 +654,9 @@ document.querySelector("#adminForm").addEventListener("submit", (event) => {
   event.preventDefault();
   const name = document.querySelector("#adminName").value.trim();
   const imageSource = document.querySelector(".image-tab.active").dataset.imageSource;
+  const existingProduct = state.products.find((product) => product.id === editingProductId);
   const product = {
-    id: `${Date.now()}-${normalizeText(name).replace(/\W+/g, "-")}`,
+    id: existingProduct ? existingProduct.id : `${Date.now()}-${normalizeText(name).replace(/\W+/g, "-")}`,
     name,
     price: Number(document.querySelector("#adminPrice").value),
     type: document.querySelector("#adminType").value,
@@ -627,25 +667,24 @@ document.querySelector("#adminForm").addEventListener("submit", (event) => {
     color: document.querySelector("#adminColor").value,
     icon: name.charAt(0).toUpperCase(),
     image: imageSource === "file" ? selectedImageData : adminImage.value.trim(),
-    reservations: [],
+    reservations: existingProduct ? existingProduct.reservations || [] : [],
     description:
       document.querySelector("#adminDescription").value ||
       "Item cadastrado no painel da Art & Cost.",
   };
 
-  state.products.unshift(product);
+  if (existingProduct) {
+    state.products = state.products.map((item) => (item.id === product.id ? product : item));
+  } else {
+    state.products.unshift(product);
+  }
+
   saveProducts();
   refreshAll();
-  event.target.reset();
-  selectedImageData = "";
-  updateImagePreview("");
-  document.querySelector(".image-tab.active").classList.remove("active");
-  document.querySelector('[data-image-source="url"]').classList.add("active");
-  document.querySelectorAll(".image-source").forEach((panel) => {
-    panel.classList.toggle("active", panel.dataset.sourcePanel === "url");
-  });
-  document.querySelector("#adminColor").value = "#b3202a";
+  resetAdminForm();
 });
+
+document.querySelector("#cancelEdit").addEventListener("click", resetAdminForm);
 
 document.querySelector("#blockForm").addEventListener("submit", (event) => {
   event.preventDefault();
@@ -669,6 +708,13 @@ document.querySelector("#blockForm").addEventListener("submit", (event) => {
 });
 
 adminList.addEventListener("click", (event) => {
+  const editButton = event.target.closest("[data-edit]");
+  if (editButton) {
+    const product = state.products.find((item) => item.id === editButton.dataset.edit);
+    if (product) fillAdminForm(product);
+    return;
+  }
+
   const unblockButton = event.target.closest("[data-unblock]");
   if (unblockButton) {
     const product = state.products.find((item) => item.id === unblockButton.dataset.unblockProduct);

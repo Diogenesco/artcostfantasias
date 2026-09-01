@@ -325,7 +325,12 @@
             Descricao
             <textarea id="adminDescription" rows="3" placeholder="Detalhes, medidas, acessorios inclusos"></textarea>
           </label>
-          <button class="primary-action form-action" type="submit">Adicionar ao catalogo</button>
+          <div class="form-actions form-action">
+            <button class="primary-action" id="adminSubmit" type="submit">Adicionar ao catalogo</button>
+            <button class="secondary-action hidden-control" id="cancelEdit" type="button">
+              Cancelar edicao
+            </button>
+          </div>
         </form>
 
         <div class="admin-list">

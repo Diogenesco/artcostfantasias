@@ -569,6 +569,20 @@ h2 {
   grid-column: 1 / -1;
 }
 
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.form-actions .secondary-action {
+  color: var(--ink);
+}
+
+.hidden-control {
+  display: none;
+}
+
 .rental-field.hidden {
   display: none;
 }
@@ -859,6 +873,7 @@ body.admin-visible .admin-panel {
   min-width: 0;
 }
 
+.admin-edit,
 .admin-delete,
 .admin-unblock {
   background: #fff;
@@ -869,6 +884,15 @@ body.admin-visible .admin-panel {
   font-weight: 900;
   min-height: 40px;
   padding: 0 12px;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-edit {
+  color: var(--ink);
 }
 
 .admin-unblock {

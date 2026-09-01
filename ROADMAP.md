@@ -21,6 +21,7 @@
 
 - Criar painel com cadastro de fantasia, preco, tipo, publico, tema, tamanhos, fotos e descricao.
 - Permitir cadastro de imagem por link ou arquivo local no prototipo.
+- Permitir editar itens cadastrados sem recriar o produto.
 - Permitir bloqueio de datas por item.
 - Listar itens e bloqueios cadastrados.
 - Trocar a senha simples de prototipo por login real.
