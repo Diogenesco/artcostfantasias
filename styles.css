@@ -85,7 +85,7 @@ textarea {
   display: inline-flex;
   justify-content: center;
   min-width: 0;
-  padding: 8px clamp(16px, 5vw, 56px);
+  padding: 0;
   width: 100%;
 }
 
@@ -94,9 +94,9 @@ textarea {
   border: 0;
   border-radius: 0;
   display: block;
-  height: clamp(92px, 18vw, 180px);
-  max-width: min(100%, 980px);
-  object-fit: contain;
+  height: clamp(112px, 18vw, 220px);
+  max-width: none;
+  object-fit: cover;
   padding: 0;
   width: 100%;
 }
@@ -1121,7 +1121,7 @@ dd {
 
   .drawer {
     flex-direction: column;
-    top: 164px;
+    top: 144px;
   }
 
   .hero,
@@ -1134,6 +1134,17 @@ dd {
 
   .hero {
     min-height: auto;
+    padding-top: 42px;
+    padding-bottom: 42px;
+  }
+
+  h1 {
+    font-size: 40px;
+    line-height: 1.02;
+  }
+
+  h2 {
+    font-size: 30px;
   }
 
   .catalog-grid {
@@ -1166,12 +1177,17 @@ dd {
 
 @media (max-width: 440px) {
   .topbar {
-    padding-left: 12px;
-    padding-right: 12px;
+    padding: 0;
+  }
+
+  .nav-row {
+    padding-left: 14px;
+    padding-right: 14px;
   }
 
   .brand img {
-    height: 90px;
+    height: 82px;
+    object-fit: cover;
   }
 
   .site-footer {
@@ -1185,10 +1201,36 @@ dd {
     padding-right: 14px;
   }
 
+  .product-card h3 {
+    font-size: 16px;
+  }
+
+  .price {
+    font-size: 19px;
+  }
+
+  .meta {
+    font-size: 12px;
+  }
+
+  .booking-panel,
+  .admin-panel,
+  .contact-band,
+  .atelier-band {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
   .product-add {
     bottom: 12px;
     height: 46px;
     right: 12px;
     width: 46px;
+  }
+
+  .whatsapp-float {
+    bottom: 12px;
+    min-height: 48px;
+    right: 12px;
   }
 }
