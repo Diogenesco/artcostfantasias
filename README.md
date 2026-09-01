@@ -38,3 +38,7 @@ produtos por planilha.
 ## Roadmap
 
 O planejamento de evolução do site está em `ROADMAP.md`.
+
+## Segurança
+
+As orientações para proteger o painel administrativo estão em `SECURITY.md`.

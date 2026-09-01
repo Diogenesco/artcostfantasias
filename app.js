@@ -3,7 +3,13 @@ const CATALOG_KEY = "artCostCatalog";
 const SETTINGS_KEY = "artCostSettings";
 const ORDERS_KEY = "artCostOrders";
 const CASHFLOW_KEY = "artCostCashflow";
-const ADMIN_PASSWORD = "artcost";
+const ADMIN_HASH = "ebec06905f9b68b38f09dcf72afbd4992696951bd6411d5b3dfb16001c5e9754";
+const ADMIN_ATTEMPTS_KEY = "artCostAdminAttempts";
+const ADMIN_LOCK_KEY = "artCostAdminLock";
+const ADMIN_SESSION_KEY = "artCostAdminSession";
+const ADMIN_MAX_ATTEMPTS = 5;
+const ADMIN_LOCK_MINUTES = 15;
+const ADMIN_SESSION_HOURS = 8;
 
 const starterProducts = [
   {
@@ -307,6 +313,53 @@ function normalizeText(value) {
 
 function sanitizePhone(value) {
   return String(value || "").replace(/\D/g, "");
+}
+
+async function sha256(value) {
+  const bytes = new TextEncoder().encode(value);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function adminSessionValid() {
+  const expiresAt = Number(sessionStorage.getItem(ADMIN_SESSION_KEY) || 0);
+  return expiresAt > Date.now();
+}
+
+function unlockAdmin() {
+  adminLock.style.display = "none";
+  adminContent.classList.remove("locked");
+}
+
+function lockAdminUntil() {
+  return Number(localStorage.getItem(ADMIN_LOCK_KEY) || 0);
+}
+
+function lockRemainingMinutes() {
+  const remaining = Math.ceil((lockAdminUntil() - Date.now()) / 60000);
+  return Math.max(remaining, 1);
+}
+
+function adminIsTemporarilyLocked() {
+  return lockAdminUntil() > Date.now();
+}
+
+function recordFailedAdminAttempt() {
+  const attempts = Number(localStorage.getItem(ADMIN_ATTEMPTS_KEY) || 0) + 1;
+  if (attempts >= ADMIN_MAX_ATTEMPTS) {
+    localStorage.setItem(ADMIN_LOCK_KEY, String(Date.now() + ADMIN_LOCK_MINUTES * 60000));
+    localStorage.removeItem(ADMIN_ATTEMPTS_KEY);
+    return true;
+  }
+  localStorage.setItem(ADMIN_ATTEMPTS_KEY, String(attempts));
+  return false;
+}
+
+function resetAdminAttempts() {
+  localStorage.removeItem(ADMIN_ATTEMPTS_KEY);
+  localStorage.removeItem(ADMIN_LOCK_KEY);
 }
 
 function typeLabel(product) {
@@ -949,17 +1002,28 @@ document.querySelector("#menuButton").addEventListener("click", () => {
 
 window.addEventListener("hashchange", syncAdminVisibility);
 
-document.querySelector("#lockForm").addEventListener("submit", (event) => {
+document.querySelector("#lockForm").addEventListener("submit", async (event) => {
   event.preventDefault();
-  const password = document.querySelector("#adminPassword").value.trim().toLowerCase();
+  const hint = document.querySelector("#lockHint");
+  const passwordInput = document.querySelector("#adminPassword");
 
-  if (password !== ADMIN_PASSWORD) {
-    document.querySelector("#lockHint").textContent = "Senha incorreta. Tente novamente.";
+  if (adminIsTemporarilyLocked()) {
+    hint.textContent = `Acesso bloqueado por tentativas incorretas. Tente novamente em ${lockRemainingMinutes()} min.`;
     return;
   }
 
-  adminLock.style.display = "none";
-  adminContent.classList.remove("locked");
+  if ((await sha256(passwordInput.value)) !== ADMIN_HASH) {
+    const locked = recordFailedAdminAttempt();
+    hint.textContent = locked
+      ? `Acesso bloqueado por ${ADMIN_LOCK_MINUTES} minutos.`
+      : "Senha incorreta. Confira e tente novamente.";
+    passwordInput.value = "";
+    return;
+  }
+
+  resetAdminAttempts();
+  sessionStorage.setItem(ADMIN_SESSION_KEY, String(Date.now() + ADMIN_SESSION_HOURS * 60 * 60000));
+  unlockAdmin();
 });
 
 document.querySelectorAll(".segment").forEach((button) => {
@@ -1368,4 +1432,5 @@ document.querySelector("#adminWhatsapp").value =
 
 syncAdminVisibility();
 setDateLimits();
+if (adminSessionValid()) unlockAdmin();
 refreshAll();
