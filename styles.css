@@ -80,29 +80,22 @@ textarea {
 }
 
 .brand {
-  background: var(--black);
-  border: 1px solid rgba(216, 167, 74, 0.5);
-  color: var(--gold-strong);
-  display: flex;
-  flex-direction: column;
+  align-items: center;
+  background: transparent;
+  border: 0;
+  display: inline-flex;
   justify-self: center;
-  min-width: 148px;
-  padding: 12px 18px;
-  text-align: center;
+  min-width: 0;
+  padding: 0;
 }
 
-.brand-mark {
-  font-family: Parisienne, cursive;
-  font-size: 30px;
-  line-height: 1;
-}
-
-.brand-subtitle {
-  color: #f7ecd5;
-  font-size: 10px;
-  letter-spacing: 2px;
-  margin-top: 5px;
-  text-transform: uppercase;
+.brand img {
+  aspect-ratio: 1 / 1;
+  border: 1px solid rgba(216, 167, 74, 0.42);
+  display: block;
+  height: 64px;
+  object-fit: cover;
+  width: 64px;
 }
 
 .cart-button {
@@ -506,6 +499,53 @@ h2 {
   color: var(--ink);
 }
 
+.admin-lock {
+  align-items: center;
+  background: var(--black);
+  border-radius: 8px;
+  color: var(--paper);
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 380px);
+  margin-bottom: 28px;
+  padding: clamp(24px, 5vw, 42px);
+}
+
+.admin-lock p {
+  color: #eadfcf;
+  line-height: 1.6;
+}
+
+.lock-form {
+  display: grid;
+  gap: 12px;
+}
+
+.lock-form label {
+  color: #eadfcf;
+  display: grid;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 8px;
+  text-transform: uppercase;
+}
+
+.lock-form input {
+  border: 1px solid rgba(216, 167, 74, 0.3);
+  border-radius: 6px;
+  min-height: 48px;
+  padding: 0 12px;
+}
+
+.lock-hint {
+  font-size: 13px;
+  margin: 0;
+}
+
+.admin-content.locked {
+  display: none;
+}
+
 .availability-message {
   background: rgba(255, 253, 248, 0.1);
   border: 1px solid rgba(216, 167, 74, 0.25);
@@ -731,6 +771,7 @@ dd {
 
   .hero,
   .booking-panel,
+  .admin-lock,
   .product-dialog[open] {
     grid-template-columns: 1fr;
   }
@@ -771,13 +812,9 @@ dd {
     padding-right: 12px;
   }
 
-  .brand {
-    min-width: 130px;
-    padding: 10px 12px;
-  }
-
-  .brand-mark {
-    font-size: 26px;
+  .brand img {
+    height: 58px;
+    width: 58px;
   }
 
   .catalog-grid {

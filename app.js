@@ -1,6 +1,7 @@
 const DEFAULT_WHATSAPP_NUMBER = "5500000000000";
 const CATALOG_KEY = "artCostCatalog";
 const SETTINGS_KEY = "artCostSettings";
+const ADMIN_PASSWORD = "artcost";
 
 const starterProducts = [
   {
@@ -113,6 +114,8 @@ const drawer = document.querySelector("#drawer");
 const dialog = document.querySelector("#productDialog");
 const adminList = document.querySelector("#adminList");
 const blockProduct = document.querySelector("#blockProduct");
+const adminLock = document.querySelector("#adminLock");
+const adminContent = document.querySelector("#adminContent");
 
 function loadProducts() {
   const saved = localStorage.getItem(CATALOG_KEY);
@@ -364,6 +367,19 @@ function updateAvailabilityMessage() {
 
 document.querySelector("#menuButton").addEventListener("click", () => {
   drawer.classList.toggle("open");
+});
+
+document.querySelector("#lockForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const password = document.querySelector("#adminPassword").value.trim().toLowerCase();
+
+  if (password !== ADMIN_PASSWORD) {
+    document.querySelector("#lockHint").textContent = "Senha incorreta. Tente novamente.";
+    return;
+  }
+
+  adminLock.style.display = "none";
+  adminContent.classList.remove("locked");
 });
 
 document.querySelectorAll(".segment").forEach((button) => {

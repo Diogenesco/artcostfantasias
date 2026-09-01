@@ -25,8 +25,7 @@
       </button>
 
       <a class="brand" href="#catalogo" aria-label="Art & Cost Fantasias">
-        <span class="brand-mark">Art & Cost</span>
-        <span class="brand-subtitle">Fantasias e Atelie</span>
+        <img src="assets/logo-art-cost.jpeg" alt="Art & Cost" />
       </a>
 
       <a class="cart-button" id="cartButton" href="#pedido" aria-label="Ver pedido">
@@ -38,8 +37,8 @@
     <nav class="drawer" id="drawer" aria-label="Menu principal">
       <a href="#catalogo">Catalogo</a>
       <a href="#como-funciona">Como funciona</a>
-      <a href="#admin">Painel</a>
       <a href="#contato">Contato</a>
+      <a href="#admin">Painel</a>
     </nav>
 
     <main>
@@ -53,7 +52,7 @@
           </p>
           <div class="hero-actions">
             <a class="primary-action" href="#catalogo">Ver fantasias</a>
-            <a class="secondary-action" href="#admin">Cadastrar item</a>
+            <a class="secondary-action" href="#pedido">Reservar data</a>
           </div>
         </div>
         <div class="hero-showcase" aria-label="Destaques do catalogo">
@@ -146,6 +145,23 @@
       </section>
 
       <section class="admin-panel" id="admin">
+        <div class="admin-lock" id="adminLock">
+          <div>
+            <p class="eyebrow">Area administrativa</p>
+            <h2>Acesso ao painel</h2>
+            <p>Use a senha de teste para liberar o cadastro neste prototipo.</p>
+          </div>
+          <form class="lock-form" id="lockForm">
+            <label>
+              Senha
+              <input id="adminPassword" type="password" placeholder="Digite a senha" />
+            </label>
+            <button class="primary-action" type="submit">Entrar</button>
+            <p class="lock-hint" id="lockHint">Senha de teste: artcost</p>
+          </form>
+        </div>
+
+        <div class="admin-content locked" id="adminContent">
         <div class="admin-heading">
           <div>
             <p class="eyebrow">Painel administrativo inicial</p>
@@ -245,6 +261,7 @@
         <div class="admin-list">
           <h3>Itens e bloqueios cadastrados</h3>
           <div id="adminList"></div>
+        </div>
         </div>
       </section>
 
