@@ -46,8 +46,8 @@ textarea {
   display: grid;
   gap: 16px;
   grid-template-columns: 48px 1fr 48px;
-  min-height: 92px;
-  padding: 14px clamp(18px, 5vw, 56px);
+  min-height: 112px;
+  padding: 12px clamp(18px, 5vw, 56px);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -90,12 +90,14 @@ textarea {
 }
 
 .brand img {
-  aspect-ratio: 1 / 1;
+  background: var(--black);
   border: 1px solid rgba(216, 167, 74, 0.42);
+  border-radius: 4px;
   display: block;
-  height: 64px;
-  object-fit: cover;
-  width: 64px;
+  height: 86px;
+  object-fit: contain;
+  padding: 3px;
+  width: 178px;
 }
 
 .cart-button {
@@ -1101,7 +1103,7 @@ dd {
 
   .drawer {
     flex-direction: column;
-    top: 84px;
+    top: 96px;
   }
 
   .hero,
@@ -1151,8 +1153,8 @@ dd {
   }
 
   .brand img {
-    height: 58px;
-    width: 58px;
+    height: 72px;
+    width: 150px;
   }
 
   .site-footer {
