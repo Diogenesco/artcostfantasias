@@ -365,6 +365,12 @@ function customerWhatsappPhone(value) {
   return phone;
 }
 
+function customerPhoneIsValid(value) {
+  const phone = sanitizePhone(value);
+  if (phone.startsWith("55")) return phone.length === 12 || phone.length === 13;
+  return phone.length === 10 || phone.length === 11;
+}
+
 function customerWhatsappUrl(order) {
   return `https://wa.me/${customerWhatsappPhone(order.customerPhone)}?text=${encodeURIComponent(customerReplyMessage(order))}`;
 }
@@ -1479,7 +1485,10 @@ orderDateEnd?.addEventListener("input", () => {
 });
 
 ["#customerName", "#customerPhone", "#eventDate", "#desiredSize", "#bookingNotes"].forEach((selector) => {
-  document.querySelector(selector)?.addEventListener("input", updateMessagePreview);
+  document.querySelector(selector)?.addEventListener("input", (event) => {
+    if (event.currentTarget.id === "customerPhone") event.currentTarget.setCustomValidity("");
+    updateMessagePreview();
+  });
 });
 
 bookingProduct?.addEventListener("change", () => {
@@ -1517,6 +1526,14 @@ bookingForm?.addEventListener("submit", (event) => {
   const product = state.products.find((item) => item.id === bookingProduct.value);
   const start = makeDateTime("#startDate", "#pickupTime");
   const end = makeDateTime("#endDate", "#returnTime");
+  const customerPhoneInput = document.querySelector("#customerPhone");
+
+  if (!customerPhoneIsValid(customerPhoneInput.value)) {
+    customerPhoneInput.setCustomValidity("Informe um telefone com DDD para finalizar o pedido.");
+    customerPhoneInput.reportValidity();
+    return;
+  }
+  customerPhoneInput.setCustomValidity("");
 
   if (
     bookingMode.value === "locacao" &&
