@@ -269,6 +269,10 @@
           <div class="admin-list">
             <div class="admin-list-heading">
               <h3>Clientes e histórico</h3>
+              <label class="admin-filter">
+                <span>Buscar cliente</span>
+                <input id="customerSearch" type="search" placeholder="Nome ou telefone" />
+              </label>
             </div>
             <div id="customersList"></div>
           </div>
@@ -279,6 +283,16 @@
                 <h3>Agenda de locações</h3>
                 <p class="admin-note">Próximas retiradas, devoluções e bloqueios manuais em ordem de data.</p>
               </div>
+              <label class="admin-filter compact-filter">
+                <span>Mostrar</span>
+                <select id="agendaFilter">
+                  <option value="todos">Todos</option>
+                  <option value="retirada">Retiradas</option>
+                  <option value="devolucao">Devoluções</option>
+                  <option value="bloqueio">Bloqueios</option>
+                  <option value="atrasado">Atrasos</option>
+                </select>
+              </label>
             </div>
             <div id="rentalAgenda"></div>
           </div>

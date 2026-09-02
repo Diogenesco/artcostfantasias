@@ -31,6 +31,7 @@
 - Criar agenda operacional com próximas retiradas, devoluções e bloqueios.
 - Criar dashboard inicial com alertas do dia e valor previsto.
 - Salvar histórico local de clientes a partir das solicitações.
+- Permitir busca no histórico de clientes.
 - Gerar recibo e contrato simples de locação para PDF.
 - Adicionar controle simples de estoque/unidades.
 - Listar itens e bloqueios cadastrados.
@@ -51,6 +52,7 @@
 - Bloquear automaticamente a data da fantasia quando a solicitação for marcada como reservada.
 - Responder a cliente pelo WhatsApp a partir da solicitação, com mensagem pronta por status.
 - Gerar relatório simples de reservas por período.
+- Destacar devoluções atrasadas na agenda operacional.
 - Exportar solicitações filtradas por período em CSV.
 - Calcular locações por diária e refletir o total no WhatsApp, solicitações e fluxo financeiro.
 - Gerar relatório PDF do fluxo financeiro com logo da empresa.

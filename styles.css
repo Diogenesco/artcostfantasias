@@ -953,6 +953,15 @@ body.admin-visible .brand img {
   font-size: 13px;
 }
 
+.danger-dashboard-card {
+  border-color: rgba(158, 31, 40, 0.35) !important;
+  background: rgba(158, 31, 40, 0.06) !important;
+}
+
+.danger-dashboard-card strong {
+  color: var(--red);
+}
+
 .wide-dashboard-card {
   grid-column: span 2;
 }
@@ -1257,6 +1266,16 @@ body.admin-visible .brand img {
 
 .agenda-item.bloqueio .agenda-date {
   border-color: rgba(158, 31, 40, 0.35);
+}
+
+.agenda-item.atrasado .agenda-date {
+  background: rgba(158, 31, 40, 0.08);
+  border-color: rgba(158, 31, 40, 0.45);
+}
+
+.agenda-item.atrasado .agenda-date strong,
+.agenda-item.atrasado > div:last-child strong {
+  color: var(--red);
 }
 
 .status-select {

@@ -52,6 +52,9 @@ O painel administrativo inclui dashboard diário, histórico de clientes,
 controle simples de estoque/unidades e geração de recibo ou contrato de locação
 para salvar em PDF.
 
+O histórico de clientes possui busca por nome, telefone ou atendimento, e a
+agenda pode ser filtrada por retiradas, devoluções, bloqueios e atrasos.
+
 Para acelerar o cadastro real, o painel oferece um modelo CSV e importação de
 produtos por planilha.
 

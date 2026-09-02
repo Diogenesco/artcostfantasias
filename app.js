@@ -134,6 +134,8 @@ const state = {
   orderDateField: "createdAt",
   orderDateStart: "",
   orderDateEnd: "",
+  customerSearch: "",
+  agendaFilter: "todos",
   selectedProductId: null,
 };
 
@@ -162,6 +164,8 @@ const orderStatusFilter = document.querySelector("#orderStatusFilter");
 const orderDateField = document.querySelector("#orderDateField");
 const orderDateStart = document.querySelector("#orderDateStart");
 const orderDateEnd = document.querySelector("#orderDateEnd");
+const customerSearch = document.querySelector("#customerSearch");
+const agendaFilter = document.querySelector("#agendaFilter");
 const cashflowList = document.querySelector("#cashflowList");
 const financeSummary = document.querySelector("#financeSummary");
 const rentalAgenda = document.querySelector("#rentalAgenda");
@@ -988,11 +992,17 @@ function getRentalAgendaItems() {
   const floor = new Date();
   floor.setDate(floor.getDate() - 1);
   floor.setHours(0, 0, 0, 0);
+  const now = Date.now();
 
   const orderItems = state.orders
     .filter((order) => order.mode === "locacao" && order.status !== "cancelado")
     .flatMap((order) => {
       const details = `${order.customerName} | ${statusLabel(order.status)} | ${orderValueDetails(order)}`;
+      const returnDate = new Date(order.rentalEnd);
+      const isLateReturn =
+        !Number.isNaN(returnDate.getTime()) &&
+        returnDate.getTime() < now &&
+        !["devolvido", "finalizado", "cancelado"].includes(order.status);
       return [
         {
           kind: "retirada",
@@ -1001,10 +1011,10 @@ function getRentalAgendaItems() {
           details,
         },
         {
-          kind: "devolucao",
+          kind: isLateReturn ? "atrasado" : "devolucao",
           date: order.rentalEnd,
-          title: `Devolução - ${order.productName}`,
-          details,
+          title: `${isLateReturn ? "Atraso na devolução" : "Devolução"} - ${order.productName}`,
+          details: isLateReturn ? `${details} | Entrar em contato com a cliente` : details,
         },
       ];
     });
@@ -1023,6 +1033,7 @@ function getRentalAgendaItems() {
   return [...orderItems, ...manualBlocks]
     .map((item) => ({ ...item, parts: agendaDateParts(item.date) }))
     .filter((item) => item.parts && item.parts.sortValue >= floor.getTime())
+    .filter((item) => state.agendaFilter === "todos" || item.kind === state.agendaFilter)
     .sort((first, second) => first.parts.sortValue - second.parts.sortValue)
     .slice(0, 30);
 }
@@ -1107,6 +1118,15 @@ function renderAdminDashboard() {
   const returnsToday = state.orders.filter(
     (order) => order.mode === "locacao" && sameDate(order.rentalEnd, today) && !["cancelado", "finalizado"].includes(order.status)
   );
+  const lateReturns = state.orders.filter((order) => {
+    const returnDate = new Date(order.rentalEnd);
+    return (
+      order.mode === "locacao" &&
+      !Number.isNaN(returnDate.getTime()) &&
+      returnDate.getTime() < Date.now() &&
+      !["devolvido", "finalizado", "cancelado"].includes(order.status)
+    );
+  });
   const pending = state.orders.filter((order) => order.status === "solicitado").length;
   const monthTotal = state.orders
     .filter((order) => !["cancelado"].includes(order.status) && monthValue(order.createdAt) === currentMonth)
@@ -1143,6 +1163,10 @@ function renderAdminDashboard() {
       <span>Pendentes</span>
       <strong>${pending}</strong>
     </article>
+    <article class="${lateReturns.length ? "danger-dashboard-card" : ""}">
+      <span>Atrasos</span>
+      <strong>${lateReturns.length}</strong>
+    </article>
     <article>
       <span>Previsto no mês</span>
       <strong>${money(monthTotal)}</strong>
@@ -1161,13 +1185,31 @@ function renderAdminDashboard() {
 function renderCustomersList() {
   if (!customersList) return;
   syncCustomersFromOrders();
+  const term = normalizeText(state.customerSearch);
+  const customers = state.customers.filter((customer) => {
+    if (!term) return true;
+    const customerOrders = state.orders.filter(
+      (order) => order.customerId === customer.id || customerWhatsappPhone(order.customerPhone) === customer.phone
+    );
+    const searchable = [
+      customer.name,
+      customer.phone,
+      ...customerOrders.map((order) => `${order.productName} ${order.modeLabel} ${statusLabel(order.status)}`),
+    ];
+    return normalizeText(searchable.join(" ")).includes(term);
+  });
 
   if (!state.customers.length) {
     customersList.innerHTML = `<p class="empty-admin">Nenhum cliente registrado ainda.</p>`;
     return;
   }
 
-  customersList.innerHTML = state.customers
+  if (!customers.length) {
+    customersList.innerHTML = `<p class="empty-admin">Nenhum cliente encontrado para essa busca.</p>`;
+    return;
+  }
+
+  customersList.innerHTML = customers
     .map((customer) => {
       const customerOrders = state.orders.filter(
         (order) => order.customerId === customer.id || customerWhatsappPhone(order.customerPhone) === customer.phone
@@ -1920,6 +1962,16 @@ orderDateStart?.addEventListener("input", () => {
 orderDateEnd?.addEventListener("input", () => {
   state.orderDateEnd = orderDateEnd.value;
   renderOrdersList();
+});
+
+customerSearch?.addEventListener("input", () => {
+  state.customerSearch = customerSearch.value;
+  renderCustomersList();
+});
+
+agendaFilter?.addEventListener("change", () => {
+  state.agendaFilter = agendaFilter.value;
+  renderRentalAgenda();
 });
 
 ["#bookingProduct", "#bookingMode", "#startDate", "#pickupTime", "#endDate", "#returnTime"].forEach((selector) => {
