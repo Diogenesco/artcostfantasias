@@ -1298,6 +1298,31 @@ body.admin-visible .brand img {
   line-height: 1.45;
 }
 
+.order-timeline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.order-timeline span {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  display: inline-flex;
+  font-size: 11px;
+  gap: 6px;
+  padding: 6px 10px;
+  width: auto;
+}
+
+.order-timeline strong {
+  color: var(--ink);
+  display: inline;
+  font-size: 11px;
+}
+
 .reservation-row {
   align-items: center;
   display: flex;

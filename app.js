@@ -201,7 +201,11 @@ function loadSettings() {
 function loadOrders() {
   const saved = localStorage.getItem(ORDERS_KEY);
   const orders = saved ? JSON.parse(saved) : [];
-  return orders.map((order) => ({
+  return orders.map((order) => normalizeOrder(order));
+}
+
+function normalizeOrder(order) {
+  const normalized = {
     status: "solicitado",
     customerPhone: "",
     eventDate: "",
@@ -209,8 +213,19 @@ function loadOrders() {
     rentalStart: "",
     rentalEnd: "",
     customerId: "",
+    statusHistory: [],
     ...order,
-  }));
+  };
+  if (!Array.isArray(normalized.statusHistory) || !normalized.statusHistory.length) {
+    normalized.statusHistory = [
+      {
+        status: normalized.status || "solicitado",
+        changedAt: normalized.createdAt || new Date().toISOString(),
+        note: "Solicitação registrada",
+      },
+    ];
+  }
+  return normalized;
 }
 
 function loadCashflow() {
@@ -959,6 +974,7 @@ function renderOrdersList() {
             <span>${order.modeLabel} | ${orderValueDetails(order)} | ${formatDateTime(order.createdAt)} | ${statusLabel(order.status)}</span>
             <span>${order.customerPhone || "Sem telefone"} | Evento: ${formatDateOnly(order.eventDate) || "Não informado"} | Tamanho: ${order.desiredSize || "Não informado"}</span>
             <span>${order.period || "Pedido de compra"} | ${order.notes}</span>
+            ${orderTimelineMarkup(order)}
           </div>
           <div class="admin-actions">
             <button class="admin-edit" type="button" data-order-whatsapp="${order.id}" ${hasCustomerPhone ? "" : "disabled"}>Responder WhatsApp</button>
@@ -1685,6 +1701,7 @@ function exportOrdersCsv() {
     "tamanho",
     "valor_total",
     "observacoes",
+    "historico_status",
   ];
   const rows = getFilteredOrders().map((order) => [
     formatDateTime(order.createdAt),
@@ -1700,6 +1717,9 @@ function exportOrdersCsv() {
     order.desiredSize || "",
     String(orderTotal(order).toFixed(2)).replace(".", ","),
     order.notes || "",
+    (order.statusHistory || [])
+      .map((entry) => `${statusLabel(entry.status)} em ${formatDateTime(entry.changedAt)}`)
+      .join(" | "),
   ]);
   const csv = `${headers.join(";")}\n${rows.map((row) => row.map(csvEscape).join(";")).join("\n")}\n`;
   downloadTextFile(
@@ -1854,10 +1874,11 @@ function createOrderRecord() {
   const isRental = bookingMode.value === "locacao";
   const days = isRental ? rentalDays(start, end) : 1;
   const totalPrice = isRental ? product.price * days : product.price;
+  const createdAt = new Date().toISOString();
 
   return {
     id: `order-${Date.now()}`,
-    createdAt: new Date().toISOString(),
+    createdAt,
     status: "solicitado",
     customerName,
     customerPhone,
@@ -1875,6 +1896,13 @@ function createOrderRecord() {
     rentalEnd: isRental ? end : "",
     period: isRental ? `${formatDateTime(start)} até ${formatDateTime(end)}` : "",
     notes,
+    statusHistory: [
+      {
+        status: "solicitado",
+        changedAt: createdAt,
+        note: "Solicitação registrada",
+      },
+    ],
   };
 }
 
@@ -1899,6 +1927,53 @@ function orderStatusOptions(currentStatus) {
         `<option value="${status}" ${status === normalizedStatus ? "selected" : ""}>${statusLabel(status)}</option>`
     )
     .join("");
+}
+
+function orderStatusNote(status) {
+  const notes = {
+    solicitado: "Solicitação registrada",
+    confirmado: "Reserva confirmada",
+    reservado: "Reserva confirmada",
+    retirado: "Item retirado pela cliente",
+    devolvido: "Item devolvido",
+    finalizado: "Atendimento finalizado",
+    cancelado: "Solicitação cancelada",
+  };
+  return notes[status] || "Status atualizado";
+}
+
+function addOrderStatusHistory(order, status) {
+  const normalizedStatus = status === "reservado" ? "confirmado" : status;
+  const history = Array.isArray(order.statusHistory) ? order.statusHistory : [];
+  const last = history[history.length - 1];
+  if (last && last.status === normalizedStatus) return history;
+  return [
+    ...history,
+    {
+      status: normalizedStatus,
+      changedAt: new Date().toISOString(),
+      note: orderStatusNote(normalizedStatus),
+    },
+  ];
+}
+
+function orderTimelineMarkup(order) {
+  const history = Array.isArray(order.statusHistory) ? order.statusHistory : [];
+  if (!history.length) return "";
+  return `
+    <div class="order-timeline" aria-label="Histórico de status">
+      ${history
+        .map(
+          (entry) => `
+            <span>
+              <strong>${escapeHtml(statusLabel(entry.status))}</strong>
+              ${escapeHtml(formatDateTime(entry.changedAt))}
+            </span>
+          `
+        )
+        .join("")}
+    </div>
+  `;
 }
 
 function formatDateOnly(value) {
@@ -2339,6 +2414,7 @@ ordersList?.addEventListener("change", (event) => {
   const order = state.orders.find((item) => item.id === statusSelect.dataset.orderStatus);
   if (!order) return;
   const updatedOrder = { ...order, status: statusSelect.value };
+  updatedOrder.statusHistory = addOrderStatusHistory(order, statusSelect.value);
   const synced = syncOrderReservation(updatedOrder);
   if (!synced) {
     statusSelect.value = order.status;

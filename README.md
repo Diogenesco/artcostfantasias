@@ -29,6 +29,9 @@ painel administrativo e entram no arquivo de backup.
 O histórico local possui status operacional para acompanhar solicitações,
 reservas, retiradas, devoluções e cancelamentos.
 
+Cada solicitação mantém uma linha do tempo de status, registrando quando o
+pedido foi solicitado, confirmado, retirado, devolvido, finalizado ou cancelado.
+
 Ao marcar uma solicitação de locação como reservada, o período é bloqueado
 automaticamente no item para evitar conflito com outra reserva.
 

@@ -27,6 +27,7 @@
 - Adicionar exportação e importação de backup do catálogo no protótipo.
 - Registrar histórico local de solicitações enviadas pelo formulário.
 - Permitir status de solicitação: solicitado, reservado, retirado, devolvido e cancelado.
+- Registrar linha do tempo de mudanças de status por solicitação.
 - Criar fluxo local de entradas e saídas para locações, vendas e despesas.
 - Criar agenda operacional com próximas retiradas, devoluções e bloqueios.
 - Criar dashboard inicial com alertas do dia e valor previsto.
