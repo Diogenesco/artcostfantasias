@@ -1553,24 +1553,51 @@ function printOrderReceipt(orderId) {
 function printRentalContract(orderId) {
   const order = state.orders.find((item) => item.id === orderId);
   if (!order || order.mode !== "locacao") return;
+  const total = orderTotal(order);
   printDocument(
-    "Contrato simples de locação",
+    "Contrato de locação de fantasia",
     `
+      <p class="receipt-code">Contrato ${escapeHtml(orderDocumentNumber(order))}</p>
+      ${storeDocumentInfo()}
       <section class="summary">
         <div><span>Cliente</span><strong>${escapeHtml(order.customerName)}</strong></div>
         <div><span>Telefone</span><strong>${escapeHtml(order.customerPhone || "Não informado")}</strong></div>
+        <div><span>CPF/RG</span><strong><span class="field-line"></span></strong></div>
+        <div><span>Endereço</span><strong><span class="field-line"></span></strong></div>
         <div><span>Fantasia</span><strong>${escapeHtml(order.productName)}</strong></div>
-        <div><span>Período</span><strong>${escapeHtml(order.period || "Não informado")}</strong></div>
+        <div><span>Tamanho</span><strong>${escapeHtml(order.desiredSize || "Não informado")}</strong></div>
+        <div><span>Retirada e devolução</span><strong>${escapeHtml(order.period || "Não informado")}</strong></div>
         <div><span>Diárias</span><strong>${escapeHtml(String(order.rentalDays || 1))}</strong></div>
-        <div><span>Valor total</span><strong>${escapeHtml(money(orderTotal(order)))}</strong></div>
       </section>
-      <h2>Termos de locação</h2>
+      <section class="totals">
+        <div><span>Diária</span><strong>${escapeHtml(money(orderDailyPrice(order)))}</strong></div>
+        <div><span>Total da locação</span><strong>${escapeHtml(money(total))}</strong></div>
+        <div><span>Caução</span><strong><span class="field-line"></span></strong></div>
+      </section>
+      <h2>1. Objeto da locação</h2>
+      <p>A Art & Cost Fantasias entrega à cliente a fantasia descrita neste contrato para uso temporário no período informado acima.</p>
+      <p>Acessórios entregues: <span class="field-line"></span></p>
+      <h2>2. Retirada e devolução</h2>
       <ul>
-        <li>A peça deve ser retirada e devolvida nas datas e horários combinados.</li>
-        <li>A cliente se responsabiliza por danos, manchas, perda de acessórios ou avarias durante o período de locação.</li>
-        <li>Atrasos na devolução podem gerar cobrança adicional conforme combinado com a Art & Cost Fantasias.</li>
-        <li>A fantasia deve ser devolvida com todos os acessórios informados no atendimento.</li>
+        <li>A retirada e a devolução devem ocorrer nas datas e horários combinados neste documento.</li>
+        <li>A devolução fora do prazo pode gerar cobrança adicional proporcional ao atraso ou nova diária, conforme combinado no atendimento.</li>
+        <li>A peça deve ser devolvida com todos os acessórios, embalagens ou componentes entregues na retirada.</li>
+      </ul>
+      <h2>3. Pagamento e caução</h2>
+      <p>Forma de pagamento: <span class="field-line"></span></p>
+      <p>Valor pago na retirada: <span class="field-line"></span> Valor restante: <span class="field-line"></span></p>
+      <p>A caução, quando aplicada, poderá ser retida total ou parcialmente em caso de dano, perda de acessório, atraso ou necessidade de reparo.</p>
+      <h2>4. Conservação da fantasia</h2>
+      <ul>
+        <li>A cliente se responsabiliza pela guarda e conservação da fantasia durante todo o período de locação.</li>
+        <li>Não é permitido cortar, tingir, colar, costurar, lavar de forma inadequada ou modificar a peça sem autorização da Art & Cost Fantasias.</li>
+        <li>Manchas, rasgos, avarias, perda de peças ou acessórios poderão gerar cobrança de reparo ou reposição.</li>
+      </ul>
+      <h2>5. Confirmações</h2>
+      <ul>
+        <li>A reserva só é considerada válida conforme o status informado pela administração da Art & Cost Fantasias.</li>
         <li>Qualquer ajuste de data, horário ou tamanho deve ser confirmado previamente pelo WhatsApp.</li>
+        <li>A assinatura deste contrato confirma ciência das condições de locação descritas acima.</li>
       </ul>
       <h2>Observações</h2>
       <p>${escapeHtml(order.notes || "Sem observações")}</p>

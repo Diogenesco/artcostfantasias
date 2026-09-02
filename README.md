@@ -55,6 +55,10 @@ para salvar em PDF.
 O comprovante de reserva ou compra inclui número do pedido, dados da loja,
 dados da cliente, período, valores, campos de pagamento e espaço para assinatura.
 
+O contrato de locação inclui identificação da cliente, dados da fantasia,
+período, valores, caução, acessórios, regras de devolução, conservação, atraso,
+avarias e assinaturas.
+
 O histórico de clientes possui busca por nome, telefone ou atendimento, e a
 agenda pode ser filtrada por retiradas, devoluções, bloqueios e atrasos.
 

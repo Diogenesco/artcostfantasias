@@ -35,6 +35,7 @@
 - Exportar clientes filtrados em CSV.
 - Gerar recibo e contrato simples de locação para PDF.
 - Melhorar comprovante com número do pedido, pagamento e assinatura.
+- Melhorar contrato de locação com termos de caução, atraso, avarias e acessórios.
 - Adicionar controle simples de estoque/unidades.
 - Listar itens e bloqueios cadastrados.
 - Trocar a senha simples de protótipo por login real.
