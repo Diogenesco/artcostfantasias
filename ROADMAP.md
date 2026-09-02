@@ -25,6 +25,7 @@
 - Permitir editar itens cadastrados sem recriar o produto.
 - Permitir bloqueio de datas por item.
 - Adicionar exportação e importação de backup do catálogo no protótipo.
+- Exibir status do último backup e alerta para cópias atrasadas.
 - Registrar histórico local de solicitações enviadas pelo formulário.
 - Permitir status de solicitação: solicitado, reservado, retirado, devolvido e cancelado.
 - Registrar linha do tempo de mudanças de status por solicitação.

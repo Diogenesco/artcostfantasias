@@ -176,6 +176,7 @@ const adminImage = document.querySelector("#adminImage");
 const adminImageFile = document.querySelector("#adminImageFile");
 const imagePreview = document.querySelector("#imagePreview");
 const backupStatus = document.querySelector("#backupStatus");
+const backupStatusCard = document.querySelector("#backupStatusCard");
 const csvStatus = document.querySelector("#csvStatus");
 let selectedImageData = "";
 let editingProductId = "";
@@ -195,7 +196,11 @@ function loadProducts() {
 
 function loadSettings() {
   const saved = localStorage.getItem(SETTINGS_KEY);
-  return saved ? JSON.parse(saved) : { whatsapp: DEFAULT_WHATSAPP_NUMBER };
+  return {
+    whatsapp: DEFAULT_WHATSAPP_NUMBER,
+    lastBackupAt: "",
+    ...(saved ? JSON.parse(saved) : {}),
+  };
 }
 
 function loadOrders() {
@@ -282,6 +287,41 @@ function saveCustomers() {
 function setBackupStatus(message) {
   if (!backupStatus) return;
   backupStatus.textContent = message;
+}
+
+function daysSince(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return Math.floor((Date.now() - date.getTime()) / 86400000);
+}
+
+function renderBackupStatus() {
+  if (!backupStatusCard) return;
+
+  const lastBackup = state.settings.lastBackupAt;
+  const days = daysSince(lastBackup);
+  let status = "warning";
+  let title = "Backup ainda não exportado";
+  let detail = "Exporte um backup completo para guardar catálogo, clientes, solicitações e financeiro.";
+
+  if (lastBackup && days !== null) {
+    if (days > 7) {
+      status = "danger";
+      title = `Backup atrasado há ${days} dias`;
+      detail = `Último backup: ${formatDateTime(lastBackup)}. Faça uma nova exportação para manter uma cópia recente.`;
+    } else {
+      status = "ok";
+      title = "Backup em dia";
+      detail = `Último backup: ${formatDateTime(lastBackup)}. Recomendo renovar esse arquivo pelo menos uma vez por semana.`;
+    }
+  }
+
+  backupStatusCard.className = `backup-status-card ${status}`;
+  backupStatusCard.innerHTML = `
+    <strong>${escapeHtml(title)}</strong>
+    <span>${escapeHtml(detail)}</span>
+  `;
 }
 
 function setCsvStatus(message) {
@@ -1806,6 +1846,7 @@ function refreshAll() {
   renderCustomersList();
   renderAdminStats();
   renderCashflow();
+  renderBackupStatus();
   updateRentalFields();
   updateAvailabilityMessage();
   updateMessagePreview();
@@ -2605,6 +2646,7 @@ document.querySelector("#exportCatalog")?.addEventListener("click", () => {
     "application/json"
   );
   setBackupStatus("Backup exportado. Guarde esse arquivo em local seguro.");
+  renderBackupStatus();
 });
 
 document.querySelector("#importCatalog")?.addEventListener("change", (event) => {
@@ -2620,7 +2662,12 @@ document.querySelector("#importCatalog")?.addEventListener("change", (event) => 
       }
 
       state.products = data.products;
-      state.settings = data.settings || state.settings;
+      state.settings = {
+        whatsapp: DEFAULT_WHATSAPP_NUMBER,
+        lastBackupAt: "",
+        ...state.settings,
+        ...(data.settings || {}),
+      };
       state.orders = Array.isArray(data.orders) ? data.orders : [];
       state.cashflow = Array.isArray(data.cashflow) ? data.cashflow : [];
       state.customers = Array.isArray(data.customers) ? data.customers : [];

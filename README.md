@@ -23,6 +23,9 @@ integração com banco de dados e armazenamento real.
 O painel também permite exportar e importar um backup JSON do catálogo enquanto
 os dados ainda ficam salvos localmente no navegador.
 
+O painel mostra o status do último backup completo e alerta quando a cópia está
+há mais de sete dias sem renovação.
+
 As solicitações enviadas pelo formulário também ficam registradas localmente no
 painel administrativo e entram no arquivo de backup.
 

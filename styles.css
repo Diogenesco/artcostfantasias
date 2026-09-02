@@ -999,6 +999,45 @@ body.admin-visible .brand img {
   gap: 10px;
 }
 
+.backup-status-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+}
+
+.backup-status-card strong {
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.backup-status-card span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.backup-status-card.ok {
+  background: rgba(15, 127, 92, 0.08);
+  border-color: rgba(15, 127, 92, 0.25);
+}
+
+.backup-status-card.warning {
+  background: rgba(216, 167, 74, 0.12);
+  border-color: rgba(216, 167, 74, 0.35);
+}
+
+.backup-status-card.danger {
+  background: rgba(158, 31, 40, 0.08);
+  border-color: rgba(158, 31, 40, 0.35);
+}
+
+.backup-status-card.danger strong {
+  color: var(--red);
+}
+
 .import-button {
   align-items: center;
   background: #fff;
