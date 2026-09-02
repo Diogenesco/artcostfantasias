@@ -3,6 +3,7 @@ const CATALOG_KEY = "artCostCatalog";
 const SETTINGS_KEY = "artCostSettings";
 const ORDERS_KEY = "artCostOrders";
 const CASHFLOW_KEY = "artCostCashflow";
+const CUSTOMERS_KEY = "artCostCustomers";
 const ADMIN_HASH = "ebec06905f9b68b38f09dcf72afbd4992696951bd6411d5b3dfb16001c5e9754";
 const ADMIN_ATTEMPTS_KEY = "artCostAdminAttempts";
 const ADMIN_LOCK_KEY = "artCostAdminLock";
@@ -23,6 +24,7 @@ const starterProducts = [
     sizes: "P, M, G",
     color: "#b3202a",
     icon: "B",
+    quantity: 1,
     image: "",
     reservations: [],
     description: "Conjunto temático com saia vermelha, camiseta e acessórios para festa a fantasia.",
@@ -38,6 +40,7 @@ const starterProducts = [
     sizes: "P, M",
     color: "#9e1f28",
     icon: "C",
+    quantity: 1,
     image: "",
     reservations: [
       {
@@ -60,6 +63,7 @@ const starterProducts = [
     sizes: "Infantil 6, 8, 10",
     color: "#0f7f5c",
     icon: "F",
+    quantity: 1,
     image: "",
     reservations: [],
     description: "Vestido verde com visual encantado, ideal para festa infantil e tema fantasia.",
@@ -75,6 +79,7 @@ const starterProducts = [
     sizes: "M, G",
     color: "#1d4f8f",
     icon: "M",
+    quantity: 1,
     image: "",
     reservations: [],
     description: "Look temático azul e branco com composição delicada para festas e apresentações.",
@@ -90,6 +95,7 @@ const starterProducts = [
     sizes: "Sob medida",
     color: "#6f3d7b",
     icon: "A",
+    quantity: 1,
     image: "",
     reservations: [],
     description: "Peça de ateliê para venda, com ajustes e detalhes definidos pelo atendimento.",
@@ -105,6 +111,7 @@ const starterProducts = [
     sizes: "P, M, G, GG",
     color: "#c9902e",
     icon: "L",
+    quantity: 1,
     image: "",
     reservations: [],
     description: "Look versátil para venda ou locação, com brilho e acabamento em tons dourados.",
@@ -116,7 +123,12 @@ const state = {
   settings: loadSettings(),
   orders: loadOrders(),
   cashflow: loadCashflow(),
+  customers: loadCustomers(),
   filter: "todos",
+  audienceFilter: "todos",
+  genderFilter: "todos",
+  priceFilter: "todos",
+  sizeFilter: "",
   adminProductSearch: "",
   orderStatusFilter: "todos",
   orderDateField: "createdAt",
@@ -127,6 +139,10 @@ const state = {
 
 const catalogGrid = document.querySelector("#catalogGrid");
 const searchInput = document.querySelector("#searchInput");
+const audienceFilter = document.querySelector("#audienceFilter");
+const genderFilter = document.querySelector("#genderFilter");
+const priceFilter = document.querySelector("#priceFilter");
+const sizeFilter = document.querySelector("#sizeFilter");
 const bookingProduct = document.querySelector("#bookingProduct");
 const bookingMode = document.querySelector("#bookingMode");
 const bookingForm = document.querySelector("#bookingForm");
@@ -136,9 +152,11 @@ const cartCount = document.querySelector("#cartCount");
 const drawer = document.querySelector("#drawer");
 const dialog = document.querySelector("#productDialog");
 const adminList = document.querySelector("#adminList");
+const adminDashboard = document.querySelector("#adminDashboard");
 const adminStats = document.querySelector("#adminStats");
 const ordersList = document.querySelector("#ordersList");
 const orderSummary = document.querySelector("#orderSummary");
+const customersList = document.querySelector("#customersList");
 const adminProductSearch = document.querySelector("#adminProductSearch");
 const orderStatusFilter = document.querySelector("#orderStatusFilter");
 const orderDateField = document.querySelector("#orderDateField");
@@ -165,6 +183,7 @@ function loadProducts() {
     reservations: [],
     theme: "tematico",
     gender: "unissex",
+    quantity: 1,
     image: "",
     ...product,
   }));
@@ -185,6 +204,7 @@ function loadOrders() {
     desiredSize: "",
     rentalStart: "",
     rentalEnd: "",
+    customerId: "",
     ...order,
   }));
 }
@@ -204,6 +224,21 @@ function loadCashflow() {
   }));
 }
 
+function loadCustomers() {
+  const saved = localStorage.getItem(CUSTOMERS_KEY);
+  const customers = saved ? JSON.parse(saved) : [];
+  return customers.map((customer) => ({
+    id: `customer-${Date.now()}`,
+    name: "",
+    phone: "",
+    notes: "",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    orderIds: [],
+    ...customer,
+  }));
+}
+
 function saveProducts() {
   localStorage.setItem(CATALOG_KEY, JSON.stringify(state.products));
 }
@@ -218,6 +253,10 @@ function saveOrders() {
 
 function saveCashflow() {
   localStorage.setItem(CASHFLOW_KEY, JSON.stringify(state.cashflow));
+}
+
+function saveCustomers() {
+  localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(state.customers));
 }
 
 function setBackupStatus(message) {
@@ -312,6 +351,7 @@ function productFromCsvRow(headers, row) {
     sizes: data.tamanhos || data.sizes || "Consultar",
     color: data.cor || data.color || "#b3202a",
     icon: name.trim().charAt(0).toUpperCase(),
+    quantity: Number(data.estoque || data.quantidade || data.quantity || "1") || 1,
     image: data.imagem || data.image || "",
     reservations: [],
     description: data.descricao || data.description || "Item importado pela planilha da Art & Cost.",
@@ -392,6 +432,17 @@ ${valueLine}
 Qualquer ajuste de horário ou tamanho, pode nos chamar por aqui.`;
   }
 
+  if (order.status === "confirmado") {
+    return `${greeting}
+
+Sua reserva foi confirmada.
+${itemLine}
+${order.period ? `Período: ${order.period}` : "Período: não informado"}
+${valueLine}
+
+Qualquer ajuste de horário ou tamanho, pode nos chamar por aqui.`;
+  }
+
   if (order.status === "cancelado") {
     return `${greeting}
 
@@ -421,12 +472,66 @@ ${itemLine}
 Obrigada pela preferência.`;
   }
 
+  if (order.status === "finalizado") {
+    return `${greeting}
+
+Seu atendimento foi finalizado.
+${itemLine}
+
+Obrigada pela preferência.`;
+  }
+
   return `${greeting}
 
 Recebemos sua solicitação e vamos confirmar a disponibilidade.
 ${itemLine}
 ${order.period ? `Período solicitado: ${order.period}` : "Tipo: compra"}
 ${valueLine}`;
+}
+
+function upsertCustomerFromOrder(order) {
+  const phone = customerWhatsappPhone(order.customerPhone);
+  const name = String(order.customerName || "").trim();
+  if (!phone && !name) return "";
+
+  const existing = state.customers.find(
+    (customer) => customer.phone === phone || normalizeText(customer.name) === normalizeText(name)
+  );
+  const now = new Date().toISOString();
+  if (existing) {
+    existing.name = name || existing.name;
+    existing.phone = phone || existing.phone;
+    existing.updatedAt = now;
+    existing.orderIds = Array.from(new Set([...(existing.orderIds || []), order.id]));
+    saveCustomers();
+    return existing.id;
+  }
+
+  const customer = {
+    id: `customer-${Date.now()}`,
+    name: name || "Cliente",
+    phone,
+    notes: "",
+    createdAt: now,
+    updatedAt: now,
+    orderIds: [order.id],
+  };
+  state.customers.unshift(customer);
+  saveCustomers();
+  return customer.id;
+}
+
+function syncCustomersFromOrders() {
+  let changed = false;
+  state.orders.forEach((order) => {
+    if (order.customerId) return;
+    const customerId = upsertCustomerFromOrder(order);
+    if (customerId) {
+      order.customerId = customerId;
+      changed = true;
+    }
+  });
+  if (changed) saveOrders();
 }
 
 async function sha256(value) {
@@ -487,6 +592,12 @@ function productPriceLabel(product) {
   return `${money(product.price)} / diária`;
 }
 
+function productStockLabel(product) {
+  const quantity = Number(product.quantity ?? 1);
+  if (product.type === "locacao") return `${quantity || 1} ${quantity === 1 ? "unidade" : "unidades"}`;
+  return quantity > 0 ? `${quantity} em estoque` : "Sob consulta";
+}
+
 function audienceLabel(product) {
   if (product.audience === "todos") return "Todas as idades";
   return product.audience === "infantil" ? "Infantil" : "Adulto";
@@ -500,6 +611,7 @@ function genderLabel(product) {
 
 function productMatches(product) {
   const term = normalizeText(searchInput.value);
+  const sizeTerm = normalizeText(state.sizeFilter);
   let inFilter = state.filter === "todos";
   if (state.filter === "locacao" || state.filter === "venda") {
     inFilter = product.type === state.filter || product.type === "ambos";
@@ -522,8 +634,26 @@ function productMatches(product) {
     audienceLabel(product),
     genderLabel(product),
   ];
+  const audienceMatch =
+    state.audienceFilter === "todos" || product.audience === state.audienceFilter || product.audience === "todos";
+  const genderMatch =
+    state.genderFilter === "todos" || product.gender === state.genderFilter || product.gender === "unissex";
+  const sizeMatch = !sizeTerm || normalizeText(product.sizes).includes(sizeTerm);
+  const price = Number(product.price) || 0;
+  const priceMatch =
+    state.priceFilter === "todos" ||
+    (state.priceFilter === "ate-100" && price <= 100) ||
+    (state.priceFilter === "100-200" && price > 100 && price <= 200) ||
+    (state.priceFilter === "acima-200" && price > 200);
 
-  return inFilter && (!term || normalizeText(searchable.join(" ")).includes(term));
+  return (
+    inFilter &&
+    audienceMatch &&
+    genderMatch &&
+    sizeMatch &&
+    priceMatch &&
+    (!term || normalizeText(searchable.join(" ")).includes(term))
+  );
 }
 
 function makeDateTime(dateId, timeId) {
@@ -559,9 +689,13 @@ function removeOrderReservation(orderId) {
   if (changed) saveProducts();
 }
 
+function reservationStatusBlocks(status) {
+  return ["confirmado", "reservado", "retirado"].includes(status);
+}
+
 function syncOrderReservation(order) {
   removeOrderReservation(order.id);
-  if (order.status !== "reservado" || order.mode !== "locacao" || !order.rentalStart || !order.rentalEnd) return true;
+  if (!reservationStatusBlocks(order.status) || order.mode !== "locacao" || !order.rentalStart || !order.rentalEnd) return true;
 
   const product = state.products.find((item) => item.id === order.productId);
   if (!product) return true;
@@ -631,6 +765,7 @@ function resetAdminForm() {
   setImageSource("url");
   updateImagePreview("");
   document.querySelector("#adminColor").value = "#b3202a";
+  document.querySelector("#adminQuantity").value = "1";
   document.querySelector("#adminSubmit").textContent = "Adicionar ao catálogo";
   document.querySelector("#cancelEdit").classList.add("hidden-control");
 }
@@ -640,6 +775,7 @@ function fillAdminForm(product) {
   editingProductId = product.id;
   document.querySelector("#adminName").value = product.name;
   document.querySelector("#adminPrice").value = product.price;
+  document.querySelector("#adminQuantity").value = product.quantity ?? 1;
   document.querySelector("#adminType").value = product.type;
   document.querySelector("#adminAudience").value = product.audience;
   document.querySelector("#adminGender").value = product.gender || "unissex";
@@ -672,7 +808,7 @@ function renderCatalog() {
           </div>
           <h3>${product.name}</h3>
           <div class="price">${productPriceLabel(product)}</div>
-          <div class="meta">${product.sizes} | ${audienceLabel(product)} | ${genderLabel(product)}</div>
+          <div class="meta">${product.sizes} | ${audienceLabel(product)} | ${genderLabel(product)} | ${productStockLabel(product)}</div>
         </article>
       `;
     })
@@ -734,7 +870,7 @@ function renderAdminList() {
         <article class="admin-item">
           <div>
             <strong>${product.name}</strong>
-            <span>${typeLabel(product)} | ${money(product.price)} | ${product.sizes} | ${genderLabel(product)}</span>
+            <span>${typeLabel(product)} | ${money(product.price)} | ${product.sizes} | ${genderLabel(product)} | ${productStockLabel(product)}</span>
             ${reservations || "<span>Sem bloqueios de data.</span>"}
           </div>
           <div class="admin-actions">
@@ -748,7 +884,8 @@ function renderAdminList() {
 }
 
 function orderMatchesFilters(order) {
-  const statusMatch = state.orderStatusFilter === "todos" || order.status === state.orderStatusFilter;
+  const normalizedStatus = order.status === "reservado" ? "confirmado" : order.status;
+  const statusMatch = state.orderStatusFilter === "todos" || normalizedStatus === state.orderStatusFilter;
   const sourceDate = state.orderDateField === "eventDate" ? order.eventDate : order.createdAt;
   const dateValue = String(sourceDate || "").slice(0, 10);
   const afterStart = !state.orderDateStart || (dateValue && dateValue >= state.orderDateStart);
@@ -764,7 +901,7 @@ function renderOrderSummary(orders) {
   if (!orderSummary) return;
   const rentals = orders.filter((order) => order.mode === "locacao").length;
   const sales = orders.filter((order) => order.mode === "venda").length;
-  const open = orders.filter((order) => !["devolvido", "cancelado"].includes(order.status)).length;
+  const open = orders.filter((order) => !["devolvido", "finalizado", "cancelado"].includes(order.status)).length;
   const total = orders.reduce((sum, order) => sum + orderTotal(order), 0);
 
   orderSummary.innerHTML = `
@@ -821,6 +958,8 @@ function renderOrdersList() {
           </div>
           <div class="admin-actions">
             <button class="admin-edit" type="button" data-order-whatsapp="${order.id}" ${hasCustomerPhone ? "" : "disabled"}>Responder WhatsApp</button>
+            <button class="admin-edit" type="button" data-order-receipt="${order.id}">Recibo PDF</button>
+            <button class="admin-edit" type="button" data-order-contract="${order.id}" ${order.mode === "locacao" ? "" : "disabled"}>Contrato</button>
             <button class="admin-edit" type="button" data-order-cashflow="${order.id}" ${hasCashflow ? "disabled" : ""}>${hasCashflow ? "Lançado" : "Lançar entrada"}</button>
             <select class="status-select" data-order-status="${order.id}" aria-label="Status da solicitação">
               ${orderStatusOptions(order.status)}
@@ -948,6 +1087,107 @@ function renderAdminStats() {
       <strong>${orders}</strong>
     </article>
   `;
+}
+
+function sameDate(value, dateValue) {
+  return String(value || "").slice(0, 10) === dateValue;
+}
+
+function monthValue(value) {
+  return String(value || "").slice(0, 7);
+}
+
+function renderAdminDashboard() {
+  if (!adminDashboard) return;
+  const today = todayDateValue();
+  const currentMonth = monthValue(today);
+  const pickupsToday = state.orders.filter(
+    (order) => order.mode === "locacao" && sameDate(order.rentalStart, today) && !["cancelado", "finalizado"].includes(order.status)
+  );
+  const returnsToday = state.orders.filter(
+    (order) => order.mode === "locacao" && sameDate(order.rentalEnd, today) && !["cancelado", "finalizado"].includes(order.status)
+  );
+  const pending = state.orders.filter((order) => order.status === "solicitado").length;
+  const monthTotal = state.orders
+    .filter((order) => !["cancelado"].includes(order.status) && monthValue(order.createdAt) === currentMonth)
+    .reduce((sum, order) => sum + orderTotal(order), 0);
+  const topProduct = Object.entries(
+    state.orders.reduce((summary, order) => {
+      if (order.status === "cancelado") return summary;
+      summary[order.productName] = (summary[order.productName] || 0) + 1;
+      return summary;
+    }, {})
+  ).sort((first, second) => second[1] - first[1])[0];
+
+  const agendaAlerts = [...pickupsToday, ...returnsToday]
+    .slice(0, 5)
+    .map((order) => {
+      const type = sameDate(order.rentalStart, today) ? "Retirada" : "Devolução";
+      const time = sameDate(order.rentalStart, today)
+        ? agendaDateParts(order.rentalStart)?.time
+        : agendaDateParts(order.rentalEnd)?.time;
+      return `<li><strong>${type}</strong> ${time || ""} - ${escapeHtml(order.customerName)} / ${escapeHtml(order.productName)}</li>`;
+    })
+    .join("");
+
+  adminDashboard.innerHTML = `
+    <article>
+      <span>Retiradas hoje</span>
+      <strong>${pickupsToday.length}</strong>
+    </article>
+    <article>
+      <span>Devoluções hoje</span>
+      <strong>${returnsToday.length}</strong>
+    </article>
+    <article>
+      <span>Pendentes</span>
+      <strong>${pending}</strong>
+    </article>
+    <article>
+      <span>Previsto no mês</span>
+      <strong>${money(monthTotal)}</strong>
+    </article>
+    <article class="wide-dashboard-card">
+      <span>Item mais pedido</span>
+      <strong>${topProduct ? `${escapeHtml(topProduct[0])} (${topProduct[1]})` : "Sem histórico"}</strong>
+    </article>
+    <article class="wide-dashboard-card">
+      <span>Alertas de hoje</span>
+      ${agendaAlerts ? `<ul>${agendaAlerts}</ul>` : "<strong>Nenhuma retirada ou devolução marcada para hoje.</strong>"}
+    </article>
+  `;
+}
+
+function renderCustomersList() {
+  if (!customersList) return;
+  syncCustomersFromOrders();
+
+  if (!state.customers.length) {
+    customersList.innerHTML = `<p class="empty-admin">Nenhum cliente registrado ainda.</p>`;
+    return;
+  }
+
+  customersList.innerHTML = state.customers
+    .map((customer) => {
+      const customerOrders = state.orders.filter(
+        (order) => order.customerId === customer.id || customerWhatsappPhone(order.customerPhone) === customer.phone
+      );
+      const total = customerOrders.reduce((sum, order) => sum + orderTotal(order), 0);
+      const lastOrder = [...customerOrders].sort((first, second) => String(second.createdAt).localeCompare(String(first.createdAt)))[0];
+      return `
+        <article class="admin-item">
+          <div>
+            <strong>${escapeHtml(customer.name)}</strong>
+            <span>${customer.phone || "Sem telefone"} | ${customerOrders.length} pedido(s) | Total: ${money(total)}</span>
+            <span>Último atendimento: ${lastOrder ? `${formatDateOnly(lastOrder.createdAt)} - ${escapeHtml(lastOrder.productName)}` : "Sem pedido vinculado"}</span>
+          </div>
+          <div class="admin-actions">
+            <button class="admin-edit" type="button" data-customer-whatsapp="${customer.id}" ${customer.phone ? "" : "disabled"}>WhatsApp</button>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
 }
 
 function cashflowTypeLabel(type) {
@@ -1148,6 +1388,107 @@ function printCashflowPdf() {
   reportWindow.print();
 }
 
+function printDocument(title, bodyHtml) {
+  const reportWindow = window.open("", "_blank");
+  if (!reportWindow) return;
+
+  reportWindow.document.write(`
+    <!doctype html>
+    <html lang="pt-BR">
+      <head>
+        <meta charset="utf-8" />
+        <title>${escapeHtml(title)} | Art & Cost</title>
+        <style>
+          * { box-sizing: border-box; }
+          body { color: #1e1d1a; font-family: Arial, sans-serif; margin: 0; padding: 32px; }
+          header { align-items: center; border-bottom: 2px solid #d8a74a; display: flex; gap: 18px; margin-bottom: 24px; padding-bottom: 18px; }
+          header img { background: #080706; height: 78px; object-fit: contain; padding: 8px; width: 180px; }
+          h1 { font-size: 24px; margin: 0 0 8px; }
+          h2 { font-size: 17px; margin: 24px 0 10px; }
+          p, li { color: #38342e; font-size: 13px; line-height: 1.55; }
+          .muted { color: #716a5f; margin: 0; }
+          .summary { display: grid; gap: 10px; grid-template-columns: repeat(2, 1fr); margin: 20px 0; }
+          .summary div { border: 1px solid #e6dccb; border-radius: 8px; padding: 14px; }
+          .summary span { color: #716a5f; display: block; font-size: 11px; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; }
+          .summary strong { font-size: 15px; }
+          .signature { display: grid; gap: 28px; grid-template-columns: 1fr 1fr; margin-top: 48px; }
+          .signature div { border-top: 1px solid #1e1d1a; padding-top: 8px; text-align: center; }
+          @media print { body { padding: 18mm; } }
+        </style>
+      </head>
+      <body>
+        <header>
+          <img src="${window.location.origin}/assets/logo-art-cost-banner.png" alt="Art & Cost" />
+          <div>
+            <h1>${escapeHtml(title)}</h1>
+            <p class="muted">Gerado em ${escapeHtml(formatDateTime(new Date().toISOString()))}</p>
+          </div>
+        </header>
+        ${bodyHtml}
+      </body>
+    </html>
+  `);
+  reportWindow.document.close();
+  reportWindow.focus();
+  reportWindow.print();
+}
+
+function printOrderReceipt(orderId) {
+  const order = state.orders.find((item) => item.id === orderId);
+  if (!order) return;
+  printDocument(
+    "Recibo de atendimento",
+    `
+      <section class="summary">
+        <div><span>Cliente</span><strong>${escapeHtml(order.customerName)}</strong></div>
+        <div><span>Telefone</span><strong>${escapeHtml(order.customerPhone || "Não informado")}</strong></div>
+        <div><span>Item</span><strong>${escapeHtml(order.productName)}</strong></div>
+        <div><span>Status</span><strong>${escapeHtml(statusLabel(order.status))}</strong></div>
+        <div><span>Tipo</span><strong>${escapeHtml(order.modeLabel)}</strong></div>
+        <div><span>Valor total</span><strong>${escapeHtml(money(orderTotal(order)))}</strong></div>
+        <div><span>Evento</span><strong>${escapeHtml(formatDateOnly(order.eventDate) || "Não informado")}</strong></div>
+        <div><span>Tamanho</span><strong>${escapeHtml(order.desiredSize || "Não informado")}</strong></div>
+      </section>
+      <h2>Detalhes</h2>
+      <p>${escapeHtml(order.period || "Pedido de compra")}</p>
+      <p>${escapeHtml(orderValueDetails(order))}</p>
+      <p>Observações: ${escapeHtml(order.notes || "Sem observações")}</p>
+    `
+  );
+}
+
+function printRentalContract(orderId) {
+  const order = state.orders.find((item) => item.id === orderId);
+  if (!order || order.mode !== "locacao") return;
+  printDocument(
+    "Contrato simples de locação",
+    `
+      <section class="summary">
+        <div><span>Cliente</span><strong>${escapeHtml(order.customerName)}</strong></div>
+        <div><span>Telefone</span><strong>${escapeHtml(order.customerPhone || "Não informado")}</strong></div>
+        <div><span>Fantasia</span><strong>${escapeHtml(order.productName)}</strong></div>
+        <div><span>Período</span><strong>${escapeHtml(order.period || "Não informado")}</strong></div>
+        <div><span>Diárias</span><strong>${escapeHtml(String(order.rentalDays || 1))}</strong></div>
+        <div><span>Valor total</span><strong>${escapeHtml(money(orderTotal(order)))}</strong></div>
+      </section>
+      <h2>Termos de locação</h2>
+      <ul>
+        <li>A peça deve ser retirada e devolvida nas datas e horários combinados.</li>
+        <li>A cliente se responsabiliza por danos, manchas, perda de acessórios ou avarias durante o período de locação.</li>
+        <li>Atrasos na devolução podem gerar cobrança adicional conforme combinado com a Art & Cost Fantasias.</li>
+        <li>A fantasia deve ser devolvida com todos os acessórios informados no atendimento.</li>
+        <li>Qualquer ajuste de data, horário ou tamanho deve ser confirmado previamente pelo WhatsApp.</li>
+      </ul>
+      <h2>Observações</h2>
+      <p>${escapeHtml(order.notes || "Sem observações")}</p>
+      <section class="signature">
+        <div>Assinatura da cliente</div>
+        <div>Art & Cost Fantasias</div>
+      </section>
+    `
+  );
+}
+
 function exportOrdersCsv() {
   const headers = [
     "data_solicitacao",
@@ -1191,8 +1532,10 @@ function refreshAll() {
   renderCatalog();
   renderBookingOptions();
   renderAdminList();
+  renderAdminDashboard();
   renderOrdersList();
   renderRentalAgenda();
+  renderCustomersList();
   renderAdminStats();
   renderCashflow();
   updateRentalFields();
@@ -1357,34 +1700,42 @@ function createOrderRecord() {
 function statusLabel(status) {
   const labels = {
     solicitado: "Solicitado",
+    confirmado: "Confirmado",
     reservado: "Reservado",
     retirado: "Retirado",
     devolvido: "Devolvido",
+    finalizado: "Finalizado",
     cancelado: "Cancelado",
   };
   return labels[status] || "Solicitado";
 }
 
 function orderStatusOptions(currentStatus) {
-  return ["solicitado", "reservado", "retirado", "devolvido", "cancelado"]
+  const normalizedStatus = currentStatus === "reservado" ? "confirmado" : currentStatus;
+  return ["solicitado", "confirmado", "retirado", "devolvido", "finalizado", "cancelado"]
     .map(
       (status) =>
-        `<option value="${status}" ${status === currentStatus ? "selected" : ""}>${statusLabel(status)}</option>`
+        `<option value="${status}" ${status === normalizedStatus ? "selected" : ""}>${statusLabel(status)}</option>`
     )
     .join("");
 }
 
 function formatDateOnly(value) {
   if (!value) return "";
-  return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(new Date(`${value}T12:00`));
+  const normalized = String(value).includes("T") ? value : `${value}T12:00`;
+  const date = new Date(normalized);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(date);
 }
 
 function formatDateTime(value) {
   if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
     timeStyle: "short",
-  }).format(new Date(value));
+  }).format(date);
 }
 
 function todayDateValue() {
@@ -1529,6 +1880,22 @@ document.querySelector("#searchImageLink")?.addEventListener("click", () => {
 });
 
 searchInput?.addEventListener("input", renderCatalog);
+audienceFilter?.addEventListener("change", (event) => {
+  state.audienceFilter = event.currentTarget.value;
+  renderCatalog();
+});
+genderFilter?.addEventListener("change", (event) => {
+  state.genderFilter = event.currentTarget.value;
+  renderCatalog();
+});
+priceFilter?.addEventListener("change", (event) => {
+  state.priceFilter = event.currentTarget.value;
+  renderCatalog();
+});
+sizeFilter?.addEventListener("input", (event) => {
+  state.sizeFilter = event.currentTarget.value;
+  renderCatalog();
+});
 
 adminProductSearch?.addEventListener("input", () => {
   state.adminProductSearch = adminProductSearch.value;
@@ -1627,7 +1994,9 @@ bookingForm?.addEventListener("submit", (event) => {
   }
 
   const message = buildBookingMessage();
-  state.orders.unshift(createOrderRecord());
+  const order = createOrderRecord();
+  order.customerId = upsertCustomerFromOrder(order);
+  state.orders.unshift(order);
   saveOrders();
   refreshAll();
   window.open(whatsappUrl(message), "_blank", "noopener");
@@ -1649,6 +2018,7 @@ document.querySelector("#adminForm")?.addEventListener("submit", (event) => {
     id: existingProduct ? existingProduct.id : `${Date.now()}-${normalizeText(name).replace(/\W+/g, "-")}`,
     name,
     price: Number(document.querySelector("#adminPrice").value),
+    quantity: Number(document.querySelector("#adminQuantity").value) || 1,
     type: document.querySelector("#adminType").value,
     audience: document.querySelector("#adminAudience").value,
     gender: document.querySelector("#adminGender").value,
@@ -1740,12 +2110,36 @@ ordersList?.addEventListener("click", (event) => {
     return;
   }
 
+  const receiptButton = event.target.closest("[data-order-receipt]");
+  if (receiptButton) {
+    printOrderReceipt(receiptButton.dataset.orderReceipt);
+    return;
+  }
+
+  const contractButton = event.target.closest("[data-order-contract]");
+  if (contractButton) {
+    printRentalContract(contractButton.dataset.orderContract);
+    return;
+  }
+
   const deleteButton = event.target.closest("[data-delete-order]");
   if (!deleteButton) return;
   removeOrderReservation(deleteButton.dataset.deleteOrder);
   state.orders = state.orders.filter((order) => order.id !== deleteButton.dataset.deleteOrder);
   saveOrders();
   refreshAll();
+});
+
+customersList?.addEventListener("click", (event) => {
+  const whatsappButton = event.target.closest("[data-customer-whatsapp]");
+  if (!whatsappButton) return;
+  const customer = state.customers.find((item) => item.id === whatsappButton.dataset.customerWhatsapp);
+  if (!customer || !customer.phone) return;
+  window.open(
+    `https://wa.me/${customer.phone}?text=${encodeURIComponent("Olá! Aqui é da Art & Cost Fantasias.")}`,
+    "_blank",
+    "noopener"
+  );
 });
 
 ordersList?.addEventListener("change", (event) => {
@@ -1825,12 +2219,15 @@ document.querySelector("#saveWhatsapp")?.addEventListener("click", () => {
 });
 
 document.querySelector("#exportCatalog")?.addEventListener("click", () => {
+  state.settings.lastBackupAt = new Date().toISOString();
+  saveSettings();
   const payload = {
-    exportedAt: new Date().toISOString(),
+    exportedAt: state.settings.lastBackupAt,
     products: state.products,
     settings: state.settings,
     orders: state.orders,
     cashflow: state.cashflow,
+    customers: state.customers,
   };
   downloadTextFile(
     `art-cost-catalogo-${new Date().toISOString().slice(0, 10)}.json`,
@@ -1856,10 +2253,12 @@ document.querySelector("#importCatalog")?.addEventListener("change", (event) => 
       state.settings = data.settings || state.settings;
       state.orders = Array.isArray(data.orders) ? data.orders : [];
       state.cashflow = Array.isArray(data.cashflow) ? data.cashflow : [];
+      state.customers = Array.isArray(data.customers) ? data.customers : [];
       saveProducts();
       saveSettings();
       saveOrders();
       saveCashflow();
+      saveCustomers();
       refreshAll();
       document.querySelector("#adminWhatsapp").value =
         state.settings.whatsapp === DEFAULT_WHATSAPP_NUMBER ? "" : state.settings.whatsapp;
@@ -1874,7 +2273,7 @@ document.querySelector("#importCatalog")?.addEventListener("change", (event) => 
 });
 
 document.querySelector("#downloadCsvTemplate")?.addEventListener("click", () => {
-  const headers = ["nome", "preco", "tipo", "publico", "genero", "tamanhos", "tema", "imagem", "descricao"];
+  const headers = ["nome", "preco", "tipo", "publico", "genero", "tamanhos", "tema", "estoque", "imagem", "descricao"];
   const example = [
     "Fantasia Princesa",
     "95",
@@ -1883,6 +2282,7 @@ document.querySelector("#downloadCsvTemplate")?.addEventListener("click", () => 
     "feminino",
     "Infantil 8, Infantil 10",
     "tematico",
+    "1",
     "https://exemplo.com/foto.jpg",
     "Vestido de princesa com acessórios",
   ];

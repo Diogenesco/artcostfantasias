@@ -365,6 +365,31 @@ h2 {
   color: var(--gold-strong);
 }
 
+.catalog-filters {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
+}
+
+.catalog-filters label {
+  color: var(--muted);
+  display: grid;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 7px;
+  text-transform: uppercase;
+}
+
+.catalog-filters input,
+.catalog-filters select {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  min-height: 44px;
+  padding: 0 12px;
+}
+
 .catalog-grid {
   display: grid;
   gap: clamp(18px, 3vw, 30px);
@@ -879,6 +904,57 @@ body.admin-visible .brand img {
   gap: 18px;
   grid-template-columns: repeat(3, minmax(240px, 1fr));
   margin-bottom: 24px;
+}
+
+.admin-dashboard {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  margin-bottom: 18px;
+}
+
+.admin-dashboard article {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+}
+
+.admin-dashboard span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.admin-dashboard strong {
+  color: var(--ink);
+  font-size: 20px;
+}
+
+.admin-dashboard ul {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.admin-dashboard li {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin-dashboard li strong {
+  color: var(--gold-strong);
+  font-size: 13px;
+}
+
+.wide-dashboard-card {
+  grid-column: span 2;
 }
 
 .admin-box {
@@ -1443,6 +1519,11 @@ dd {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .catalog-filters,
+  .admin-dashboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .product-card h3 {
     font-size: 18px;
   }
@@ -1461,6 +1542,10 @@ dd {
   .finance-summary,
   .order-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wide-dashboard-card {
+    grid-column: auto;
   }
 
   .admin-item {
@@ -1635,9 +1720,14 @@ dd {
   }
 
   .admin-stats,
+  .admin-dashboard,
   .finance-summary,
   .order-summary {
     gap: 10px;
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-filters {
     grid-template-columns: 1fr;
   }
 

@@ -54,6 +54,7 @@
         </div>
 
         <div class="admin-content locked" id="adminContent">
+          <div class="admin-dashboard" id="adminDashboard" aria-label="Dashboard administrativo"></div>
           <div class="admin-stats" id="adminStats" aria-label="Resumo do painel"></div>
           <div class="admin-heading">
             <div>
@@ -78,7 +79,7 @@
             </article>
 
             <article class="admin-box">
-              <h3>Backup do catálogo</h3>
+              <h3>Backup completo</h3>
               <div class="backup-actions">
                 <button class="secondary-action" id="exportCatalog" type="button">
                   Exportar backup
@@ -89,7 +90,7 @@
                 </label>
               </div>
               <p class="admin-note" id="backupStatus">
-                Salve uma cópia dos cadastros enquanto o banco de dados não estiver ligado.
+                Salve uma cópia dos cadastros, clientes, solicitações e financeiro enquanto o banco de dados não estiver ligado.
               </p>
             </article>
 
@@ -105,7 +106,7 @@
                 </label>
               </div>
               <p class="admin-note" id="csvStatus">
-                Use colunas: nome, preço, tipo, público, gênero, tamanhos, tema, imagem, descrição.
+                Use colunas: nome, preço, tipo, público, gênero, tamanhos, tema, estoque, imagem, descrição.
               </p>
             </article>
 
@@ -143,6 +144,10 @@
             <label>
               Preço
               <input id="adminPrice" type="number" min="0" step="0.01" required />
+            </label>
+            <label>
+              Estoque / unidades
+              <input id="adminQuantity" type="number" min="0" step="1" value="1" />
             </label>
             <label>
               Tipo
@@ -246,9 +251,10 @@
                   <select id="orderStatusFilter">
                     <option value="todos">Todos</option>
                     <option value="solicitado">Solicitado</option>
-                    <option value="reservado">Reservado</option>
+                    <option value="confirmado">Confirmado</option>
                     <option value="retirado">Retirado</option>
                     <option value="devolvido">Devolvido</option>
+                    <option value="finalizado">Finalizado</option>
                     <option value="cancelado">Cancelado</option>
                   </select>
                 </label>
@@ -258,6 +264,13 @@
             </div>
             <div class="order-summary" id="orderSummary" aria-label="Resumo de solicitações"></div>
             <div id="ordersList"></div>
+          </div>
+
+          <div class="admin-list">
+            <div class="admin-list-heading">
+              <h3>Clientes e histórico</h3>
+            </div>
+            <div id="customersList"></div>
           </div>
 
           <div class="admin-list agenda-panel">

@@ -29,6 +29,10 @@
 - Permitir status de solicitação: solicitado, reservado, retirado, devolvido e cancelado.
 - Criar fluxo local de entradas e saídas para locações, vendas e despesas.
 - Criar agenda operacional com próximas retiradas, devoluções e bloqueios.
+- Criar dashboard inicial com alertas do dia e valor previsto.
+- Salvar histórico local de clientes a partir das solicitações.
+- Gerar recibo e contrato simples de locação para PDF.
+- Adicionar controle simples de estoque/unidades.
 - Listar itens e bloqueios cadastrados.
 - Trocar a senha simples de protótipo por login real.
 
@@ -50,6 +54,7 @@
 - Exportar solicitações filtradas por período em CSV.
 - Calcular locações por diária e refletir o total no WhatsApp, solicitações e fluxo financeiro.
 - Gerar relatório PDF do fluxo financeiro com logo da empresa.
+- Melhorar busca pública com filtros por idade, gênero, preço e tamanho.
 
 ## Fase 6 - Loja futura
 

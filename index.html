@@ -97,6 +97,39 @@
           <button class="segment" data-filter="masculino" type="button">Masculino</button>
           <button class="segment" data-filter="tematico" type="button">Temáticos</button>
         </div>
+
+        <div class="catalog-filters" aria-label="Filtros avançados do catálogo">
+          <label>
+            Idade
+            <select id="audienceFilter">
+              <option value="todos">Todas</option>
+              <option value="infantil">Infantil</option>
+              <option value="adulto">Adulto</option>
+            </select>
+          </label>
+          <label>
+            Gênero
+            <select id="genderFilter">
+              <option value="todos">Todos</option>
+              <option value="feminino">Feminino</option>
+              <option value="masculino">Masculino</option>
+              <option value="unissex">Unissex</option>
+            </select>
+          </label>
+          <label>
+            Faixa de preço
+            <select id="priceFilter">
+              <option value="todos">Todos</option>
+              <option value="ate-100">Até R$ 100</option>
+              <option value="100-200">R$ 100 a R$ 200</option>
+              <option value="acima-200">Acima de R$ 200</option>
+            </select>
+          </label>
+          <label>
+            Tamanho
+            <input id="sizeFilter" type="search" placeholder="Ex: M, G, Infantil 8" />
+          </label>
+        </div>
       </section>
 
       <section class="catalog-grid" id="catalogGrid" aria-live="polite"></section>

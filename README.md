@@ -48,6 +48,10 @@ com a logo da Art & Cost no cabeçalho.
 O painel também possui uma agenda de locações com próximas retiradas,
 devoluções e bloqueios manuais em ordem de data.
 
+O painel administrativo inclui dashboard diário, histórico de clientes,
+controle simples de estoque/unidades e geração de recibo ou contrato de locação
+para salvar em PDF.
+
 Para acelerar o cadastro real, o painel oferece um modelo CSV e importação de
 produtos por planilha.
 
