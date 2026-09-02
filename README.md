@@ -32,6 +32,9 @@ reservas, retiradas, devoluções e cancelamentos.
 Ao marcar uma solicitação de locação como reservada, o período é bloqueado
 automaticamente no item para evitar conflito com outra reserva.
 
+Cada solicitação possui um botão para responder a cliente pelo WhatsApp com uma
+mensagem pronta conforme o status do atendimento.
+
 O painel também possui um fluxo financeiro local para lançar entradas, saídas,
 locações, vendas, ajustes e manutenções.
 

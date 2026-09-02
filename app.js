@@ -357,6 +357,71 @@ function sanitizePhone(value) {
   return String(value || "").replace(/\D/g, "");
 }
 
+function customerWhatsappPhone(value) {
+  const phone = sanitizePhone(value);
+  if (!phone) return "";
+  if (phone.startsWith("55")) return phone;
+  if (phone.length === 10 || phone.length === 11) return `55${phone}`;
+  return phone;
+}
+
+function customerWhatsappUrl(order) {
+  return `https://wa.me/${customerWhatsappPhone(order.customerPhone)}?text=${encodeURIComponent(customerReplyMessage(order))}`;
+}
+
+function customerReplyMessage(order) {
+  const greeting = `Olá, ${order.customerName || "tudo bem"}! Aqui é da Art & Cost Fantasias.`;
+  const itemLine = `Item: ${order.productName}`;
+  const valueLine = orderValueDetails(order);
+
+  if (order.status === "reservado") {
+    return `${greeting}
+
+Sua reserva foi confirmada.
+${itemLine}
+${order.period ? `Período: ${order.period}` : "Período: não informado"}
+${valueLine}
+
+Qualquer ajuste de horário ou tamanho, pode nos chamar por aqui.`;
+  }
+
+  if (order.status === "cancelado") {
+    return `${greeting}
+
+Passando para avisar que a solicitação abaixo foi cancelada:
+${itemLine}
+${order.period ? `Período: ${order.period}` : ""}
+
+Se quiser escolher outra data ou fantasia, ficamos à disposição.`;
+  }
+
+  if (order.status === "retirado") {
+    return `${greeting}
+
+Registramos a retirada da fantasia.
+${itemLine}
+${order.period ? `Período combinado: ${order.period}` : ""}
+
+Obrigada pela preferência.`;
+  }
+
+  if (order.status === "devolvido") {
+    return `${greeting}
+
+Registramos a devolução da fantasia.
+${itemLine}
+
+Obrigada pela preferência.`;
+  }
+
+  return `${greeting}
+
+Recebemos sua solicitação e vamos confirmar a disponibilidade.
+${itemLine}
+${order.period ? `Período solicitado: ${order.period}` : "Tipo: compra"}
+${valueLine}`;
+}
+
 async function sha256(value) {
   const bytes = new TextEncoder().encode(value);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
@@ -738,6 +803,7 @@ function renderOrdersList() {
     .map(
       (order) => {
         const hasCashflow = state.cashflow.some((entry) => entry.sourceOrderId === order.id);
+        const hasCustomerPhone = Boolean(customerWhatsappPhone(order.customerPhone));
         return `
         <article class="admin-item">
           <div>
@@ -747,6 +813,7 @@ function renderOrdersList() {
             <span>${order.period || "Pedido de compra"} | ${order.notes}</span>
           </div>
           <div class="admin-actions">
+            <button class="admin-edit" type="button" data-order-whatsapp="${order.id}" ${hasCustomerPhone ? "" : "disabled"}>Responder WhatsApp</button>
             <button class="admin-edit" type="button" data-order-cashflow="${order.id}" ${hasCashflow ? "disabled" : ""}>${hasCashflow ? "Lançado" : "Lançar entrada"}</button>
             <select class="status-select" data-order-status="${order.id}" aria-label="Status da solicitação">
               ${orderStatusOptions(order.status)}
@@ -1558,6 +1625,15 @@ adminList?.addEventListener("click", (event) => {
 });
 
 ordersList?.addEventListener("click", (event) => {
+  const whatsappButton = event.target.closest("[data-order-whatsapp]");
+  if (whatsappButton) {
+    const order = state.orders.find((item) => item.id === whatsappButton.dataset.orderWhatsapp);
+    if (order && customerWhatsappPhone(order.customerPhone)) {
+      window.open(customerWhatsappUrl(order), "_blank", "noopener");
+    }
+    return;
+  }
+
   const cashflowButton = event.target.closest("[data-order-cashflow]");
   if (cashflowButton) {
     addCashflowFromOrder(cashflowButton.dataset.orderCashflow);
