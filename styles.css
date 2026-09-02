@@ -942,14 +942,16 @@ body.admin-visible .admin-panel {
   padding: 20px;
 }
 
-.finance-summary {
+.finance-summary,
+.order-summary {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin: 16px 0;
 }
 
-.finance-summary article {
+.finance-summary article,
+.order-summary article {
   background: var(--soft);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -959,15 +961,21 @@ body.admin-visible .admin-panel {
   padding: 16px;
 }
 
-.finance-summary span {
+.finance-summary span,
+.order-summary span {
   color: var(--muted);
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
 }
 
-.finance-summary strong {
+.finance-summary strong,
+.order-summary strong {
   font-size: 26px;
+}
+
+.order-summary {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .finance-form {
@@ -1077,6 +1085,10 @@ body.admin-visible .admin-panel {
   gap: 6px;
   min-width: min(260px, 100%);
   text-transform: uppercase;
+}
+
+.compact-filter {
+  min-width: 150px;
 }
 
 .admin-filter input,
@@ -1360,6 +1372,7 @@ dd {
   .block-form,
   .finance-form,
   .finance-summary,
+  .order-summary,
   .featured-strip,
   .info-band {
     grid-template-columns: 1fr;

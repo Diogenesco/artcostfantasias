@@ -226,6 +226,21 @@
             <div class="admin-list-heading">
               <h3>Solicitações recebidas neste navegador</h3>
               <div class="admin-list-actions">
+                <label class="admin-filter compact-filter">
+                  <span>Data inicial</span>
+                  <input id="orderDateStart" type="date" />
+                </label>
+                <label class="admin-filter compact-filter">
+                  <span>Data final</span>
+                  <input id="orderDateEnd" type="date" />
+                </label>
+                <label class="admin-filter compact-filter">
+                  <span>Filtrar por</span>
+                  <select id="orderDateField">
+                    <option value="createdAt">Solicitação</option>
+                    <option value="eventDate">Evento</option>
+                  </select>
+                </label>
                 <label class="admin-filter">
                   <span>Status</span>
                   <select id="orderStatusFilter">
@@ -237,9 +252,11 @@
                     <option value="cancelado">Cancelado</option>
                   </select>
                 </label>
+                <button class="admin-edit" id="exportOrders" type="button">Exportar CSV</button>
                 <button class="admin-delete" id="clearOrders" type="button">Limpar histórico</button>
               </div>
             </div>
+            <div class="order-summary" id="orderSummary" aria-label="Resumo de solicitações"></div>
             <div id="ordersList"></div>
           </div>
 

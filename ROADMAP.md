@@ -44,6 +44,7 @@
 - Registrar nome, telefone e observações da cliente.
 - Criar status: solicitado, reservado, retirado, devolvido e cancelado.
 - Gerar relatório simples de reservas por período.
+- Exportar solicitações filtradas por período em CSV.
 
 ## Fase 6 - Loja futura
 

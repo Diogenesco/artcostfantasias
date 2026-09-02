@@ -119,6 +119,9 @@ const state = {
   filter: "todos",
   adminProductSearch: "",
   orderStatusFilter: "todos",
+  orderDateField: "createdAt",
+  orderDateStart: "",
+  orderDateEnd: "",
   selectedProductId: null,
 };
 
@@ -135,8 +138,12 @@ const dialog = document.querySelector("#productDialog");
 const adminList = document.querySelector("#adminList");
 const adminStats = document.querySelector("#adminStats");
 const ordersList = document.querySelector("#ordersList");
+const orderSummary = document.querySelector("#orderSummary");
 const adminProductSearch = document.querySelector("#adminProductSearch");
 const orderStatusFilter = document.querySelector("#orderStatusFilter");
+const orderDateField = document.querySelector("#orderDateField");
+const orderDateStart = document.querySelector("#orderDateStart");
+const orderDateEnd = document.querySelector("#orderDateEnd");
 const cashflowList = document.querySelector("#cashflowList");
 const financeSummary = document.querySelector("#financeSummary");
 const blockProduct = document.querySelector("#blockProduct");
@@ -583,11 +590,54 @@ function renderAdminList() {
     .join("");
 }
 
+function orderMatchesFilters(order) {
+  const statusMatch = state.orderStatusFilter === "todos" || order.status === state.orderStatusFilter;
+  const sourceDate = state.orderDateField === "eventDate" ? order.eventDate : order.createdAt;
+  const dateValue = String(sourceDate || "").slice(0, 10);
+  const afterStart = !state.orderDateStart || (dateValue && dateValue >= state.orderDateStart);
+  const beforeEnd = !state.orderDateEnd || (dateValue && dateValue <= state.orderDateEnd);
+  return statusMatch && afterStart && beforeEnd;
+}
+
+function getFilteredOrders() {
+  return state.orders.filter(orderMatchesFilters);
+}
+
+function renderOrderSummary(orders) {
+  if (!orderSummary) return;
+  const rentals = orders.filter((order) => order.mode === "locacao").length;
+  const sales = orders.filter((order) => order.mode === "venda").length;
+  const open = orders.filter((order) => !["devolvido", "cancelado"].includes(order.status)).length;
+  const total = orders.reduce((sum, order) => sum + (Number(order.price) || 0), 0);
+
+  orderSummary.innerHTML = `
+    <article>
+      <span>Filtradas</span>
+      <strong>${orders.length}</strong>
+    </article>
+    <article>
+      <span>Locações</span>
+      <strong>${rentals}</strong>
+    </article>
+    <article>
+      <span>Vendas</span>
+      <strong>${sales}</strong>
+    </article>
+    <article>
+      <span>Em andamento</span>
+      <strong>${open}</strong>
+    </article>
+    <article>
+      <span>Valor previsto</span>
+      <strong>${money(total)}</strong>
+    </article>
+  `;
+}
+
 function renderOrdersList() {
   if (!ordersList) return;
-  const orders = state.orders.filter((order) =>
-    state.orderStatusFilter === "todos" || order.status === state.orderStatusFilter
-  );
+  const orders = getFilteredOrders();
+  renderOrderSummary(orders);
 
   if (!state.orders.length) {
     ordersList.innerHTML = `<p class="empty-admin">Nenhuma solicitação registrada ainda.</p>`;
@@ -764,6 +814,41 @@ function exportCashflowCsv() {
   const csv = `${headers.join(";")}\n${rows.map((row) => row.map(csvEscape).join(";")).join("\n")}\n`;
   downloadTextFile(
     `art-cost-fluxo-${new Date().toISOString().slice(0, 10)}.csv`,
+    csv,
+    "text/csv;charset=utf-8"
+  );
+}
+
+function exportOrdersCsv() {
+  const headers = [
+    "data_solicitacao",
+    "status",
+    "cliente",
+    "telefone",
+    "produto",
+    "tipo",
+    "data_evento",
+    "periodo",
+    "tamanho",
+    "valor",
+    "observacoes",
+  ];
+  const rows = getFilteredOrders().map((order) => [
+    formatDateTime(order.createdAt),
+    statusLabel(order.status),
+    order.customerName,
+    order.customerPhone,
+    order.productName,
+    order.modeLabel,
+    formatDateOnly(order.eventDate) || "",
+    order.period || "",
+    order.desiredSize || "",
+    String(Number(order.price || 0).toFixed(2)).replace(".", ","),
+    order.notes || "",
+  ]);
+  const csv = `${headers.join(";")}\n${rows.map((row) => row.map(csvEscape).join(";")).join("\n")}\n`;
+  downloadTextFile(
+    `art-cost-solicitacoes-${new Date().toISOString().slice(0, 10)}.csv`,
     csv,
     "text/csv;charset=utf-8"
   );
@@ -1110,6 +1195,21 @@ orderStatusFilter?.addEventListener("change", () => {
   renderOrdersList();
 });
 
+orderDateField?.addEventListener("change", () => {
+  state.orderDateField = orderDateField.value;
+  renderOrdersList();
+});
+
+orderDateStart?.addEventListener("input", () => {
+  state.orderDateStart = orderDateStart.value;
+  renderOrdersList();
+});
+
+orderDateEnd?.addEventListener("input", () => {
+  state.orderDateEnd = orderDateEnd.value;
+  renderOrdersList();
+});
+
 ["#bookingProduct", "#bookingMode", "#startDate", "#pickupTime", "#endDate", "#returnTime"].forEach((selector) => {
   document.querySelector(selector)?.addEventListener("input", () => {
     setDateLimits();
@@ -1299,6 +1399,8 @@ document.querySelector("#clearOrders")?.addEventListener("click", () => {
   saveOrders();
   refreshAll();
 });
+
+document.querySelector("#exportOrders")?.addEventListener("click", exportOrdersCsv);
 
 document.querySelector("#cashflowForm")?.addEventListener("submit", (event) => {
   event.preventDefault();
