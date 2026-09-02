@@ -1185,19 +1185,7 @@ function renderAdminDashboard() {
 function renderCustomersList() {
   if (!customersList) return;
   syncCustomersFromOrders();
-  const term = normalizeText(state.customerSearch);
-  const customers = state.customers.filter((customer) => {
-    if (!term) return true;
-    const customerOrders = state.orders.filter(
-      (order) => order.customerId === customer.id || customerWhatsappPhone(order.customerPhone) === customer.phone
-    );
-    const searchable = [
-      customer.name,
-      customer.phone,
-      ...customerOrders.map((order) => `${order.productName} ${order.modeLabel} ${statusLabel(order.status)}`),
-    ];
-    return normalizeText(searchable.join(" ")).includes(term);
-  });
+  const customers = getFilteredCustomers();
 
   if (!state.customers.length) {
     customersList.innerHTML = `<p class="empty-admin">Nenhum cliente registrado ainda.</p>`;
@@ -1211,9 +1199,7 @@ function renderCustomersList() {
 
   customersList.innerHTML = customers
     .map((customer) => {
-      const customerOrders = state.orders.filter(
-        (order) => order.customerId === customer.id || customerWhatsappPhone(order.customerPhone) === customer.phone
-      );
+      const customerOrders = ordersForCustomer(customer);
       const total = customerOrders.reduce((sum, order) => sum + orderTotal(order), 0);
       const lastOrder = [...customerOrders].sort((first, second) => String(second.createdAt).localeCompare(String(first.createdAt)))[0];
       return `
@@ -1230,6 +1216,26 @@ function renderCustomersList() {
       `;
     })
     .join("");
+}
+
+function ordersForCustomer(customer) {
+  return state.orders.filter(
+    (order) => order.customerId === customer.id || customerWhatsappPhone(order.customerPhone) === customer.phone
+  );
+}
+
+function getFilteredCustomers() {
+  const term = normalizeText(state.customerSearch);
+  return state.customers.filter((customer) => {
+    if (!term) return true;
+    const customerOrders = ordersForCustomer(customer);
+    const searchable = [
+      customer.name,
+      customer.phone,
+      ...customerOrders.map((order) => `${order.productName} ${order.modeLabel} ${statusLabel(order.status)}`),
+    ];
+    return normalizeText(searchable.join(" ")).includes(term);
+  });
 }
 
 function cashflowTypeLabel(type) {
@@ -1453,6 +1459,9 @@ function printDocument(title, bodyHtml) {
           .summary div { border: 1px solid #e6dccb; border-radius: 8px; padding: 14px; }
           .summary span { color: #716a5f; display: block; font-size: 11px; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; }
           .summary strong { font-size: 15px; }
+          table { border-collapse: collapse; margin-top: 16px; width: 100%; }
+          th, td { border-bottom: 1px solid #e6dccb; font-size: 12px; padding: 10px 8px; text-align: left; vertical-align: top; }
+          th { background: #f5f1e9; color: #716a5f; text-transform: uppercase; }
           .signature { display: grid; gap: 28px; grid-template-columns: 1fr 1fr; margin-top: 48px; }
           .signature div { border-top: 1px solid #1e1d1a; padding-top: 8px; text-align: center; }
           @media print { body { padding: 18mm; } }
@@ -1527,6 +1536,67 @@ function printRentalContract(orderId) {
         <div>Assinatura da cliente</div>
         <div>Art & Cost Fantasias</div>
       </section>
+    `
+  );
+}
+
+function exportCustomersCsv() {
+  syncCustomersFromOrders();
+  const headers = ["cliente", "telefone", "pedidos", "valor_total", "ultimo_atendimento"];
+  const rows = getFilteredCustomers().map((customer) => {
+    const customerOrders = ordersForCustomer(customer);
+    const total = customerOrders.reduce((sum, order) => sum + orderTotal(order), 0);
+    const lastOrder = [...customerOrders].sort((first, second) => String(second.createdAt).localeCompare(String(first.createdAt)))[0];
+    return [
+      customer.name,
+      customer.phone,
+      customerOrders.length,
+      String(total.toFixed(2)).replace(".", ","),
+      lastOrder ? `${formatDateOnly(lastOrder.createdAt)} - ${lastOrder.productName}` : "",
+    ];
+  });
+  const csv = `${headers.join(";")}\n${rows.map((row) => row.map(csvEscape).join(";")).join("\n")}\n`;
+  downloadTextFile(
+    `art-cost-clientes-${new Date().toISOString().slice(0, 10)}.csv`,
+    csv,
+    "text/csv;charset=utf-8"
+  );
+}
+
+function printAgendaPdf() {
+  const items = getRentalAgendaItems();
+  const rows = items.length
+    ? items
+        .map(
+          (item) => `
+            <tr>
+              <td>${escapeHtml(item.parts.date)}</td>
+              <td>${escapeHtml(item.parts.time)}</td>
+              <td>${escapeHtml(item.kind === "atrasado" ? "Atraso" : item.kind)}</td>
+              <td>${escapeHtml(item.title)}</td>
+              <td>${escapeHtml(item.details)}</td>
+            </tr>
+          `
+        )
+        .join("")
+    : `<tr><td colspan="5">Nenhum item encontrado para a agenda atual.</td></tr>`;
+
+  printDocument(
+    "Agenda de locações",
+    `
+      <p class="muted">Filtro: ${escapeHtml(agendaFilter?.selectedOptions?.[0]?.textContent || "Todos")}</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Hora</th>
+            <th>Tipo</th>
+            <th>Item</th>
+            <th>Detalhes</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
     `
   );
 }
@@ -2222,6 +2292,7 @@ document.querySelector("#clearOrders")?.addEventListener("click", () => {
 });
 
 document.querySelector("#exportOrders")?.addEventListener("click", exportOrdersCsv);
+document.querySelector("#exportCustomers")?.addEventListener("click", exportCustomersCsv);
 
 document.querySelector("#cashflowForm")?.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -2259,6 +2330,7 @@ document.querySelector("#clearCashflow")?.addEventListener("click", () => {
 
 document.querySelector("#exportCashflow")?.addEventListener("click", exportCashflowCsv);
 document.querySelector("#printCashflow")?.addEventListener("click", printCashflowPdf);
+document.querySelector("#printAgenda")?.addEventListener("click", printAgendaPdf);
 
 document.querySelector("#saveWhatsapp")?.addEventListener("click", () => {
   const phone = sanitizePhone(document.querySelector("#adminWhatsapp").value);

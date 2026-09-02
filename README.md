@@ -55,6 +55,9 @@ para salvar em PDF.
 O histórico de clientes possui busca por nome, telefone ou atendimento, e a
 agenda pode ser filtrada por retiradas, devoluções, bloqueios e atrasos.
 
+Clientes podem ser exportados em CSV, e a agenda filtrada pode ser gerada em
+PDF para conferência diária.
+
 Para acelerar o cadastro real, o painel oferece um modelo CSV e importação de
 produtos por planilha.
 

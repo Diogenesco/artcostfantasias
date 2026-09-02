@@ -32,6 +32,7 @@
 - Criar dashboard inicial com alertas do dia e valor previsto.
 - Salvar histórico local de clientes a partir das solicitações.
 - Permitir busca no histórico de clientes.
+- Exportar clientes filtrados em CSV.
 - Gerar recibo e contrato simples de locação para PDF.
 - Adicionar controle simples de estoque/unidades.
 - Listar itens e bloqueios cadastrados.
@@ -53,6 +54,7 @@
 - Responder a cliente pelo WhatsApp a partir da solicitação, com mensagem pronta por status.
 - Gerar relatório simples de reservas por período.
 - Destacar devoluções atrasadas na agenda operacional.
+- Gerar PDF da agenda filtrada para conferência diária.
 - Exportar solicitações filtradas por período em CSV.
 - Calcular locações por diária e refletir o total no WhatsApp, solicitações e fluxo financeiro.
 - Gerar relatório PDF do fluxo financeiro com logo da empresa.
