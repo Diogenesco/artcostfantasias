@@ -675,6 +675,14 @@ body.admin-visible .admin-panel {
   display: block;
 }
 
+body.admin-visible .topbar {
+  position: static;
+}
+
+body.admin-visible .brand img {
+  height: clamp(78px, 12vw, 150px);
+}
+
 .admin-back {
   color: var(--muted);
   display: inline-flex;
@@ -1324,6 +1332,23 @@ dd {
     min-height: 0;
   }
 
+  body.admin-visible .brand img {
+    height: 82px;
+  }
+
+  body.admin-visible .nav-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding: 10px 16px;
+  }
+
+  body.admin-visible .nav-cta,
+  body.admin-visible .admin-home-link {
+    min-height: 44px;
+    padding: 0 12px;
+    width: 100%;
+  }
+
   .drawer {
     flex-direction: column;
     top: 150px;
@@ -1368,14 +1393,32 @@ dd {
   .booking-form,
   .admin-form,
   .admin-grid,
-  .admin-stats,
   .block-form,
   .finance-form,
-  .finance-summary,
-  .order-summary,
   .featured-strip,
   .info-band {
     grid-template-columns: 1fr;
+  }
+
+  .admin-stats,
+  .finance-summary,
+  .order-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-item {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .admin-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-actions .status-select,
+  .admin-actions button {
+    width: 100%;
   }
 
   .admin-heading {
@@ -1517,6 +1560,53 @@ dd {
     padding-right: 14px;
   }
 
+  body.admin-visible .brand img {
+    height: 72px;
+  }
+
+  .admin-panel {
+    padding-top: 24px;
+  }
+
+  .admin-lock {
+    gap: 16px;
+  }
+
+  .admin-lock h2,
+  .admin-heading h2 {
+    font-size: 24px;
+  }
+
+  .admin-stats,
+  .finance-summary,
+  .order-summary {
+    gap: 10px;
+    grid-template-columns: 1fr;
+  }
+
+  .admin-stat,
+  .finance-summary article,
+  .order-summary article {
+    min-height: auto;
+    padding: 14px;
+  }
+
+  .admin-stat strong,
+  .finance-summary strong,
+  .order-summary strong {
+    font-size: 24px;
+  }
+
+  .admin-form,
+  .block-form,
+  .finance-form {
+    gap: 12px;
+  }
+
+  .image-tabs {
+    grid-template-columns: 1fr;
+  }
+
   .product-add {
     bottom: 12px;
     height: 46px;
@@ -1558,6 +1648,20 @@ dd {
   .admin-filter,
   .status-select {
     width: 100%;
+  }
+
+  .admin-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .finance-panel {
+    margin-left: -2px;
+    margin-right: -2px;
+    padding: 14px;
+  }
+
+  .finance-table {
+    min-width: 640px;
   }
 
   dl div {
