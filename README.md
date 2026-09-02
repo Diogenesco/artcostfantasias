@@ -32,6 +32,13 @@ reservas, retiradas, devoluções e cancelamentos.
 O painel também possui um fluxo financeiro local para lançar entradas, saídas,
 locações, vendas, ajustes e manutenções.
 
+Nas locações, o preço cadastrado é tratado como diária. O sistema calcula o
+total pelo período escolhido e usa esse valor nas solicitações, no WhatsApp e no
+fluxo financeiro.
+
+O fluxo financeiro permite exportar CSV e gerar um relatório para salvar em PDF
+com a logo da Art & Cost no cabeçalho.
+
 Para acelerar o cadastro real, o painel oferece um modelo CSV e importação de
 produtos por planilha.
 

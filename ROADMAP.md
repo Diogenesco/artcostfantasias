@@ -45,6 +45,8 @@
 - Criar status: solicitado, reservado, retirado, devolvido e cancelado.
 - Gerar relatório simples de reservas por período.
 - Exportar solicitações filtradas por período em CSV.
+- Calcular locações por diária e refletir o total no WhatsApp, solicitações e fluxo financeiro.
+- Gerar relatório PDF do fluxo financeiro com logo da empresa.
 
 ## Fase 6 - Loja futura
 

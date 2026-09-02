@@ -240,6 +240,15 @@ function csvEscape(value) {
   return `"${String(value || "").replace(/"/g, '""')}"`;
 }
 
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function parseCsv(text) {
   const rows = [];
   let cell = "";
@@ -313,6 +322,28 @@ function money(value) {
   }).format(value);
 }
 
+function rentalDays(start, end) {
+  if (!start || !end) return 1;
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime()) || endDate <= startDate) return 1;
+  return Math.max(1, Math.ceil((endDate - startDate) / 86400000));
+}
+
+function orderTotal(order) {
+  return Number(order.totalPrice ?? order.price ?? 0) || 0;
+}
+
+function orderDailyPrice(order) {
+  return Number(order.dailyPrice ?? order.price ?? 0) || 0;
+}
+
+function orderValueDetails(order) {
+  if (order.mode !== "locacao") return `Valor: ${money(orderTotal(order))}`;
+  const days = Number(order.rentalDays || 1);
+  return `Diária: ${money(orderDailyPrice(order))} | ${days} ${days === 1 ? "diária" : "diárias"} | Total: ${money(orderTotal(order))}`;
+}
+
 function normalizeText(value) {
   return String(value || "")
     .normalize("NFD")
@@ -375,6 +406,11 @@ function resetAdminAttempts() {
 function typeLabel(product) {
   if (product.type === "ambos") return "Venda e locação";
   return product.type === "venda" ? "Venda" : "Locação";
+}
+
+function productPriceLabel(product) {
+  if (product.type === "venda") return money(product.price);
+  return `${money(product.price)} / diária`;
 }
 
 function audienceLabel(product) {
@@ -514,7 +550,7 @@ function renderCatalog() {
             <button class="product-add" type="button" aria-label="Reservar ${product.name}" data-reserve="${product.id}">+</button>
           </div>
           <h3>${product.name}</h3>
-          <div class="price">${money(product.price)}</div>
+          <div class="price">${productPriceLabel(product)}</div>
           <div class="meta">${product.sizes} | ${audienceLabel(product)} | ${genderLabel(product)}</div>
         </article>
       `;
@@ -530,7 +566,7 @@ function renderBookingOptions() {
   const options = state.products
     .map(
       (product) =>
-        `<option value="${product.id}">${product.name} - ${money(product.price)}</option>`
+        `<option value="${product.id}">${product.name} - ${productPriceLabel(product)}</option>`
     )
     .join("");
 
@@ -608,7 +644,7 @@ function renderOrderSummary(orders) {
   const rentals = orders.filter((order) => order.mode === "locacao").length;
   const sales = orders.filter((order) => order.mode === "venda").length;
   const open = orders.filter((order) => !["devolvido", "cancelado"].includes(order.status)).length;
-  const total = orders.reduce((sum, order) => sum + (Number(order.price) || 0), 0);
+  const total = orders.reduce((sum, order) => sum + orderTotal(order), 0);
 
   orderSummary.innerHTML = `
     <article>
@@ -657,7 +693,7 @@ function renderOrdersList() {
         <article class="admin-item">
           <div>
             <strong>${order.customerName} - ${order.productName}</strong>
-            <span>${order.modeLabel} | ${money(order.price)} | ${formatDateTime(order.createdAt)} | ${statusLabel(order.status)}</span>
+            <span>${order.modeLabel} | ${orderValueDetails(order)} | ${formatDateTime(order.createdAt)} | ${statusLabel(order.status)}</span>
             <span>${order.customerPhone || "Sem telefone"} | Evento: ${formatDateOnly(order.eventDate) || "Não informado"} | Tamanho: ${order.desiredSize || "Não informado"}</span>
             <span>${order.period || "Pedido de compra"} | ${order.notes}</span>
           </div>
@@ -791,7 +827,7 @@ function addCashflowFromOrder(orderId) {
     type: "entrada",
     category: order.mode === "venda" ? "venda" : "locacao",
     description: `${order.modeLabel} - ${order.productName} - ${order.customerName}`,
-    amount: Number(order.price) || 0,
+    amount: orderTotal(order),
     sourceOrderId: order.id,
   });
 
@@ -819,6 +855,95 @@ function exportCashflowCsv() {
   );
 }
 
+function printCashflowPdf() {
+  const entries = [...state.cashflow].sort((first, second) =>
+    String(first.date).localeCompare(String(second.date))
+  );
+  const totals = entries.reduce(
+    (summary, entry) => {
+      const amount = Number(entry.amount) || 0;
+      if (entry.type === "saida") summary.out += amount;
+      else summary.in += amount;
+      return summary;
+    },
+    { in: 0, out: 0 }
+  );
+  const balance = totals.in - totals.out;
+  const rows = entries.length
+    ? entries
+        .map(
+          (entry) => `
+            <tr>
+              <td>${escapeHtml(formatDateOnly(entry.date))}</td>
+              <td>${escapeHtml(cashflowTypeLabel(entry.type))}</td>
+              <td>${escapeHtml(cashflowCategoryLabel(entry.category))}</td>
+              <td>${escapeHtml(entry.description)}</td>
+              <td class="money">${escapeHtml(money(Number(entry.amount) || 0))}</td>
+            </tr>
+          `
+        )
+        .join("")
+    : `<tr><td colspan="5">Nenhum lançamento registrado.</td></tr>`;
+  const reportWindow = window.open("", "_blank");
+  if (!reportWindow) return;
+
+  reportWindow.document.write(`
+    <!doctype html>
+    <html lang="pt-BR">
+      <head>
+        <meta charset="utf-8" />
+        <title>Fluxo financeiro | Art & Cost</title>
+        <style>
+          * { box-sizing: border-box; }
+          body { color: #1e1d1a; font-family: Arial, sans-serif; margin: 0; padding: 32px; }
+          header { align-items: center; border-bottom: 2px solid #d8a74a; display: flex; gap: 18px; margin-bottom: 24px; padding-bottom: 18px; }
+          header img { background: #080706; height: 78px; object-fit: contain; padding: 8px; width: 180px; }
+          h1 { font-size: 24px; margin: 0 0 8px; }
+          p { color: #716a5f; margin: 0; }
+          .summary { display: grid; gap: 10px; grid-template-columns: repeat(3, 1fr); margin: 24px 0; }
+          .summary div { border: 1px solid #e6dccb; border-radius: 8px; padding: 14px; }
+          .summary span { color: #716a5f; display: block; font-size: 11px; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; }
+          .summary strong { font-size: 20px; }
+          table { border-collapse: collapse; margin-top: 16px; width: 100%; }
+          th, td { border-bottom: 1px solid #e6dccb; font-size: 12px; padding: 10px 8px; text-align: left; vertical-align: top; }
+          th { background: #f5f1e9; color: #716a5f; text-transform: uppercase; }
+          .money { text-align: right; white-space: nowrap; }
+          @media print { body { padding: 18mm; } }
+        </style>
+      </head>
+      <body>
+        <header>
+          <img src="${window.location.origin}/assets/logo-art-cost-banner.png" alt="Art & Cost" />
+          <div>
+            <h1>Fluxo de entradas e saídas</h1>
+            <p>Relatório gerado em ${escapeHtml(formatDateTime(new Date().toISOString()))}</p>
+          </div>
+        </header>
+        <section class="summary">
+          <div><span>Entradas</span><strong>${escapeHtml(money(totals.in))}</strong></div>
+          <div><span>Saídas</span><strong>${escapeHtml(money(totals.out))}</strong></div>
+          <div><span>Saldo</span><strong>${escapeHtml(money(balance))}</strong></div>
+        </section>
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Tipo</th>
+              <th>Categoria</th>
+              <th>Descrição</th>
+              <th class="money">Valor</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </body>
+    </html>
+  `);
+  reportWindow.document.close();
+  reportWindow.focus();
+  reportWindow.print();
+}
+
 function exportOrdersCsv() {
   const headers = [
     "data_solicitacao",
@@ -829,8 +954,10 @@ function exportOrdersCsv() {
     "tipo",
     "data_evento",
     "periodo",
+    "diaria",
+    "quantidade_diarias",
     "tamanho",
-    "valor",
+    "valor_total",
     "observacoes",
   ];
   const rows = getFilteredOrders().map((order) => [
@@ -842,8 +969,10 @@ function exportOrdersCsv() {
     order.modeLabel,
     formatDateOnly(order.eventDate) || "",
     order.period || "",
+    order.mode === "locacao" ? String(orderDailyPrice(order).toFixed(2)).replace(".", ",") : "",
+    order.mode === "locacao" ? order.rentalDays || 1 : "",
     order.desiredSize || "",
-    String(Number(order.price || 0).toFixed(2)).replace(".", ","),
+    String(orderTotal(order).toFixed(2)).replace(".", ","),
     order.notes || "",
   ]);
   const csv = `${headers.join(";")}\n${rows.map((row) => row.map(csvEscape).join(";")).join("\n")}\n`;
@@ -924,7 +1053,7 @@ function openProduct(productId) {
   document.querySelector("#dialogType").textContent = typeLabel(product);
   document.querySelector("#dialogTitle").textContent = product.name;
   document.querySelector("#dialogDescription").textContent = product.description;
-  document.querySelector("#dialogPrice").textContent = money(product.price);
+  document.querySelector("#dialogPrice").textContent = productPriceLabel(product);
   document.querySelector("#dialogSizes").textContent = product.sizes;
   document.querySelector("#dialogReserve").dataset.id = product.id;
   dialog.showModal();
@@ -945,6 +1074,8 @@ function buildBookingMessage() {
   const start = makeDateTime("#startDate", "#pickupTime");
   const end = makeDateTime("#endDate", "#returnTime");
   const notes = document.querySelector("#bookingNotes").value || "Sem observações";
+  const days = rentalDays(start, end);
+  const totalPrice = product.price * days;
 
   if (bookingMode.value === "venda") {
     return `Olá! Tenho interesse em comprar com a Art & Cost.
@@ -966,7 +1097,9 @@ Cliente: ${customerName}
 Telefone: ${customerPhone}
 Item: ${product.name}
 Tipo: ${typeLabel(product)}
-Valor: ${money(product.price)}
+Diária: ${money(product.price)}
+Quantidade de diárias: ${days}
+Valor total previsto: ${money(totalPrice)}
 Data do evento: ${formatDateOnly(eventDate) || "Não informada"}
 Tamanho desejado: ${desiredSize}
 Retirada: ${formatDateTime(start)}
@@ -990,6 +1123,8 @@ function createOrderRecord() {
   const start = makeDateTime("#startDate", "#pickupTime");
   const end = makeDateTime("#endDate", "#returnTime");
   const isRental = bookingMode.value === "locacao";
+  const days = isRental ? rentalDays(start, end) : 1;
+  const totalPrice = isRental ? product.price * days : product.price;
 
   return {
     id: `order-${Date.now()}`,
@@ -1003,7 +1138,10 @@ function createOrderRecord() {
     productName: product.name,
     mode: bookingMode.value,
     modeLabel: isRental ? "Locação" : "Compra",
-    price: product.price,
+    price: totalPrice,
+    dailyPrice: product.price,
+    rentalDays: days,
+    totalPrice,
     period: isRental ? `${formatDateTime(start)} até ${formatDateTime(end)}` : "",
     notes,
   };
@@ -1437,6 +1575,7 @@ document.querySelector("#clearCashflow")?.addEventListener("click", () => {
 });
 
 document.querySelector("#exportCashflow")?.addEventListener("click", exportCashflowCsv);
+document.querySelector("#printCashflow")?.addEventListener("click", printCashflowPdf);
 
 document.querySelector("#saveWhatsapp")?.addEventListener("click", () => {
   const phone = sanitizePhone(document.querySelector("#adminWhatsapp").value);
