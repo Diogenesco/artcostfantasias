@@ -52,6 +52,9 @@ O painel administrativo inclui dashboard diário, histórico de clientes,
 controle simples de estoque/unidades e geração de recibo ou contrato de locação
 para salvar em PDF.
 
+O comprovante de reserva ou compra inclui número do pedido, dados da loja,
+dados da cliente, período, valores, campos de pagamento e espaço para assinatura.
+
 O histórico de clientes possui busca por nome, telefone ou atendimento, e a
 agenda pode ser filtrada por retiradas, devoluções, bloqueios e atrasos.
 

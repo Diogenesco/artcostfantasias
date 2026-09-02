@@ -1454,11 +1454,18 @@ function printDocument(title, bodyHtml) {
           h1 { font-size: 24px; margin: 0 0 8px; }
           h2 { font-size: 17px; margin: 24px 0 10px; }
           p, li { color: #38342e; font-size: 13px; line-height: 1.55; }
+          .receipt-code { color: #9e1f28; font-size: 13px; font-weight: 700; margin-top: 4px; }
           .muted { color: #716a5f; margin: 0; }
+          .document-note { background: #f5f1e9; border-left: 4px solid #d8a74a; margin: 18px 0; padding: 12px 14px; }
           .summary { display: grid; gap: 10px; grid-template-columns: repeat(2, 1fr); margin: 20px 0; }
           .summary div { border: 1px solid #e6dccb; border-radius: 8px; padding: 14px; }
           .summary span { color: #716a5f; display: block; font-size: 11px; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; }
           .summary strong { font-size: 15px; }
+          .totals { border: 2px solid #d8a74a; border-radius: 8px; display: grid; gap: 10px; grid-template-columns: repeat(3, 1fr); margin: 20px 0; padding: 14px; }
+          .totals div { display: grid; gap: 5px; }
+          .totals span { color: #716a5f; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+          .totals strong { font-size: 18px; }
+          .field-line { border-bottom: 1px solid #1e1d1a; display: inline-block; min-width: 160px; min-height: 18px; vertical-align: bottom; }
           table { border-collapse: collapse; margin-top: 16px; width: 100%; }
           th, td { border-bottom: 1px solid #e6dccb; font-size: 12px; padding: 10px 8px; text-align: left; vertical-align: top; }
           th { background: #f5f1e9; color: #716a5f; text-transform: uppercase; }
@@ -1484,26 +1491,61 @@ function printDocument(title, bodyHtml) {
   reportWindow.print();
 }
 
+function orderDocumentNumber(order) {
+  return String(order.id || "")
+    .replace(/^order-/, "AC-")
+    .slice(0, 18)
+    .toUpperCase();
+}
+
+function storeDocumentInfo() {
+  const whatsapp = customerWhatsappPhone(state.settings.whatsapp || DEFAULT_WHATSAPP_NUMBER);
+  return `
+    <section class="summary">
+      <div><span>Loja</span><strong>Art & Cost Fantasias</strong></div>
+      <div><span>WhatsApp</span><strong>${escapeHtml(whatsapp || DEFAULT_WHATSAPP_NUMBER)}</strong></div>
+      <div><span>Site</span><strong>artcostfantasias.com.br</strong></div>
+      <div><span>Emissão</span><strong>${escapeHtml(formatDateTime(new Date().toISOString()))}</strong></div>
+    </section>
+  `;
+}
+
 function printOrderReceipt(orderId) {
   const order = state.orders.find((item) => item.id === orderId);
   if (!order) return;
+  const total = orderTotal(order);
+  const daily = order.mode === "locacao" ? orderDailyPrice(order) : total;
+  const days = order.mode === "locacao" ? Number(order.rentalDays || 1) : 1;
   printDocument(
-    "Recibo de atendimento",
+    order.mode === "locacao" ? "Comprovante de reserva" : "Comprovante de compra",
     `
+      <p class="receipt-code">Pedido ${escapeHtml(orderDocumentNumber(order))}</p>
+      ${storeDocumentInfo()}
       <section class="summary">
         <div><span>Cliente</span><strong>${escapeHtml(order.customerName)}</strong></div>
         <div><span>Telefone</span><strong>${escapeHtml(order.customerPhone || "Não informado")}</strong></div>
         <div><span>Item</span><strong>${escapeHtml(order.productName)}</strong></div>
         <div><span>Status</span><strong>${escapeHtml(statusLabel(order.status))}</strong></div>
         <div><span>Tipo</span><strong>${escapeHtml(order.modeLabel)}</strong></div>
-        <div><span>Valor total</span><strong>${escapeHtml(money(orderTotal(order)))}</strong></div>
         <div><span>Evento</span><strong>${escapeHtml(formatDateOnly(order.eventDate) || "Não informado")}</strong></div>
         <div><span>Tamanho</span><strong>${escapeHtml(order.desiredSize || "Não informado")}</strong></div>
+        <div><span>Período</span><strong>${escapeHtml(order.period || "Pedido de compra")}</strong></div>
       </section>
-      <h2>Detalhes</h2>
-      <p>${escapeHtml(order.period || "Pedido de compra")}</p>
-      <p>${escapeHtml(orderValueDetails(order))}</p>
-      <p>Observações: ${escapeHtml(order.notes || "Sem observações")}</p>
+      <section class="totals">
+        <div><span>${order.mode === "locacao" ? "Diária" : "Valor do item"}</span><strong>${escapeHtml(money(daily))}</strong></div>
+        <div><span>${order.mode === "locacao" ? "Diárias" : "Quantidade"}</span><strong>${escapeHtml(String(days))}</strong></div>
+        <div><span>Total</span><strong>${escapeHtml(money(total))}</strong></div>
+      </section>
+      <h2>Pagamento</h2>
+      <p>Forma de pagamento: <span class="field-line"></span></p>
+      <p>Sinal/entrada: <span class="field-line"></span> Restante: <span class="field-line"></span></p>
+      <h2>Observações</h2>
+      <p>${escapeHtml(order.notes || "Sem observações")}</p>
+      <p class="document-note">Este comprovante registra a solicitação feita pelo atendimento da Art & Cost Fantasias. A confirmação final depende do status informado pela administração.</p>
+      <section class="signature">
+        <div>Assinatura da cliente</div>
+        <div>Art & Cost Fantasias</div>
+      </section>
     `
   );
 }
