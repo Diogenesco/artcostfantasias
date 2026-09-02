@@ -38,6 +38,7 @@
 - Melhorar comprovante com número do pedido, pagamento e assinatura.
 - Melhorar contrato de locação com termos de caução, atraso, avarias e acessórios.
 - Adicionar controle simples de estoque/unidades.
+- Respeitar múltiplas unidades da mesma fantasia na disponibilidade de locação.
 - Listar itens e bloqueios cadastrados.
 - Trocar a senha simples de protótipo por login real.
 

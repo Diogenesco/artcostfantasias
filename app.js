@@ -685,11 +685,32 @@ function periodsOverlap(firstStart, firstEnd, secondStart, secondEnd) {
   return new Date(firstStart) < new Date(secondEnd) && new Date(firstEnd) > new Date(secondStart);
 }
 
-function findConflict(product, start, end) {
+function productQuantity(product) {
+  return Math.max(1, Number(product?.quantity ?? 1) || 1);
+}
+
+function overlappingReservations(product, start, end) {
   if (!start || !end || new Date(start) >= new Date(end)) return null;
-  return (product.reservations || []).find((reservation) =>
+  return (product.reservations || []).filter((reservation) =>
     periodsOverlap(start, end, reservation.start, reservation.end)
   );
+}
+
+function availabilityForPeriod(product, start, end) {
+  const overlaps = overlappingReservations(product, start, end) || [];
+  const quantity = productQuantity(product);
+  return {
+    available: overlaps.length < quantity,
+    quantity,
+    used: overlaps.length,
+    remaining: Math.max(0, quantity - overlaps.length),
+    conflict: overlaps[0] || null,
+  };
+}
+
+function findConflict(product, start, end) {
+  const availability = availabilityForPeriod(product, start, end);
+  return availability.available ? null : availability.conflict;
 }
 
 function orderReservationId(orderId) {
@@ -718,9 +739,9 @@ function syncOrderReservation(order) {
 
   const product = state.products.find((item) => item.id === order.productId);
   if (!product) return true;
-  const conflict = findConflict(product, order.rentalStart, order.rentalEnd);
-  if (conflict) {
-    alert(`Não foi possível reservar. Já existe bloqueio neste período: ${conflict.reason || "reserva"}.`);
+  const availability = availabilityForPeriod(product, order.rentalStart, order.rentalEnd);
+  if (!availability.available) {
+    alert(`Não foi possível reservar. As ${availability.quantity} unidade(s) já estão bloqueadas neste período.`);
     return false;
   }
 
@@ -746,7 +767,7 @@ function syncOrderReservation(order) {
 function availabilityText(product) {
   const hasBlocks = (product.reservations || []).length > 0;
   return {
-    label: hasBlocks ? "Verificar datas" : "Disponível",
+    label: hasBlocks ? `Verificar datas (${productQuantity(product)} un.)` : `Disponível (${productQuantity(product)} un.)`,
     blocked: hasBlocks,
   };
 }
@@ -2049,14 +2070,14 @@ function updateAvailabilityMessage() {
     return;
   }
 
-  const conflict = findConflict(product, start, end);
-  if (conflict) {
-    availabilityMessage.textContent = `Este período está bloqueado: ${conflict.reason || "reserva"} de ${formatDateTime(conflict.start)} até ${formatDateTime(conflict.end)}.`;
+  const availability = availabilityForPeriod(product, start, end);
+  if (!availability.available) {
+    availabilityMessage.textContent = `Este período está indisponível. As ${availability.quantity} unidade(s) já estão bloqueadas.`;
     availabilityMessage.classList.add("show", "blocked");
     return;
   }
 
-  availabilityMessage.textContent = "Período livre no cadastro atual. A confirmação final será feita pelo WhatsApp.";
+  availabilityMessage.textContent = `Período livre. ${availability.remaining} de ${availability.quantity} unidade(s) disponível(is) no cadastro atual.`;
   availabilityMessage.classList.add("show", "ok");
 }
 
@@ -2253,7 +2274,7 @@ bookingForm?.addEventListener("submit", (event) => {
 
   if (
     bookingMode.value === "locacao" &&
-    (findConflict(product, start, end) || new Date(start) >= new Date(end) || new Date(start) < new Date())
+    (!availabilityForPeriod(product, start, end).available || new Date(start) >= new Date(end) || new Date(start) < new Date())
   ) {
     updateAvailabilityMessage();
     return;
@@ -2319,6 +2340,11 @@ document.querySelector("#blockForm")?.addEventListener("submit", (event) => {
   const end = document.querySelector("#blockEnd").value;
 
   if (!product || !start || !end || new Date(start) >= new Date(end) || new Date(start) < new Date()) return;
+  const availability = availabilityForPeriod(product, start, end);
+  if (!availability.available) {
+    alert(`Não foi possível bloquear. As ${availability.quantity} unidade(s) já estão ocupadas neste período.`);
+    return;
+  }
 
   product.reservations = product.reservations || [];
   product.reservations.push({

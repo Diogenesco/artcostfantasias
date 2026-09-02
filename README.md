@@ -35,6 +35,9 @@ pedido foi solicitado, confirmado, retirado, devolvido, finalizado ou cancelado.
 Ao marcar uma solicitação de locação como reservada, o período é bloqueado
 automaticamente no item para evitar conflito com outra reserva.
 
+Quando uma fantasia tem mais de uma unidade cadastrada, o sistema permite
+reservas simultâneas até atingir a quantidade disponível.
+
 Cada solicitação possui um botão para responder a cliente pelo WhatsApp com uma
 mensagem pronta conforme o status do atendimento.
 
