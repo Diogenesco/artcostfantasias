@@ -213,6 +213,7 @@ function normalizeOrder(order) {
     rentalStart: "",
     rentalEnd: "",
     customerId: "",
+    stockDeducted: false,
     statusHistory: [],
     ...order,
   };
@@ -612,9 +613,9 @@ function productPriceLabel(product) {
 }
 
 function productStockLabel(product) {
-  const quantity = Number(product.quantity ?? 1);
-  if (product.type === "locacao") return `${quantity || 1} ${quantity === 1 ? "unidade" : "unidades"}`;
-  return quantity > 0 ? `${quantity} em estoque` : "Sob consulta";
+  const quantity = product.type === "locacao" ? productQuantity(product) : saleStock(product);
+  if (product.type === "locacao") return `${quantity} ${quantity === 1 ? "unidade" : "unidades"}`;
+  return quantity > 0 ? `${quantity} em estoque` : "Esgotado";
 }
 
 function audienceLabel(product) {
@@ -687,6 +688,14 @@ function periodsOverlap(firstStart, firstEnd, secondStart, secondEnd) {
 
 function productQuantity(product) {
   return Math.max(1, Number(product?.quantity ?? 1) || 1);
+}
+
+function saleStock(product) {
+  return Math.max(0, Number(product?.quantity ?? 1) || 0);
+}
+
+function saleStockAvailable(product) {
+  return saleStock(product) > 0;
 }
 
 function overlappingReservations(product, start, end) {
@@ -764,8 +773,44 @@ function syncOrderReservation(order) {
   return true;
 }
 
+function updateSaleStock(order, nextStatus) {
+  if (order.mode !== "venda") return { ok: true, order };
+  const product = state.products.find((item) => item.id === order.productId);
+  if (!product) return { ok: true, order };
+  const shouldDeduct = nextStatus === "finalizado";
+  const alreadyDeducted = Boolean(order.stockDeducted);
+
+  if (shouldDeduct && !alreadyDeducted) {
+    if (!saleStockAvailable(product)) {
+      alert("Não foi possível finalizar a venda. Este item está sem estoque.");
+      return { ok: false, order };
+    }
+    state.products = state.products.map((item) =>
+      item.id === product.id ? { ...item, quantity: saleStock(item) - 1 } : item
+    );
+    saveProducts();
+    return { ok: true, order: { ...order, stockDeducted: true } };
+  }
+
+  if (!shouldDeduct && alreadyDeducted) {
+    state.products = state.products.map((item) =>
+      item.id === product.id ? { ...item, quantity: saleStock(item) + 1 } : item
+    );
+    saveProducts();
+    return { ok: true, order: { ...order, stockDeducted: false } };
+  }
+
+  return { ok: true, order };
+}
+
 function availabilityText(product) {
   const hasBlocks = (product.reservations || []).length > 0;
+  if (product.type === "venda" && !saleStockAvailable(product)) {
+    return { label: "Esgotado", blocked: true };
+  }
+  if (product.type === "ambos" && !saleStockAvailable(product)) {
+    return { label: "Venda esgotada", blocked: true };
+  }
   return {
     label: hasBlocks ? `Verificar datas (${productQuantity(product)} un.)` : `Disponível (${productQuantity(product)} un.)`,
     blocked: hasBlocks,
@@ -838,13 +883,14 @@ function renderCatalog() {
   catalogGrid.innerHTML = products
     .map((product) => {
       const status = availabilityText(product);
+      const reserveDisabled = product.type === "venda" && !saleStockAvailable(product);
       return `
         <article class="product-card" data-id="${product.id}" tabindex="0">
           <div class="product-image" style="background: linear-gradient(145deg, ${product.color}, #111);">
             <span class="status-pill ${status.blocked ? "blocked" : ""}">${status.label}</span>
             <span class="tag">${typeLabel(product)}</span>
             ${mediaMarkup(product)}
-            <button class="product-add" type="button" aria-label="Reservar ${product.name}" data-reserve="${product.id}">+</button>
+            <button class="product-add" type="button" aria-label="${reserveDisabled ? `Produto esgotado: ${product.name}` : `Reservar ${product.name}`}" data-reserve="${product.id}" ${reserveDisabled ? "disabled" : ""}>+</button>
           </div>
           <h3>${product.name}</h3>
           <div class="price">${productPriceLabel(product)}</div>
@@ -1788,14 +1834,16 @@ function renderBookingModes() {
   if (!product) return;
 
   if (product.type === "venda") {
-    bookingMode.innerHTML = `<option value="venda">Compra</option>`;
+    bookingMode.innerHTML = saleStockAvailable(product)
+      ? `<option value="venda">Compra</option>`
+      : `<option value="" disabled selected>Produto sem estoque</option>`;
     return;
   }
 
   if (product.type === "ambos") {
     bookingMode.innerHTML = `
       <option value="locacao">Locação</option>
-      <option value="venda">Compra</option>
+      ${saleStockAvailable(product) ? `<option value="venda">Compra</option>` : ""}
     `;
     return;
   }
@@ -1825,7 +1873,11 @@ function openProduct(productId) {
   document.querySelector("#dialogDescription").textContent = product.description;
   document.querySelector("#dialogPrice").textContent = productPriceLabel(product);
   document.querySelector("#dialogSizes").textContent = product.sizes;
-  document.querySelector("#dialogReserve").dataset.id = product.id;
+  const dialogReserve = document.querySelector("#dialogReserve");
+  const saleUnavailable = product.type === "venda" && !saleStockAvailable(product);
+  dialogReserve.dataset.id = product.id;
+  dialogReserve.disabled = saleUnavailable;
+  dialogReserve.textContent = saleUnavailable ? "Produto esgotado" : "Reservar este item";
   dialog.showModal();
 }
 
@@ -2056,7 +2108,20 @@ function updateAvailabilityMessage() {
   availabilityMessage.className = "availability-message";
   availabilityMessage.textContent = "";
 
-  if (!product || bookingMode.value !== "locacao" || !start || !end) return;
+  if (!product) return;
+
+  if (bookingMode.value === "venda") {
+    if (!saleStockAvailable(product)) {
+      availabilityMessage.textContent = "Produto sem estoque para compra no momento.";
+      availabilityMessage.classList.add("show", "blocked");
+      return;
+    }
+    availabilityMessage.textContent = `Compra disponível. ${saleStock(product)} unidade(s) em estoque no cadastro atual.`;
+    availabilityMessage.classList.add("show", "ok");
+    return;
+  }
+
+  if (bookingMode.value !== "locacao" || !start || !end) return;
 
   if (new Date(start) < new Date()) {
     availabilityMessage.textContent = "A retirada não pode ficar em data ou horário passado.";
@@ -2272,6 +2337,11 @@ bookingForm?.addEventListener("submit", (event) => {
   }
   customerPhoneInput.setCustomValidity("");
 
+  if (bookingMode.value === "venda" && !saleStockAvailable(product)) {
+    updateAvailabilityMessage();
+    return;
+  }
+
   if (
     bookingMode.value === "locacao" &&
     (!availabilityForPeriod(product, start, end).available || new Date(start) >= new Date(end) || new Date(start) < new Date())
@@ -2439,7 +2509,12 @@ ordersList?.addEventListener("change", (event) => {
   if (!statusSelect) return;
   const order = state.orders.find((item) => item.id === statusSelect.dataset.orderStatus);
   if (!order) return;
-  const updatedOrder = { ...order, status: statusSelect.value };
+  const stockUpdate = updateSaleStock(order, statusSelect.value);
+  if (!stockUpdate.ok) {
+    statusSelect.value = order.status;
+    return;
+  }
+  const updatedOrder = { ...stockUpdate.order, status: statusSelect.value };
   updatedOrder.statusHistory = addOrderStatusHistory(order, statusSelect.value);
   const synced = syncOrderReservation(updatedOrder);
   if (!synced) {

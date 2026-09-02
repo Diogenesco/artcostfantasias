@@ -38,6 +38,10 @@ automaticamente no item para evitar conflito com outra reserva.
 Quando uma fantasia tem mais de uma unidade cadastrada, o sistema permite
 reservas simultâneas até atingir a quantidade disponível.
 
+Nas vendas, itens com estoque zerado aparecem como esgotados e não podem gerar
+pedido de compra. Ao finalizar uma venda no painel, o estoque é reduzido em uma
+unidade; se o status for revertido, a unidade volta ao estoque.
+
 Cada solicitação possui um botão para responder a cliente pelo WhatsApp com uma
 mensagem pronta conforme o status do atendimento.
 

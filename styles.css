@@ -468,6 +468,13 @@ h2 {
   width: 54px;
 }
 
+.product-add:disabled,
+.primary-action:disabled {
+  background: rgba(255, 253, 248, 0.68);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
 .product-card h3 {
   font-size: 21px;
   letter-spacing: 0;
