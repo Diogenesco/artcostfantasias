@@ -182,6 +182,8 @@ function loadOrders() {
     customerPhone: "",
     eventDate: "",
     desiredSize: "",
+    rentalStart: "",
+    rentalEnd: "",
     ...order,
   }));
 }
@@ -467,6 +469,53 @@ function findConflict(product, start, end) {
   return (product.reservations || []).find((reservation) =>
     periodsOverlap(start, end, reservation.start, reservation.end)
   );
+}
+
+function orderReservationId(orderId) {
+  return `order-block-${orderId}`;
+}
+
+function removeOrderReservation(orderId) {
+  let changed = false;
+  state.products = state.products.map((product) => {
+    const reservations = product.reservations || [];
+    const nextReservations = reservations.filter((reservation) => reservation.id !== orderReservationId(orderId));
+    const productChanged = nextReservations.length !== reservations.length;
+    if (productChanged) changed = true;
+    return productChanged ? { ...product, reservations: nextReservations } : product;
+  });
+  if (changed) saveProducts();
+}
+
+function syncOrderReservation(order) {
+  removeOrderReservation(order.id);
+  if (order.status !== "reservado" || order.mode !== "locacao" || !order.rentalStart || !order.rentalEnd) return true;
+
+  const product = state.products.find((item) => item.id === order.productId);
+  if (!product) return true;
+  const conflict = findConflict(product, order.rentalStart, order.rentalEnd);
+  if (conflict) {
+    alert(`Não foi possível reservar. Já existe bloqueio neste período: ${conflict.reason || "reserva"}.`);
+    return false;
+  }
+
+  state.products = state.products.map((product) => {
+    if (product.id !== order.productId) return product;
+    return {
+      ...product,
+      reservations: [
+        ...(product.reservations || []),
+        {
+          id: orderReservationId(order.id),
+          start: order.rentalStart,
+          end: order.rentalEnd,
+          reason: `Reserva - ${order.customerName}`,
+        },
+      ],
+    };
+  });
+  saveProducts();
+  return true;
 }
 
 function availabilityText(product) {
@@ -1142,6 +1191,8 @@ function createOrderRecord() {
     dailyPrice: product.price,
     rentalDays: days,
     totalPrice,
+    rentalStart: isRental ? start : "",
+    rentalEnd: isRental ? end : "",
     period: isRental ? `${formatDateTime(start)} até ${formatDateTime(end)}` : "",
     notes,
   };
@@ -1515,6 +1566,7 @@ ordersList?.addEventListener("click", (event) => {
 
   const deleteButton = event.target.closest("[data-delete-order]");
   if (!deleteButton) return;
+  removeOrderReservation(deleteButton.dataset.deleteOrder);
   state.orders = state.orders.filter((order) => order.id !== deleteButton.dataset.deleteOrder);
   saveOrders();
   refreshAll();
@@ -1523,9 +1575,17 @@ ordersList?.addEventListener("click", (event) => {
 ordersList?.addEventListener("change", (event) => {
   const statusSelect = event.target.closest("[data-order-status]");
   if (!statusSelect) return;
+  const order = state.orders.find((item) => item.id === statusSelect.dataset.orderStatus);
+  if (!order) return;
+  const updatedOrder = { ...order, status: statusSelect.value };
+  const synced = syncOrderReservation(updatedOrder);
+  if (!synced) {
+    statusSelect.value = order.status;
+    return;
+  }
   state.orders = state.orders.map((order) =>
     order.id === statusSelect.dataset.orderStatus
-      ? { ...order, status: statusSelect.value }
+      ? updatedOrder
       : order
   );
   saveOrders();
@@ -1533,6 +1593,7 @@ ordersList?.addEventListener("change", (event) => {
 });
 
 document.querySelector("#clearOrders")?.addEventListener("click", () => {
+  state.orders.forEach((order) => removeOrderReservation(order.id));
   state.orders = [];
   saveOrders();
   refreshAll();

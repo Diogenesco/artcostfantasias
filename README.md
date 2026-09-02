@@ -29,6 +29,9 @@ painel administrativo e entram no arquivo de backup.
 O histórico local possui status operacional para acompanhar solicitações,
 reservas, retiradas, devoluções e cancelamentos.
 
+Ao marcar uma solicitação de locação como reservada, o período é bloqueado
+automaticamente no item para evitar conflito com outra reserva.
+
 O painel também possui um fluxo financeiro local para lançar entradas, saídas,
 locações, vendas, ajustes e manutenções.
 

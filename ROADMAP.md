@@ -43,6 +43,7 @@
 - Criar fluxo de confirmação de reserva.
 - Registrar nome, telefone e observações da cliente.
 - Criar status: solicitado, reservado, retirado, devolvido e cancelado.
+- Bloquear automaticamente a data da fantasia quando a solicitação for marcada como reservada.
 - Gerar relatório simples de reservas por período.
 - Exportar solicitações filtradas por período em CSV.
 - Calcular locações por diária e refletir o total no WhatsApp, solicitações e fluxo financeiro.
