@@ -146,6 +146,7 @@ const orderDateStart = document.querySelector("#orderDateStart");
 const orderDateEnd = document.querySelector("#orderDateEnd");
 const cashflowList = document.querySelector("#cashflowList");
 const financeSummary = document.querySelector("#financeSummary");
+const rentalAgenda = document.querySelector("#rentalAgenda");
 const blockProduct = document.querySelector("#blockProduct");
 const adminLock = document.querySelector("#adminLock");
 const adminContent = document.querySelector("#adminContent");
@@ -833,6 +834,87 @@ function renderOrdersList() {
     .join("");
 }
 
+function agendaDateParts(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+
+  return {
+    sortValue: date.getTime(),
+    date: new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit" }).format(date),
+    time: new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(date),
+  };
+}
+
+function getRentalAgendaItems() {
+  const floor = new Date();
+  floor.setDate(floor.getDate() - 1);
+  floor.setHours(0, 0, 0, 0);
+
+  const orderItems = state.orders
+    .filter((order) => order.mode === "locacao" && order.status !== "cancelado")
+    .flatMap((order) => {
+      const details = `${order.customerName} | ${statusLabel(order.status)} | ${orderValueDetails(order)}`;
+      return [
+        {
+          kind: "retirada",
+          date: order.rentalStart,
+          title: `Retirada - ${order.productName}`,
+          details,
+        },
+        {
+          kind: "devolucao",
+          date: order.rentalEnd,
+          title: `Devolução - ${order.productName}`,
+          details,
+        },
+      ];
+    });
+
+  const manualBlocks = state.products.flatMap((product) =>
+    (product.reservations || [])
+      .filter((reservation) => !String(reservation.id || "").startsWith("order-block-"))
+      .map((reservation) => ({
+        kind: "bloqueio",
+        date: reservation.start,
+        title: `Bloqueio - ${product.name}`,
+        details: `${reservation.reason || "Período bloqueado"} até ${formatDateTime(reservation.end)}`,
+      }))
+  );
+
+  return [...orderItems, ...manualBlocks]
+    .map((item) => ({ ...item, parts: agendaDateParts(item.date) }))
+    .filter((item) => item.parts && item.parts.sortValue >= floor.getTime())
+    .sort((first, second) => first.parts.sortValue - second.parts.sortValue)
+    .slice(0, 30);
+}
+
+function renderRentalAgenda() {
+  if (!rentalAgenda) return;
+  const items = getRentalAgendaItems();
+
+  if (!items.length) {
+    rentalAgenda.innerHTML = `<p class="empty-admin">Nenhuma retirada, devolução ou bloqueio futuro registrado.</p>`;
+    return;
+  }
+
+  rentalAgenda.innerHTML = items
+    .map(
+      (item) => `
+        <article class="agenda-item ${item.kind}">
+          <div class="agenda-date">
+            <strong>${item.parts.date}</strong>
+            <span>${item.parts.time}</span>
+          </div>
+          <div>
+            <strong>${escapeHtml(item.title)}</strong>
+            <span>${escapeHtml(item.details)}</span>
+          </div>
+        </article>
+      `
+    )
+    .join("");
+}
+
 function renderAdminStats() {
   if (!adminStats) return;
   const total = state.products.length;
@@ -1110,6 +1192,7 @@ function refreshAll() {
   renderBookingOptions();
   renderAdminList();
   renderOrdersList();
+  renderRentalAgenda();
   renderAdminStats();
   renderCashflow();
   updateRentalFields();

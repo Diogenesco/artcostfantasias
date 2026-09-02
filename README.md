@@ -45,6 +45,9 @@ fluxo financeiro.
 O fluxo financeiro permite exportar CSV e gerar um relatório para salvar em PDF
 com a logo da Art & Cost no cabeçalho.
 
+O painel também possui uma agenda de locações com próximas retiradas,
+devoluções e bloqueios manuais em ordem de data.
+
 Para acelerar o cadastro real, o painel oferece um modelo CSV e importação de
 produtos por planilha.
 

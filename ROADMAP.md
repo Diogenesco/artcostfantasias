@@ -28,6 +28,7 @@
 - Registrar histórico local de solicitações enviadas pelo formulário.
 - Permitir status de solicitação: solicitado, reservado, retirado, devolvido e cancelado.
 - Criar fluxo local de entradas e saídas para locações, vendas e despesas.
+- Criar agenda operacional com próximas retiradas, devoluções e bloqueios.
 - Listar itens e bloqueios cadastrados.
 - Trocar a senha simples de protótipo por login real.
 

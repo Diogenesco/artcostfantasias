@@ -1070,6 +1070,13 @@ body.admin-visible .brand img {
   margin-top: 34px;
 }
 
+.agenda-panel {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 20px;
+}
+
 .admin-list-heading {
   align-items: center;
   display: flex;
@@ -1124,6 +1131,56 @@ body.admin-visible .brand img {
   font-weight: 700;
   margin: 0;
   padding: 18px 0;
+}
+
+.agenda-item {
+  align-items: center;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 96px 1fr;
+  padding: 14px 0;
+}
+
+.agenda-date {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  min-height: 70px;
+  padding: 10px;
+  text-align: center;
+}
+
+.agenda-date strong {
+  color: var(--ink);
+  font-size: 18px;
+}
+
+.agenda-date span,
+.agenda-item span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.agenda-item > div:last-child strong {
+  color: var(--ink);
+  display: block;
+  margin-bottom: 5px;
+}
+
+.agenda-item.retirada .agenda-date {
+  border-color: rgba(15, 127, 92, 0.35);
+}
+
+.agenda-item.devolucao .agenda-date {
+  border-color: rgba(216, 167, 74, 0.55);
+}
+
+.agenda-item.bloqueio .agenda-date {
+  border-color: rgba(158, 31, 40, 0.35);
 }
 
 .status-select {
@@ -1658,6 +1715,20 @@ dd {
     margin-left: -2px;
     margin-right: -2px;
     padding: 14px;
+  }
+
+  .agenda-panel {
+    padding: 14px;
+  }
+
+  .agenda-item {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .agenda-date {
+    min-height: auto;
+    text-align: left;
   }
 
   .finance-table {
