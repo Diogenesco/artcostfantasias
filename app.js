@@ -403,16 +403,7 @@ function applyRemoteCatalog(data) {
 
 async function loadRemoteCatalog() {
   try {
-    const endpoint = isAdminRoute() ? ADMIN_CATALOG_ENDPOINT : PUBLIC_CATALOG_ENDPOINT;
-    const response = await fetch(endpoint, { cache: "no-store" });
-    if (response.status === 403) {
-      remoteCatalogAvailable = false;
-      renderStorageStatus(
-        "O catálogo central existe, mas a API administrativa precisa ser protegida no Cloudflare Access em /api/admin*.",
-        "error"
-      );
-      return;
-    }
+    const response = await fetch(PUBLIC_CATALOG_ENDPOINT, { cache: "no-store" });
     if (!response.ok) throw new Error("Falha ao consultar catálogo central.");
     const data = await response.json();
     remoteCatalogAvailable = Boolean(data.configured);
@@ -443,6 +434,9 @@ async function syncRemoteCatalog() {
     });
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
+      if (response.status === 401 || response.status === 403) {
+        throw new Error("A API administrativa bloqueou o salvamento. Acesse pelo domínio artcostfantasias.com.br/admin e confirme que /api/admin* está na mesma aplicação do Cloudflare Access.");
+      }
       throw new Error(data.error || "Não foi possível salvar online.");
     }
     const data = await response.json();
@@ -451,7 +445,7 @@ async function syncRemoteCatalog() {
     refreshAll();
   } catch (error) {
     renderStorageStatus(
-      "Não foi possível salvar no catálogo central agora. Confira as ligações DB, IMAGES e o Access de /api/admin*.",
+      error.message || "Não foi possível salvar no catálogo central agora. Confira as ligações DB, IMAGES e o Access de /api/admin*.",
       "error"
     );
   } finally {
