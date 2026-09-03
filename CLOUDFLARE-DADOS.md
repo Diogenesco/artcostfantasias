@@ -34,6 +34,9 @@ No Cloudflare Zero Trust Access, a aplicação administrativa deve proteger:
 A rota `/api/catalog` deve continuar pública, porque é ela que a vitrine usa
 para mostrar produtos aos visitantes.
 
+Importante: não remova a proteção de `/api/admin*`. A API administrativa
+confia nessa regra do Cloudflare Access para permitir cadastros e edições.
+
 ## 4. Publicar e testar
 
 Depois de salvar os bindings, publique novamente o projeto no Cloudflare Pages.

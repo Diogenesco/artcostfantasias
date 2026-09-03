@@ -19,10 +19,6 @@ function jsonResponse(data, status = 200) {
   });
 }
 
-function accessEmail(request) {
-  return request.headers.get("Cf-Access-Authenticated-User-Email") || "";
-}
-
 function decodeDataUrl(value) {
   const match = /^data:([^;,]+);base64,(.+)$/i.exec(value || "");
   if (!match) return null;
@@ -58,10 +54,8 @@ async function storeProductImages(products, env) {
   );
 }
 
-export async function onRequestGet({ env, request }) {
-  if (!accessEmail(request)) {
-    return jsonResponse({ error: "Acesso administrativo não autenticado." }, 403);
-  }
+// This route must stay protected by Cloudflare Access at /api/admin*.
+export async function onRequestGet({ env }) {
   if (!env.DB) {
     return jsonResponse({ configured: false, products: null, settings: null }, 200);
   }
@@ -76,9 +70,6 @@ export async function onRequestGet({ env, request }) {
 }
 
 export async function onRequestPut({ env, request }) {
-  if (!accessEmail(request)) {
-    return jsonResponse({ error: "Acesso administrativo não autenticado." }, 403);
-  }
   if (!env.DB) {
     return jsonResponse({ error: "Banco de dados ainda não configurado." }, 501);
   }
