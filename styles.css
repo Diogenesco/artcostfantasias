@@ -630,6 +630,22 @@ h2 {
   width: 100%;
 }
 
+.image-status {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.image-status.success {
+  color: var(--green);
+}
+
+.image-status.error {
+  color: var(--red);
+}
+
 .form-action,
 .wide-field {
   grid-column: 1 / -1;

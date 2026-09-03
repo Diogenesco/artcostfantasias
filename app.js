@@ -175,11 +175,13 @@ const adminContent = document.querySelector("#adminContent");
 const adminImage = document.querySelector("#adminImage");
 const adminImageFile = document.querySelector("#adminImageFile");
 const imagePreview = document.querySelector("#imagePreview");
+const imageStatus = document.querySelector("#imageStatus");
 const backupStatus = document.querySelector("#backupStatus");
 const backupStatusCard = document.querySelector("#backupStatusCard");
 const csvStatus = document.querySelector("#csvStatus");
 let selectedImageData = "";
 let editingProductId = "";
+let imageProcessing = false;
 
 function loadProducts() {
   const saved = localStorage.getItem(CATALOG_KEY);
@@ -265,7 +267,15 @@ function loadCustomers() {
 }
 
 function saveProducts() {
-  localStorage.setItem(CATALOG_KEY, JSON.stringify(state.products));
+  try {
+    localStorage.setItem(CATALOG_KEY, JSON.stringify(state.products));
+    return true;
+  } catch (error) {
+    alert(
+      "Não foi possível salvar. O navegador atingiu o limite de armazenamento. Exporte um backup, remova imagens muito pesadas ou use links de imagem."
+    );
+    return false;
+  }
 }
 
 function saveSettings() {
@@ -858,19 +868,62 @@ function availabilityText(product) {
 }
 
 function mediaMarkup(product) {
-  if (product.image) {
-    return `<img src="${product.image}" alt="${product.name}" loading="lazy" />`;
-  }
+  const fallback = `<span class="product-figure">${escapeHtml(product.icon)}</span>`;
+  if (!product.image) return fallback;
 
-  return `<span class="product-figure">${product.icon}</span>`;
+  return `
+    ${fallback}
+    <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" loading="lazy" onerror="this.remove()" />
+  `;
 }
 
 function updateImagePreview(value) {
   if (!imagePreview) return;
   imagePreview.classList.toggle("empty", !value);
   imagePreview.innerHTML = value
-    ? `<img src="${value}" alt="Prévia da fantasia" />`
+    ? `<img src="${escapeHtml(value)}" alt="Prévia da fantasia" onerror="this.parentElement.classList.add('empty');this.parentElement.textContent='Imagem não carregou. Use outro link ou envie o arquivo.';" />`
     : "Prévia da imagem";
+}
+
+function setImageStatus(message, type = "info") {
+  if (!imageStatus) return;
+  imageStatus.textContent = message;
+  imageStatus.className = `image-status ${type}`;
+}
+
+function setImageProcessing(processing) {
+  imageProcessing = processing;
+  const submitButton = document.querySelector("#adminSubmit");
+  if (!submitButton) return;
+  submitButton.disabled = processing;
+  submitButton.textContent = processing
+    ? "Preparando imagem..."
+    : editingProductId
+      ? "Salvar alterações"
+      : "Adicionar ao catálogo";
+}
+
+function compressImageFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.addEventListener("error", () => reject(new Error("Não foi possível ler a imagem.")));
+    reader.addEventListener("load", () => {
+      const image = new window.Image();
+      image.addEventListener("error", () => reject(new Error("Arquivo de imagem inválido.")));
+      image.addEventListener("load", () => {
+        const maxSize = 900;
+        const ratio = Math.min(1, maxSize / Math.max(image.width, image.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.width * ratio));
+        canvas.height = Math.max(1, Math.round(image.height * ratio));
+        const context = canvas.getContext("2d");
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.76));
+      });
+      image.src = String(reader.result || "");
+    });
+    reader.readAsDataURL(file);
+  });
 }
 
 function setImageSource(source) {
@@ -889,6 +942,8 @@ function resetAdminForm() {
   selectedImageData = "";
   setImageSource("url");
   updateImagePreview("");
+  setImageStatus("Imagens do computador serão otimizadas automaticamente antes de salvar.");
+  setImageProcessing(false);
   document.querySelector("#adminColor").value = "#b3202a";
   document.querySelector("#adminQuantity").value = "1";
   document.querySelector("#adminSubmit").textContent = "Adicionar ao catálogo";
@@ -2237,22 +2292,43 @@ document.querySelectorAll(".image-tab").forEach((button) => {
 adminImage?.addEventListener("input", () => {
   if (!document.querySelector('[data-image-source="url"]').classList.contains("active")) return;
   updateImagePreview(adminImage.value.trim());
+  setImageStatus(
+    adminImage.value.trim()
+      ? "Confira a prévia. Alguns sites bloqueiam uso direto da imagem; se não aparecer, use outro link ou envie o arquivo."
+      : "Cole o link direto da imagem ou use a aba Adicionar imagem.",
+    "info"
+  );
 });
 
-adminImageFile?.addEventListener("change", () => {
+adminImageFile?.addEventListener("change", async () => {
   const file = adminImageFile.files && adminImageFile.files[0];
   if (!file) {
     selectedImageData = "";
     updateImagePreview("");
+    setImageStatus("Nenhuma imagem selecionada.");
     return;
   }
 
-  const reader = new FileReader();
-  reader.addEventListener("load", () => {
-    selectedImageData = String(reader.result || "");
+  if (!file.type.startsWith("image/")) {
+    selectedImageData = "";
+    updateImagePreview("");
+    setImageStatus("Selecione um arquivo de imagem válido.", "error");
+    return;
+  }
+
+  try {
+    setImageProcessing(true);
+    setImageStatus("Otimizando imagem para salvar sem pesar o cadastro...", "info");
+    selectedImageData = await compressImageFile(file);
     updateImagePreview(selectedImageData);
-  });
-  reader.readAsDataURL(file);
+    setImageStatus("Imagem otimizada e pronta para salvar.", "success");
+  } catch (error) {
+    selectedImageData = "";
+    updateImagePreview("");
+    setImageStatus("Não foi possível preparar esta imagem. Tente outro arquivo ou use um link.", "error");
+  } finally {
+    setImageProcessing(false);
+  }
 });
 
 document.querySelector("#searchImageLink")?.addEventListener("click", () => {
@@ -2409,6 +2485,10 @@ document.querySelector("#dialogReserve")?.addEventListener("click", (event) => {
 
 document.querySelector("#adminForm")?.addEventListener("submit", (event) => {
   event.preventDefault();
+  if (imageProcessing) {
+    setImageStatus("Aguarde a imagem terminar de ser preparada antes de salvar.", "error");
+    return;
+  }
   const name = document.querySelector("#adminName").value.trim();
   const imageSource = document.querySelector(".image-tab.active").dataset.imageSource;
   const existingProduct = state.products.find((product) => product.id === editingProductId);
@@ -2431,13 +2511,18 @@ document.querySelector("#adminForm")?.addEventListener("submit", (event) => {
       "Item cadastrado no painel da Art & Cost.",
   };
 
+  const previousProducts = [...state.products];
+
   if (existingProduct) {
     state.products = state.products.map((item) => (item.id === product.id ? product : item));
   } else {
     state.products.unshift(product);
   }
 
-  saveProducts();
+  if (!saveProducts()) {
+    state.products = previousProducts;
+    return;
+  }
   refreshAll();
   resetAdminForm();
 });

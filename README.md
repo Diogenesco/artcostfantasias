@@ -20,6 +20,9 @@ No protótipo atual, as imagens podem ser cadastradas no painel por link ou por
 arquivo escolhido no computador. Esses dados ficam salvos no navegador até a
 integração com banco de dados e armazenamento real.
 
+Ao escolher arquivo do computador, o painel otimiza a imagem automaticamente para
+reduzir o risco de atingir o limite de armazenamento do navegador.
+
 O painel também permite exportar e importar um backup JSON do catálogo enquanto
 os dados ainda ficam salvos localmente no navegador.
 
