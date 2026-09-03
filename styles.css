@@ -939,6 +939,28 @@ body.admin-visible .brand img {
   margin-bottom: 24px;
 }
 
+.admin-local-warning {
+  background: rgba(216, 167, 74, 0.12);
+  border: 1px solid rgba(216, 167, 74, 0.35);
+  border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+}
+
+.admin-local-warning strong {
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.admin-local-warning span {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
 .admin-dashboard {
   display: grid;
   gap: 14px;
@@ -1777,6 +1799,10 @@ dd {
     padding-right: 14px;
   }
 
+  .product-image {
+    aspect-ratio: 3 / 4;
+  }
+
   .product-card h3 {
     font-size: 16px;
   }
@@ -1868,6 +1894,10 @@ dd {
 
   .image-tabs {
     grid-template-columns: 1fr;
+  }
+
+  .image-preview {
+    aspect-ratio: 3 / 4;
   }
 
   .product-add {
