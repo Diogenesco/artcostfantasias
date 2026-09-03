@@ -625,8 +625,10 @@ h2 {
 }
 
 .image-preview img {
+  background: rgba(255, 253, 248, 0.95);
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  padding: 6px;
   width: 100%;
 }
 
