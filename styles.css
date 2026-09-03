@@ -903,7 +903,15 @@ body.admin-visible .brand img {
   color: var(--red);
 }
 
-.product-image img,
+.product-image img {
+  background: rgba(255, 253, 248, 0.9);
+  height: 100%;
+  grid-area: 1 / 1;
+  object-fit: contain;
+  padding: 6px;
+  width: 100%;
+}
+
 .dialog-media img {
   height: 100%;
   grid-area: 1 / 1;
