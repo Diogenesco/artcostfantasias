@@ -23,6 +23,16 @@ integração com banco de dados e armazenamento real.
 Ao escolher arquivo do computador, o painel otimiza a imagem automaticamente para
 reduzir o risco de atingir o limite de armazenamento do navegador.
 
+Para que catálogo e imagens apareçam iguais para todos os visitantes, o projeto
+possui uma API em Cloudflare Pages Functions. Configure os bindings:
+
+- D1 database com o nome `DB`.
+- R2 bucket com o nome `IMAGES`.
+- Cloudflare Access protegendo `/admin*` e `/api/admin*`.
+
+Com esses bindings ativos, a vitrine lê o catálogo central em `/api/catalog` e o
+painel salva alterações em `/api/admin/catalog`.
+
 O painel também permite exportar e importar um backup JSON do catálogo enquanto
 os dados ainda ficam salvos localmente no navegador.
 

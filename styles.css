@@ -961,6 +961,14 @@ body.admin-visible .brand img {
   line-height: 1.45;
 }
 
+.admin-local-warning span.success {
+  color: var(--green);
+}
+
+.admin-local-warning span.error {
+  color: var(--red);
+}
+
 .admin-dashboard {
   display: grid;
   gap: 14px;

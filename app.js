@@ -4,6 +4,8 @@ const SETTINGS_KEY = "artCostSettings";
 const ORDERS_KEY = "artCostOrders";
 const CASHFLOW_KEY = "artCostCashflow";
 const CUSTOMERS_KEY = "artCostCustomers";
+const PUBLIC_CATALOG_ENDPOINT = "/api/catalog";
+const ADMIN_CATALOG_ENDPOINT = "/api/admin/catalog";
 const ADMIN_HASH = "ebec06905f9b68b38f09dcf72afbd4992696951bd6411d5b3dfb16001c5e9754";
 const ADMIN_ATTEMPTS_KEY = "artCostAdminAttempts";
 const ADMIN_LOCK_KEY = "artCostAdminLock";
@@ -176,16 +178,18 @@ const adminImage = document.querySelector("#adminImage");
 const adminImageFile = document.querySelector("#adminImageFile");
 const imagePreview = document.querySelector("#imagePreview");
 const imageStatus = document.querySelector("#imageStatus");
+const storageStatus = document.querySelector("#storageStatus");
 const backupStatus = document.querySelector("#backupStatus");
 const backupStatusCard = document.querySelector("#backupStatusCard");
 const csvStatus = document.querySelector("#csvStatus");
 let selectedImageData = "";
 let editingProductId = "";
 let imageProcessing = false;
+let remoteCatalogAvailable = false;
+let remoteCatalogSyncing = false;
+let remoteCatalogSyncTimer = null;
 
-function loadProducts() {
-  const saved = localStorage.getItem(CATALOG_KEY);
-  const products = saved ? JSON.parse(saved) : starterProducts;
+function normalizeProducts(products) {
   return products.map((product) => ({
     reservations: [],
     theme: "tematico",
@@ -194,6 +198,12 @@ function loadProducts() {
     image: "",
     ...product,
   }));
+}
+
+function loadProducts() {
+  const saved = localStorage.getItem(CATALOG_KEY);
+  const products = saved ? JSON.parse(saved) : starterProducts;
+  return normalizeProducts(products);
 }
 
 function loadSettings() {
@@ -269,8 +279,17 @@ function loadCustomers() {
 function saveProducts() {
   try {
     localStorage.setItem(CATALOG_KEY, JSON.stringify(state.products));
+    scheduleRemoteCatalogSync();
     return true;
   } catch (error) {
+    if (remoteCatalogAvailable && isAdminRoute()) {
+      scheduleRemoteCatalogSync();
+      renderStorageStatus(
+        "Catálogo será salvo online. O navegador local está cheio, então faça backup e prefira manter as imagens no armazenamento central.",
+        "warning"
+      );
+      return true;
+    }
     alert(
       "Não foi possível salvar. O navegador atingiu o limite de armazenamento. Exporte um backup, remova imagens muito pesadas ou use links de imagem."
     );
@@ -280,6 +299,7 @@ function saveProducts() {
 
 function saveSettings() {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+  scheduleRemoteCatalogSync();
 }
 
 function saveOrders() {
@@ -337,6 +357,106 @@ function renderBackupStatus() {
 function setCsvStatus(message) {
   if (!csvStatus) return;
   csvStatus.textContent = message;
+}
+
+function isAdminRoute() {
+  const path = window.location.pathname.replace(/\/$/, "");
+  return path.endsWith("/admin") || path.endsWith("/admin.html") || window.location.hash === "#admin";
+}
+
+function renderStorageStatus(message, type = "info") {
+  if (!storageStatus) return;
+  if (message) {
+    storageStatus.textContent = message;
+    storageStatus.className = type;
+    return;
+  }
+
+  storageStatus.textContent = remoteCatalogAvailable
+    ? "Catálogo central ligado. Produtos e imagens salvos no painel aparecerão para todos os visitantes."
+    : "Modo local ativo. Configure o banco de dados e o armazenamento da Cloudflare para sincronizar produtos e imagens entre dispositivos.";
+  storageStatus.className = remoteCatalogAvailable ? "success" : "warning";
+}
+
+function remoteCatalogPayload() {
+  return {
+    products: state.products,
+    settings: state.settings,
+  };
+}
+
+function applyRemoteCatalog(data) {
+  if (Array.isArray(data.products) && data.products.length) {
+    state.products = normalizeProducts(data.products);
+    localStorage.setItem(CATALOG_KEY, JSON.stringify(state.products));
+  }
+  if (data.settings && typeof data.settings === "object") {
+    state.settings = {
+      whatsapp: DEFAULT_WHATSAPP_NUMBER,
+      lastBackupAt: "",
+      ...state.settings,
+      ...data.settings,
+    };
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+  }
+}
+
+async function loadRemoteCatalog() {
+  try {
+    const endpoint = isAdminRoute() ? ADMIN_CATALOG_ENDPOINT : PUBLIC_CATALOG_ENDPOINT;
+    const response = await fetch(endpoint, { cache: "no-store" });
+    if (response.status === 403) {
+      remoteCatalogAvailable = false;
+      renderStorageStatus(
+        "O catálogo central existe, mas a API administrativa precisa ser protegida no Cloudflare Access em /api/admin*.",
+        "error"
+      );
+      return;
+    }
+    if (!response.ok) throw new Error("Falha ao consultar catálogo central.");
+    const data = await response.json();
+    remoteCatalogAvailable = Boolean(data.configured);
+    if (remoteCatalogAvailable) applyRemoteCatalog(data);
+    renderStorageStatus();
+    refreshAll();
+  } catch (error) {
+    remoteCatalogAvailable = false;
+    renderStorageStatus();
+  }
+}
+
+function scheduleRemoteCatalogSync() {
+  if (!remoteCatalogAvailable || !isAdminRoute()) return;
+  window.clearTimeout(remoteCatalogSyncTimer);
+  remoteCatalogSyncTimer = window.setTimeout(syncRemoteCatalog, 500);
+}
+
+async function syncRemoteCatalog() {
+  if (remoteCatalogSyncing || !remoteCatalogAvailable || !isAdminRoute()) return;
+  remoteCatalogSyncing = true;
+  renderStorageStatus("Salvando catálogo no armazenamento central...", "info");
+  try {
+    const response = await fetch(ADMIN_CATALOG_ENDPOINT, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(remoteCatalogPayload()),
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.error || "Não foi possível salvar online.");
+    }
+    const data = await response.json();
+    applyRemoteCatalog(data);
+    renderStorageStatus("Catálogo central salvo. As alterações já podem aparecer para os visitantes.", "success");
+    refreshAll();
+  } catch (error) {
+    renderStorageStatus(
+      "Não foi possível salvar no catálogo central agora. Confira as ligações DB, IMAGES e o Access de /api/admin*.",
+      "error"
+    );
+  } finally {
+    remoteCatalogSyncing = false;
+  }
 }
 
 function downloadTextFile(filename, content, type) {
@@ -1908,9 +2028,7 @@ function refreshAll() {
 }
 
 function syncAdminVisibility() {
-  const path = window.location.pathname.replace(/\/$/, "");
-  const isAdminPage = path.endsWith("/admin") || path.endsWith("/admin.html") || window.location.hash === "#admin";
-  document.body.classList.toggle("admin-visible", isAdminPage);
+  document.body.classList.toggle("admin-visible", isAdminRoute());
 }
 
 function selectProduct(productId) {
@@ -2838,3 +2956,4 @@ syncAdminVisibility();
 setDateLimits();
 if (adminSessionValid()) unlockAdmin();
 refreshAll();
+loadRemoteCatalog();
