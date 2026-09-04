@@ -1548,6 +1548,7 @@ body.admin-visible .brand img {
   box-shadow: var(--shadow);
   max-width: 920px;
   padding: 0;
+  position: relative;
   width: min(calc(100dvw - 28px), 920px);
 }
 
@@ -1567,18 +1568,21 @@ body.admin-visible .brand img {
   border-radius: 50%;
   color: var(--paper);
   height: 36px;
+  isolation: isolate;
   position: absolute;
   right: 12px;
   top: 12px;
   width: 36px;
-  z-index: 1;
+  z-index: 30;
 }
 
 .dialog-media {
   display: grid;
+  isolation: isolate;
   min-height: 420px;
   overflow: hidden;
   place-items: center;
+  position: relative;
 }
 
 .dialog-content {
