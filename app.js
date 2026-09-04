@@ -2035,8 +2035,8 @@ function selectProduct(productId) {
   document.querySelector("#pedido").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function lockProductDialogScroll() {
-  productDialogScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+function lockProductDialogScroll(scrollY = window.scrollY || document.documentElement.scrollTop || 0) {
+  productDialogScrollY = scrollY;
   document.body.style.top = `-${productDialogScrollY}px`;
   document.body.classList.add("dialog-open");
 }
@@ -2084,8 +2084,8 @@ function openProduct(productId) {
   if (!dialog) return;
   const product = state.products.find((item) => item.id === productId);
   if (!product) return;
+  const currentScrollY = window.scrollY || document.documentElement.scrollTop || 0;
 
-  lockProductDialogScroll();
   const dialogMedia = document.querySelector("#dialogMedia");
   dialogMedia.style.background = `linear-gradient(145deg, ${product.color}, #111)`;
   dialogMedia.innerHTML = mediaMarkup(product);
@@ -2100,6 +2100,7 @@ function openProduct(productId) {
   dialogReserve.disabled = saleUnavailable;
   dialogReserve.textContent = saleUnavailable ? "Produto esgotado" : "Reservar este item";
   dialog.showModal();
+  lockProductDialogScroll(currentScrollY);
 }
 
 function whatsappUrl(message) {
