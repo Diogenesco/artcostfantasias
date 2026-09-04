@@ -188,6 +188,7 @@ let imageProcessing = false;
 let remoteCatalogAvailable = false;
 let remoteCatalogSyncing = false;
 let remoteCatalogSyncTimer = null;
+let productDialogScrollY = 0;
 
 function normalizeProducts(products) {
   return products.map((product) => ({
@@ -2034,6 +2035,19 @@ function selectProduct(productId) {
   document.querySelector("#pedido").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function lockProductDialogScroll() {
+  productDialogScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+  document.body.style.top = `-${productDialogScrollY}px`;
+  document.body.classList.add("dialog-open");
+}
+
+function unlockProductDialogScroll() {
+  if (!document.body.classList.contains("dialog-open")) return;
+  document.body.classList.remove("dialog-open");
+  document.body.style.top = "";
+  window.scrollTo(0, productDialogScrollY);
+}
+
 function renderBookingModes() {
   if (!bookingProduct || !bookingMode) return;
   const product = state.products.find((item) => item.id === bookingProduct.value) || state.products[0];
@@ -2071,6 +2085,7 @@ function openProduct(productId) {
   const product = state.products.find((item) => item.id === productId);
   if (!product) return;
 
+  lockProductDialogScroll();
   const dialogMedia = document.querySelector("#dialogMedia");
   dialogMedia.style.background = `linear-gradient(145deg, ${product.color}, #111)`;
   dialogMedia.innerHTML = mediaMarkup(product);
@@ -2587,6 +2602,7 @@ bookingForm?.addEventListener("submit", (event) => {
 });
 
 document.querySelector("#dialogClose")?.addEventListener("click", () => dialog.close());
+dialog?.addEventListener("close", unlockProductDialogScroll);
 
 document.querySelector("#dialogReserve")?.addEventListener("click", (event) => {
   dialog.close();

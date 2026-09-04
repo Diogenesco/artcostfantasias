@@ -29,6 +29,14 @@ body {
   overflow-x: hidden;
 }
 
+body.dialog-open {
+  left: 0;
+  overflow: hidden;
+  position: fixed;
+  right: 0;
+  width: 100%;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -1564,20 +1572,24 @@ body.admin-visible .brand img {
 }
 
 .dialog-close {
+  align-self: start;
   background: var(--black);
   border-radius: 50%;
   color: var(--paper);
+  grid-column: 1;
+  grid-row: 1;
   height: 36px;
   isolation: isolate;
-  position: absolute;
-  right: 12px;
-  top: 12px;
+  justify-self: end;
+  margin: 12px;
   width: 36px;
   z-index: 30;
 }
 
 .dialog-media {
   display: grid;
+  grid-column: 1;
+  grid-row: 1;
   isolation: isolate;
   min-height: 420px;
   overflow: hidden;
@@ -1586,6 +1598,8 @@ body.admin-visible .brand img {
 }
 
 .dialog-content {
+  grid-column: 2;
+  grid-row: 1;
   padding: 36px;
 }
 
@@ -1666,6 +1680,17 @@ dd {
 
   .product-dialog[open] {
     max-height: calc(100dvh - 24px);
+  }
+
+  .dialog-close,
+  .dialog-media {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .dialog-content {
+    grid-column: 1;
+    grid-row: 2;
   }
 
   .hero {
@@ -2047,6 +2072,12 @@ dd {
 
   .product-dialog[open] {
     max-height: calc(100dvh - 24px);
+  }
+
+  .dialog-close {
+    height: 42px;
+    margin: 10px;
+    width: 42px;
   }
 
   .dialog-media {
