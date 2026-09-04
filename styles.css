@@ -17,6 +17,7 @@
 }
 
 html {
+  overflow-x: hidden;
   scroll-behavior: smooth;
 }
 
@@ -25,6 +26,7 @@ body {
   background: var(--paper);
   color: var(--ink);
   font-family: Inter, Arial, sans-serif;
+  overflow-x: hidden;
 }
 
 a {
@@ -37,6 +39,7 @@ input,
 select,
 textarea {
   font: inherit;
+  max-width: 100%;
 }
 
 .topbar {
@@ -466,6 +469,7 @@ h2 {
   position: absolute;
   right: 18px;
   width: 54px;
+  z-index: 3;
 }
 
 .product-add:disabled,
@@ -543,7 +547,9 @@ h2 {
   border-radius: 6px;
   color: var(--ink);
   min-height: 48px;
+  min-width: 0;
   padding: 0 12px;
+  width: 100%;
 }
 
 .admin-form textarea {
@@ -899,6 +905,7 @@ body.admin-visible .brand img {
   padding: 0 10px;
   position: absolute;
   top: 14px;
+  z-index: 3;
 }
 
 .status-pill.blocked {
@@ -912,24 +919,28 @@ body.admin-visible .brand img {
   object-fit: contain;
   padding: 6px;
   width: 100%;
+  z-index: 1;
 }
 
 .dialog-media img {
   height: 100%;
   grid-area: 1 / 1;
-  object-fit: cover;
+  object-fit: contain;
   width: 100%;
+  z-index: 1;
 }
 
 .product-image .tag {
   position: absolute;
   right: 14px;
   top: 14px;
+  z-index: 3;
 }
 
 .product-figure {
   grid-area: 1 / 1;
   justify-self: end;
+  z-index: 2;
 }
 
 .admin-grid {
@@ -1537,7 +1548,7 @@ body.admin-visible .brand img {
   box-shadow: var(--shadow);
   max-width: 920px;
   padding: 0;
-  width: min(calc(100vw - 28px), 920px);
+  width: min(calc(100dvw - 28px), 920px);
 }
 
 .product-dialog::backdrop {
@@ -1547,7 +1558,7 @@ body.admin-visible .brand img {
 .product-dialog[open] {
   display: grid;
   grid-template-columns: minmax(260px, 0.85fr) minmax(260px, 1fr);
-  max-height: calc(100vh - 28px);
+  max-height: calc(100dvh - 28px);
   overflow: auto;
 }
 
@@ -1564,7 +1575,10 @@ body.admin-visible .brand img {
 }
 
 .dialog-media {
+  display: grid;
   min-height: 420px;
+  overflow: hidden;
+  place-items: center;
 }
 
 .dialog-content {
@@ -1641,6 +1655,15 @@ dd {
     grid-template-columns: 1fr;
   }
 
+  .product-dialog {
+    border-radius: 8px;
+    width: min(calc(100dvw - 24px), 680px);
+  }
+
+  .product-dialog[open] {
+    max-height: calc(100dvh - 24px);
+  }
+
   .hero {
     min-height: auto;
     padding-top: 42px;
@@ -1674,7 +1697,6 @@ dd {
     font-size: 18px;
   }
 
-  .booking-form,
   .admin-form,
   .admin-grid,
   .block-form,
@@ -1682,6 +1704,19 @@ dd {
   .featured-strip,
   .info-band {
     grid-template-columns: 1fr;
+  }
+
+  .booking-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .booking-form label {
+    grid-column: 1 / -1;
+  }
+
+  .booking-form label:nth-child(5),
+  .booking-form .rental-field {
+    grid-column: auto;
   }
 
   .admin-stats,
@@ -1715,7 +1750,9 @@ dd {
   }
 
   .dialog-media {
-    min-height: 260px;
+    aspect-ratio: 4 / 3;
+    max-height: 48dvh;
+    min-height: 0;
   }
 
   .dialog-content {
@@ -1802,17 +1839,18 @@ dd {
   }
 
   .catalog-grid {
-    gap: 20px 14px;
-    padding-left: 14px;
-    padding-right: 14px;
+    gap: 18px 12px;
+    padding-left: 12px;
+    padding-right: 12px;
   }
 
   .product-image {
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 4 / 5;
   }
 
   .product-card h3 {
-    font-size: 16px;
+    font-size: 15px;
+    margin-top: 12px;
   }
 
   .status-pill {
@@ -1837,11 +1875,12 @@ dd {
   }
 
   .price {
-    font-size: 19px;
+    font-size: 17px;
   }
 
   .meta {
-    font-size: 12px;
+    font-size: 11px;
+    line-height: 1.25;
   }
 
   .booking-panel,
@@ -1850,6 +1889,22 @@ dd {
   .atelier-band {
     padding-left: 14px;
     padding-right: 14px;
+  }
+
+  .booking-form {
+    gap: 12px 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .booking-form label:nth-child(5),
+  .booking-form .rental-field {
+    grid-column: auto;
+  }
+
+  .booking-form label:nth-child(5) input,
+  .booking-form .rental-field input {
+    padding-left: 8px;
+    padding-right: 8px;
   }
 
   body.admin-visible .brand img {
@@ -1878,7 +1933,8 @@ dd {
   }
 
   .catalog-filters {
-    grid-template-columns: 1fr;
+    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .admin-stat,
@@ -1910,9 +1966,10 @@ dd {
 
   .product-add {
     bottom: 12px;
-    height: 46px;
+    font-size: 23px;
+    height: 42px;
     right: 12px;
-    width: 46px;
+    width: 42px;
   }
 
   .primary-action,
@@ -1977,6 +2034,24 @@ dd {
 
   .finance-table {
     min-width: 640px;
+  }
+
+  .product-dialog {
+    border-radius: 8px;
+    width: calc(100dvw - 24px);
+  }
+
+  .product-dialog[open] {
+    max-height: calc(100dvh - 24px);
+  }
+
+  .dialog-media {
+    aspect-ratio: 3 / 4;
+    max-height: 52dvh;
+  }
+
+  .dialog-content {
+    padding: 24px;
   }
 
   dl div {

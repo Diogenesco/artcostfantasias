@@ -982,11 +982,9 @@ function availabilityText(product) {
 }
 
 function mediaMarkup(product) {
-  const fallback = `<span class="product-figure">${escapeHtml(product.icon)}</span>`;
-  if (!product.image) return fallback;
+  if (!product.image) return "";
 
   return `
-    ${fallback}
     <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" loading="lazy" onerror="this.remove()" />
   `;
 }
