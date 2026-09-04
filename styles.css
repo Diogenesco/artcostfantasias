@@ -934,8 +934,9 @@ body.admin-visible .brand img {
   grid-area: 1 / 1;
   height: auto;
   max-height: min(72dvh, 720px);
+  max-width: 100%;
   object-fit: contain;
-  width: 100%;
+  width: auto;
   z-index: 1;
 }
 
@@ -1784,13 +1785,14 @@ dd {
   }
 
   .dialog-media {
-    aspect-ratio: 4 / 3;
+    aspect-ratio: auto;
     max-height: 52dvh;
     min-height: 0;
   }
 
   .dialog-media img {
     max-height: 52dvh;
+    max-width: 100%;
   }
 
   .dialog-content {
@@ -2097,6 +2099,7 @@ dd {
 
   .dialog-media img {
     max-height: 50dvh;
+    max-width: 100%;
   }
 
   .dialog-content {
