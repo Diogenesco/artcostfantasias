@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Parisienne&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260904-2" />
+    <link rel="stylesheet" href="styles.css?v=20260905-1" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png" />
     <link rel="icon" type="image/png" href="/assets/favicon-32.png" />
@@ -179,6 +179,7 @@
           <label>
             Data do evento
             <input id="eventDate" type="date" />
+            <span class="field-example">Ex: 14/09/2026</span>
           </label>
           <label>
             Tamanho desejado
@@ -187,18 +188,22 @@
           <label class="rental-field">
             Início da locação
             <input id="startDate" type="date" required />
+            <span class="field-example">Ex: 13/09/2026</span>
           </label>
           <label class="rental-field">
             Hora da retirada
             <input id="pickupTime" type="time" required />
+            <span class="field-example">Ex: 15:00</span>
           </label>
           <label class="rental-field">
             Fim da locação
             <input id="endDate" type="date" required />
+            <span class="field-example">Ex: 16/09/2026</span>
           </label>
           <label class="rental-field">
             Hora da devolução
             <input id="returnTime" type="time" required />
+            <span class="field-example">Ex: 18:00</span>
           </label>
           <label class="wide-field">
             Observações
@@ -286,6 +291,6 @@
       </div>
     </dialog>
 
-    <script src="app.js?v=20260904-2"></script>
+    <script src="app.js?v=20260905-1"></script>
   </body>
 </html>

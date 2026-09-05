@@ -560,6 +560,14 @@ h2 {
   width: 100%;
 }
 
+.field-example {
+  color: rgba(234, 223, 207, 0.74);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-top: -2px;
+}
+
 .admin-form textarea {
   min-height: 96px;
   padding-top: 12px;
